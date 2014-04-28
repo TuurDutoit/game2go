@@ -3,7 +3,7 @@ var levels = [
 		[ //Column 1
 			function(d) {
 				d.fillStyle("#FF0000");
-				d.rect(20, 20, 20, 20);
+				d.fillRect(0, 0, 20, 20);
 			}
 		]
 	]
