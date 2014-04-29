@@ -3,7 +3,9 @@ var Game;
 //(function() { //Mask everything but Game object
 
 
+//The main Game constructor
 Game = function(elem, options) {
+//Pretty straightforward variables...
     var self     = this;
     self.options = options || {};
     self.canvas  = elem;
@@ -19,7 +21,7 @@ Game = function(elem, options) {
     self.drawBuffer      = [];
     self.worlds          = [];
     self.world           = [];
-    self.worldNum        = [];
+    self.worldNum        = 0;
     self.level           = null;
     self.levelNum        = 0;
 
@@ -40,6 +42,7 @@ Game = function(elem, options) {
 /* LOOP
  * ==== */
 
+//Start the game
 Game.prototype.start = function(levelID) {
     this.lastStartTime = new Date();
     if(!this.hasStarted) {
@@ -58,18 +61,21 @@ Game.prototype.start = function(levelID) {
 
     return this;
 }
+//Stop the game
 Game.prototype.stop = function() {
     this.stopTime = new Date();
     clearInterval(this.timer);
     this.timer = null;
     return this;
 }
+//Initialization on first start()
 Game.prototype.init = function(levelID) {
     this.initTime = new Date();
     this.levelNum = (levelID || 0);
     this.loadLevel(this.levelNum);
     return this;
 }
+//The main Game Loop
 Game.prototype.Loop = function() {
     var START = new Date();
     this.frames++;
@@ -81,15 +87,18 @@ Game.prototype.Loop = function() {
     this.drawTimes.push(END - START);
     return this;
 }
+//Draw the background (=blocks)
 Game.prototype.drawBackground = function() {
     var column, i, j, leni, lenj;
     var self = this, h = game.getHeight();
 
+//Loop drawBuffer
     leni = self.drawBuffer.length;
     for(i = 0; i < leni; i++) {
         column = self.drawBuffer[i];
         lenj = column.length;
         for(j = 0; j < lenj; j++) {
+//Reuse offsetX and offsetY for memory efficiency
             this.Draw.offsetX = ((i)*20) - (this.offset % 20);
             this.Draw.offsetY = h-((j+1)*20);
             column[j](this.Draw);
@@ -97,11 +106,13 @@ Game.prototype.drawBackground = function() {
     }
     return this;
 }
+//Update the drawBuffer
 Game.prototype.updateBuffer = function() {
     if(!this.level) {this.level = this.world[this.levelNum || 0];}
     this.drawBuffer = this.level.slice(Math.floor(this.offset/20), Math.ceil((this.offset + this.getWidth())/20));
     return this;
 }
+//Clear the whole canvas
 Game.prototype.clearCanvas = function() {
     this.context.clearRect(0, 0, this.getWidth(), this.getHeight());
     return this;
@@ -112,34 +123,44 @@ Game.prototype.clearCanvas = function() {
 /* LEVELS 
  * ====== */
 
+//Add a world to the game
 Game.prototype.addWorld = function(world) {
     this.worlds.push(world);
     return this;
 }
+//Load in a world (=select this world to play)
 Game.prototype.load = Game.prototype.loadWorld = function(world) {
     this.stop();
     this.worldLoadTime = new Date();
+//The index of the world is given
     if(typeof world === "number") {
         this.world = this.worlds[world];
     }
+//The world itself is given
     else {
         this.worlds.push(world);
-        this.world = world;
+//Select last added world
+        this.world = this.worlds.slice(-1)[0];
     }
     return this;
 }
+//Load in a level (=select this level to play)
 Game.prototype.loadLevel = function(level) {
+//Stop the game to avoid corruption
     this.stop();
     this.levelLoadTime = new Date();
+//The index of the game in the world is given
     if(typeof level === "number") {
         this.level = this.world[level];
     }
+//The level object itself is given
     else {
         this.world.push(level);
         this.level = level;
     }
     return this;
 }
+//Add a level to the current world
 Game.prototype.addLevel = function(level) {
     this.world.push(level);
     return this;
@@ -149,12 +170,18 @@ Game.prototype.addLevel = function(level) {
 
 /* UTILS
  * ===== */
+
+//Get the width of the canvas
+//CAUTION: this includes border and padding!
 Game.prototype.getWidth = function() {
     return this.canvas.offsetWidth;
 }
+//Get the height of the canvas
+//CAUTION: this includes border and padding!
 Game.prototype.getHeight = function() {
     return this.canvas.offsetHeight;
 }
+//Get the average draw time (of all frames)
 Game.prototype.getAverageDrawTime = function() {
     var sum = 0, len = this.drawTimes.length;
     for(var i = 0; i < len; i++) {
@@ -166,7 +193,10 @@ Game.prototype.getAverageDrawTime = function() {
 
 
 
-
+//The main Draw object
+//An instance of this object is passed to the block functions
+//Draw reflects the Canvas API, but x/y-coordinates are mapped to their right square on the canvas
+//This means that every block should draw inside a 20x20 block (which is placed correctly on the canvas by Draw)
 var Draw = function(context, offsetX, offsetY) {
     var self     = this;
     this.context = context;
