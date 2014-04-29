@@ -12,13 +12,16 @@ Game = function(elem, options) {
 
     self.hasStarted      = false;
     self.frames          = 0;
+    self.offset          = 0;
     self.refreshRate     = self.options.refreshRate || 16;
-
+    self.speed           = self.options.speed || 5;
+    
     self.drawBuffer      = [];
     self.worlds          = [];
     self.world           = [];
-    self.currentLevel    = null;
-    self.currentLevelNum = 0;
+    self.worldNum        = [];
+    self.level           = null;
+    self.levelNum        = 0;
 
     self.timer           = null;
     self.createTime      = new Date();
@@ -44,49 +47,62 @@ Game.prototype.start = function(levelID) {
     }
     this.hasStarted = true;
 
-    var game = this;
-    this.timer = setInterval(function() {
-        game.Loop.apply(game);
-    }, 500);
-    game.Loop();
+    if(!this.timer) {
+        var game = this;
+        this.timer = setInterval(function() {
+            game.Loop.apply(game);
+        }, this.refreshRate);
+        game.Loop();
+    }
 
     return this;
 }
 Game.prototype.stop = function() {
     this.stopTime = new Date();
     if(this.timer) clearInterval(this.timer);
+    this.timer = null;
     return this;
 }
 Game.prototype.init = function(levelID) {
     this.initTime = new Date();
-    this.currentLevelNum = (levelID || 0);
-    this.loadLevel(this.currentLevelNum);
-    this.fillBuffer(0);
+    this.levelNum = (levelID || 0);
+    this.loadLevel(this.levelNum);
     return this;
 }
 Game.prototype.Loop = function() {
+    var START = new Date();
     this.frames++;
-    console.log("Drawing frame", this.frames);
+    this.offset += this.speed;
+    this.updateBuffer();
+    this.clearCanvas();
     this.drawBackground();
+    var END = new Date();
+    console.log("Draw time: " + (END-START) + "ms");
     return this;
 }
 Game.prototype.drawBackground = function() {
-    var column, i, j;
-    var self = this;
-    for(i = self.currentLevel.length - 1; i >= 0; i--) {
-        column = self.currentLevel[i];
-        for(j = column.length - 1; j >= 0; j--) {
-            this.Draw.offsetX = i*20;
-            this.Draw.offsetY = j*20;
+    var column, i, j, leni, lenj;
+    var self = this, h = game.getHeight();
+
+    leni = self.drawBuffer.length;
+    for(i = 0; i < leni; i++) {
+        column = self.drawBuffer[i];
+        lenj = column.length;
+        for(j = 0; j < lenj; j++) {
+            this.Draw.offsetX = ((i)*20) - (this.offset % 20);
+            this.Draw.offsetY = h-((j+1)*20);
             column[j](this.Draw);
         }
     }
     return this;
 }
-Game.prototype.fillBuffer = function(index) {
-    if(!index) var index = 0;
-    if(!this.currentLevel) {this.currentLevel = this.world[0];}
-    this.drawBuffer = this.currentLevel.slice(index, Math.ceil(this.getWidth()/20) + 2);
+Game.prototype.updateBuffer = function() {
+    if(!this.level) {this.level = this.world[this.levelNum || 0];}
+    this.drawBuffer = this.level.slice(Math.floor(this.offset/20), Math.ceil((this.offset + this.getWidth())/20));
+    return this;
+}
+Game.prototype.clearCanvas = function() {
+    this.context.clearRect(0, 0, this.getWidth(), this.getHeight());
     return this;
 }
 
@@ -115,11 +131,11 @@ Game.prototype.loadLevel = function(level) {
     this.stop();
     this.levelLoadTime = new Date();
     if(typeof level === "number") {
-        this.currentLevel = this.world[level];
+        this.level = this.world[level];
     }
     else {
         this.world.push(level);
-        this.currentLevel = level;
+        this.level = level;
     }
     return this;
 }

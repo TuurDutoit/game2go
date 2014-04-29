@@ -11,13 +11,15 @@
 	</head>
 	<body>
 		<div class="main">
-			<canvas id="game-canvas"></canvas>
+			<div id="canvas-wrapper" style="width:400px; height:400px; border: 2px solid black;">
+				<canvas id="game-canvas" width="400", height="400"></canvas>
+			</div>
 			<button onclick="game.start();">Start!</button>
 			<button onclick="game.stop()">Stop!</button>
 		</div>
 		<script type="text/javascript">
-			var game = new Game(document.getElementById("game-canvas"));
-			game.load(levels, {refreshRate: 250});
+			var game = new Game(document.getElementById("game-canvas"), {refreshRate: 20, speed:2});
+			game.load(levels);
 		</script>
 	</body>
 </html>
