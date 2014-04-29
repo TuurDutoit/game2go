@@ -5,18 +5,20 @@ var Game;
 
 Game = function(elem, options) {
     var self     = this;
-    self.options = options;
+    self.options = options || {};
     self.canvas  = elem;
     self.context = self.canvas.getContext("2d");
     self.Draw    = new Draw(this.context);
+
+    self.hasStarted      = false;
+    self.frames          = 0;
+    self.refreshRate     = self.options.refreshRate || 16;
 
     self.drawBuffer      = [];
     self.worlds          = [];
     self.world           = [];
     self.currentLevel    = null;
     self.currentLevelNum = 0;
-    self.hasStarted      = false;
-    self.frames          = 0;
 
     self.timer           = null;
     self.createTime      = new Date();
@@ -45,7 +47,8 @@ Game.prototype.start = function(levelID) {
     var game = this;
     this.timer = setInterval(function() {
         game.Loop.apply(game);
-    }, 1000);
+    }, 500);
+    game.Loop();
 
     return this;
 }
