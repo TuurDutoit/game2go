@@ -7,7 +7,10 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 		<meta name="viewport" content="width=device-width" />
 		<script type="text/javascript" src="../src/game2go.js"></script>
-		<script type="text/javascript" src="levels.js"></script>
+		<!--<script type="text/javascript" src="world.js"></script>-->
+		<script type="text/javascript">
+			var world = [[[]]]
+		</script>
 	</head>
 	<body>
 		<div class="main">
@@ -19,7 +22,7 @@
 		</div>
 		<script type="text/javascript">
 			var game = new Game(document.getElementById("game-canvas"), {refreshRate: 20, speed:2});
-			game.load(levels);
+			game.load(world);
 		</script>
 	</body>
 </html>

@@ -31,6 +31,7 @@ Game = function(elem, options) {
     self.stopTime        = null;
     this.worldLoadTime   = null;
     self.levelLoadTime   = null;
+    self.drawTimes       = [];
 
     return self;
 }
@@ -59,7 +60,7 @@ Game.prototype.start = function(levelID) {
 }
 Game.prototype.stop = function() {
     this.stopTime = new Date();
-    if(this.timer) clearInterval(this.timer);
+    clearInterval(this.timer);
     this.timer = null;
     return this;
 }
@@ -73,11 +74,11 @@ Game.prototype.Loop = function() {
     var START = new Date();
     this.frames++;
     this.offset += this.speed;
-    this.updateBuffer();
     this.clearCanvas();
+    this.updateBuffer();
     this.drawBackground();
     var END = new Date();
-    console.log("Draw time: " + (END-START) + "ms");
+    this.drawTimes.push(END - START);
     return this;
 }
 Game.prototype.drawBackground = function() {
@@ -153,6 +154,13 @@ Game.prototype.getWidth = function() {
 }
 Game.prototype.getHeight = function() {
     return this.canvas.offsetHeight;
+}
+Game.prototype.getAverageDrawTime = function() {
+    var sum = 0, len = this.drawTimes.length;
+    for(var i = 0; i < len; i++) {
+        sum += this.drawTimes[i];
+    }
+    return (sum / len);
 }
 
 
