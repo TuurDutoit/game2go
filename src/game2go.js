@@ -11,8 +11,9 @@ Game = function(elem, options) {
     self.Draw    = new Draw(this.context);
 
     self.drawBuffer      = [];
+    self.worlds          = [];
     self.world           = [];
-    self.currentLevel    = [];
+    self.currentLevel    = null;
     self.currentLevelNum = 0;
     self.hasStarted      = false;
     self.frames          = 0;
@@ -23,6 +24,7 @@ Game = function(elem, options) {
     self.startTime       = null;
     self.lastStartTime   = null;
     self.stopTime        = null;
+    this.worldLoadTime   = null;
     self.levelLoadTime   = null;
 
     return self;
@@ -34,10 +36,12 @@ Game = function(elem, options) {
 
 Game.prototype.start = function(levelID) {
     this.lastStartTime = new Date();
-    if(!this.hasStarted) {this.startTime = this.lastStartTime;}
+    if(!this.hasStarted) {
+        this.startTime = this.lastStartTime;
+        this.init(levelID);
+    }
     this.hasStarted = true;
 
-    this.init(levelID);
     var game = this;
     this.timer = setInterval(function() {
         game.Loop.apply(game);
@@ -64,39 +68,54 @@ Game.prototype.Loop = function() {
     return this;
 }
 Game.prototype.drawBackground = function() {
-    var column, block, i, j;
+    var column, i, j;
     var self = this;
     for(i = self.currentLevel.length - 1; i >= 0; i--) {
         column = self.currentLevel[i];
-        for(j = column.length - 1; i >= 0; i--) {
-            block = column[j];
+        for(j = column.length - 1; j >= 0; j--) {
             this.Draw.offsetX = i*20;
             this.Draw.offsetY = j*20;
-            block(this.Draw);
+            column[j](this.Draw);
         }
     }
     return this;
 }
 Game.prototype.fillBuffer = function(index) {
     if(!index) var index = 0;
+    if(!this.currentLevel) {this.currentLevel = this.world[0];}
     this.drawBuffer = this.currentLevel.slice(index, Math.ceil(this.getWidth()/20) + 2);
+    return this;
 }
 
 
 
 /* LEVELS 
  * ====== */
+
+Game.prototype.addWorld = function(world) {
+    this.worlds.push(world);
+    return this;
+}
 Game.prototype.load = Game.prototype.loadWorld = function(world) {
-    this.world = world;
+    this.stop();
+    this.worldLoadTime = new Date();
+    if(typeof world === "number") {
+        this.world = this.worlds[world];
+    }
+    else {
+        this.worlds.push(world);
+        this.world = world;
+    }
     return this;
 }
 Game.prototype.loadLevel = function(level) {
-    this.levelLoadTime = new Date();
     this.stop();
+    this.levelLoadTime = new Date();
     if(typeof level === "number") {
         this.currentLevel = this.world[level];
     }
     else {
+        this.world.push(level);
         this.currentLevel = level;
     }
     return this;
@@ -135,7 +154,7 @@ Draw.prototype.beginPath = function() {
     return this;
 }
 Draw.prototype.closePath = function() {
-    this.context.endPath();
+    this.context.closePath();
     return this;
 }
 Draw.prototype.moveTo = function(x, y) {
@@ -228,8 +247,8 @@ Draw.prototype.strokeText = function(text, x, y, maxw) {
     return this;
 }
 Draw.prototype.fullText = function(text, x, y, maxw) {
-    this.fillText(text, x, y, maxw);
-    this.strokeText(text, x, y, maxw);
+    this.fillText(text, x+this.offsetX, y+this.offsetY, maxw);
+    this.strokeText(text, x+this.offsetX, y+this.offsetY, maxw);
     return this;
 }
 
