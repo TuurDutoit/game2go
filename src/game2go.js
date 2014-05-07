@@ -34,6 +34,9 @@
 
 
 
+/* Game2Go  **ITSELF**
+ * =========================== */
+
 
 var Game;
 
@@ -42,6 +45,7 @@ var Game;
 
 //The main Game constructor
 Game = function(elem, options) {
+
 //Pretty straightforward variables...
     var self     = this;
     self.options = options || {};
@@ -56,6 +60,7 @@ Game = function(elem, options) {
     self.offset          = 0;
     self.refreshRate     = self.options.refreshRate || 16;
     self.speed           = self.options.speed || 5;
+    self.playing         = false;
     
     self.drawBuffer      = [];
     self.worlds          = [];
@@ -98,11 +103,11 @@ Game.prototype.start = function(levelID) {
     this.hasStarted = true;
 
     if(!this.timer) {
+        this.playing = true;
         var game = this;
-        this.timer = setInterval(function() {
-            game.Loop.apply(game);
-        }, this.refreshRate);
-        game.Loop();
+        this.timer = window.requestAnimationFrame(function() {
+            game.Loop();
+        })
     }
 
     return this;
@@ -110,8 +115,7 @@ Game.prototype.start = function(levelID) {
 //Stop the game
 Game.prototype.stop = function() {
     this.stopTime = new Date();
-    clearInterval(this.timer);
-    this.timer = null;
+    this.playing = false;
     return this;
 }
 //Initialization on first start()
@@ -123,6 +127,8 @@ Game.prototype.init = function(levelID) {
 }
 //The main Game Loop
 Game.prototype.Loop = function() {
+
+//Update frame
     var START = new Date();
     this.frames++;
     this.offset += this.speed;
@@ -131,6 +137,15 @@ Game.prototype.Loop = function() {
     this.drawTerrain();
     var END = new Date();
     this.drawTimes.push(END - START);
+
+//Request next frame
+    if(this.playing) {
+        var game = this;
+        this.timer = window.requestAnimationFrame(function() {
+            game.Loop();
+        });
+    }
+
     return this;
 }
 //Draw the background (=blocks)
@@ -139,17 +154,18 @@ Game.prototype.drawTerrain = function() {
     var self = this;
     var h = game.height;
 
-//Loop drawBuffer
-    for(i = 0, leni = self.drawBuffer.length; i < leni; i++) {
+//Loop DrawBuffer
+    for(i = this.drawBuffer.length - 1; i >= 0; i--) {
         column = self.drawBuffer[i];
 
-        for(j = 0, lenj = column.length; j < lenj; j++) {
+        for(j = column.length - 1; j >= 0; j--) {
 //Reuse offsetX and offsetY for memory efficiency
             this.Draw.offsetX = ((i)*20) - (this.offset % 20);
             this.Draw.offsetY = h-((j+1)*20);
             column[j](this.Draw);
         }
     }
+
     return this;
 }
 //Update the drawBuffer
@@ -219,10 +235,11 @@ Game.prototype.addLevel = function(level) {
 
 //Get the average draw time (of all frames)
 Game.prototype.getAverageDrawTime = function() {
-    for(var i = 0, len = this.drawTime.length; i < len; i++) {
+    var sum = 0, i;
+    for(i = this.drawTimes.length - 1; i >= 0; i--) {
         sum += this.drawTimes[i];
     }
-    return (sum / len);
+    return (sum / this.drawTimes.length);
 }
 
 
