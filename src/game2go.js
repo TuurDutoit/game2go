@@ -48,6 +48,8 @@ Game = function(elem, options) {
     self.canvas  = elem;
     self.context = self.canvas.getContext("2d");
     self.Draw    = new Draw(this.context);
+    self.width   = self.canvas.offsetWidth;
+    self.height  = self.canvas.offsetHeight;
 
     self.hasStarted      = false;
     self.frames          = 0;
@@ -59,8 +61,8 @@ Game = function(elem, options) {
     self.worlds          = [];
     self.world           = [];
     self.worldNum        = 0;
-    self.level           = null;
-    self.levelNum        = 0;
+    self.scene           = null;
+    self.sceneNum        = 0;
 
     self.timer           = null;
     self.createTime      = new Date();
@@ -71,6 +73,13 @@ Game = function(elem, options) {
     this.worldLoadTime   = null;
     self.levelLoadTime   = null;
     self.drawTimes       = [];
+
+
+//Register some events
+    document.addEventListener("resize", function() {
+        self.width = self.canvas.offsetWidth;
+        self.height = self.canvas.offsetHeight;
+    })
 
     return self;
 }
@@ -119,22 +128,22 @@ Game.prototype.Loop = function() {
     this.offset += this.speed;
     this.clearCanvas();
     this.updateBuffer();
-    this.drawBackground();
+    this.drawTerrain();
     var END = new Date();
     this.drawTimes.push(END - START);
     return this;
 }
 //Draw the background (=blocks)
-Game.prototype.drawBackground = function() {
+Game.prototype.drawTerrain = function() {
     var column, i, j, leni, lenj;
-    var self = this, h = game.getHeight();
+    var self = this;
+    var h = game.height;
 
 //Loop drawBuffer
-    leni = self.drawBuffer.length;
-    for(i = 0; i < leni; i++) {
+    for(i = 0, leni = self.drawBuffer.length; i < leni; i++) {
         column = self.drawBuffer[i];
-        lenj = column.length;
-        for(j = 0; j < lenj; j++) {
+
+        for(j = 0, lenj = column.length; j < lenj; j++) {
 //Reuse offsetX and offsetY for memory efficiency
             this.Draw.offsetX = ((i)*20) - (this.offset % 20);
             this.Draw.offsetY = h-((j+1)*20);
@@ -145,13 +154,12 @@ Game.prototype.drawBackground = function() {
 }
 //Update the drawBuffer
 Game.prototype.updateBuffer = function() {
-    if(!this.level) {this.level = this.world[this.levelNum || 0];}
-    this.drawBuffer = this.level.slice(Math.floor(this.offset/20), Math.ceil((this.offset + this.getWidth())/20));
+    this.drawBuffer = this.level.slice(Math.floor(this.offset/20), Math.ceil((this.offset + this.width)/20));
     return this;
 }
 //Clear the whole canvas
 Game.prototype.clearCanvas = function() {
-    this.context.clearRect(0, 0, this.getWidth(), this.getHeight());
+    this.context.clearRect(0, 0, this.width, this.height);
     return this;
 }
 
@@ -176,7 +184,7 @@ Game.prototype.load = Game.prototype.loadWorld = function(world) {
 //The world itself is given
     else {
         this.worlds.push(world);
-//Select last added world
+//Select the world that was just added
         this.world = this.worlds.slice(-1)[0];
     }
     return this;
@@ -193,6 +201,7 @@ Game.prototype.loadLevel = function(level) {
 //The level object itself is given
     else {
         this.world.push(level);
+//Select the level that was just added
         this.level = level;
     }
     return this;
@@ -208,20 +217,9 @@ Game.prototype.addLevel = function(level) {
 /* UTILS
  * ===== */
 
-//Get the width of the canvas
-//CAUTION: this includes border and padding!
-Game.prototype.getWidth = function() {
-    return this.canvas.offsetWidth;
-}
-//Get the height of the canvas
-//CAUTION: this includes border and padding!
-Game.prototype.getHeight = function() {
-    return this.canvas.offsetHeight;
-}
 //Get the average draw time (of all frames)
 Game.prototype.getAverageDrawTime = function() {
-    var sum = 0, len = this.drawTimes.length;
-    for(var i = 0; i < len; i++) {
+    for(var i = 0, len = this.drawTime.length; i < len; i++) {
         sum += this.drawTimes[i];
     }
     return (sum / len);
