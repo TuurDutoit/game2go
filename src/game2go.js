@@ -361,6 +361,31 @@ Draw.prototype.fullText = function(text, x, y, maxw) {
     return this;
 }
 
+Draw.prototype.drawImage = Draw.prototype.image = Draw.prototype.img = function(img, sx, sy, sw, sh, dx, dy, dw, dh) {
+//All args are given -> a sub-rectangle is specified
+    if(dh) {
+        dx += this.offsetX;
+        dy += this.offsetY;
+        this.context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+    }
+//4 args are given -> a (x, y)-coordinate and dimensions are given
+    else if(sh) {
+        dx = sx + this.offsetX;
+        dy = sy + this.offsetY;
+        dw = sw;
+        dh = sh;
+        this.context.drawImage(img, dx, dy, dw, dh);
+    }
+//2 args are given -> just an (x, y)-coordinate is given
+    else if(sy) {
+        dx = sx + this.offsetX;
+        dy = sy + this.offsetY;
+        this.context.drawImage(img, dx, dy);
+    }
+
+    return this;
+}
+
 
 /* NOT IMPLEMETED
  * ==============*/
