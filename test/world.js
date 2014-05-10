@@ -1,8 +1,7 @@
 var world = [
 	[ //Level 1
 		[ //Column 1
-		//TUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUURRR GE SUCKT!
-		//TEEEEEEEEEEEEEEEEEEEEEEEEEEEST
+		//Fuck you!
 			Block.TestA,
 			Block.TestB,
 			Block.TestA,
