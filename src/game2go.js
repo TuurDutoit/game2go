@@ -79,6 +79,8 @@ Game = function(elem, options) {
     self.levelLoadTime   = null;
     self.drawTimes       = [];
 
+    self.savedBlocks     = {};
+
 
 //Register some events
     document.addEventListener("resize", function() {
@@ -225,6 +227,18 @@ Game.prototype.loadLevel = function(level) {
 //Add a level to the current world
 Game.prototype.addLevel = function(level) {
     this.world.push(level);
+    return this;
+}
+
+//Save a block
+Game.prototype.saveBlock = function(name, b) {
+    this.savedBlocks[name] = b;
+    return this;
+}
+Game.prototype.saveBlocks = function(blocks) {
+    for(name in blocks) {
+        this.savedBlocks[name] = blocks[name];
+    }
     return this;
 }
 
