@@ -1,6 +1,8 @@
 var Block = {
 Test: function(d) {
-		d.drawImage(document.getElementById("image"),0,0,20,20);
+	d.drawImage(document.getElementById("image"),0,0,20,20);
+},
+Empty: function(d) {
 },
 TestB: function(d) {
 	d.fillStyle("#00FF00").fillRect(0, 0, 20, 20);
