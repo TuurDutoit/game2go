@@ -188,7 +188,8 @@ Game.prototype.clearCanvas = function() {
 
 //Add a world to the game
 Game.prototype.addWorld = function(world) {
-    this.worlds.push(world);
+    var parsedWorld = this.parseWorld(world);
+    this.worlds.push(parsedWorld);
     return this;
 }
 //Load in a world (=select this world to play)
@@ -201,9 +202,9 @@ Game.prototype.load = Game.prototype.loadWorld = function(world) {
     }
 //The world itself is given
     else {
-        this.worlds.push(world);
-//Select the world that was just added
-        this.world = this.worlds.slice(-1)[0];
+        var parsedWorld = this.parseWorld(world);
+        this.worlds.push(parsedWorld);
+        this.world = parsedWorld;
     }
     return this;
 }
@@ -218,26 +219,30 @@ Game.prototype.loadLevel = function(level) {
     }
 //The level object itself is given
     else {
-        this.world.push(level);
-//Select the level that was just added
-        this.level = level;
+        var parsedLevel = this.parseLevel(level);
+        this.world.push(parsedLevel);
+        this.level = parsedLevel;
     }
     return this;
 }
 //Add a level to the current world
 Game.prototype.addLevel = function(level) {
-    this.world.push(level);
+    var parsedLevel = this.parseLevel(level)
+    this.world.push(parsedLevel);
     return this;
 }
 
 //Save a block
 Game.prototype.saveBlock = function(name, b) {
-    this.savedBlocks[name] = b;
+    var parsedBlock = this.parseBlock(b);
+    this.savedBlocks[name] = parsedBlock;
     return this;
 }
 Game.prototype.saveBlocks = function(blocks) {
+    var parsedBlock;
     for(name in blocks) {
-        this.savedBlocks[name] = blocks[name];
+        parsedBlock = this.parseBlock(blocks[name]);
+        this.savedBlocks[name] = parsedBlock;
     }
     return this;
 }
@@ -254,6 +259,41 @@ Game.prototype.getAverageDrawTime = function() {
         sum += this.drawTimes[i];
     }
     return (sum / this.drawTimes.length);
+}
+
+//Get parsed block
+Game.prototype.parseBlock = function(b) {
+    switch (typeof b) {
+        case "function":
+            return b;
+            break;
+        case "string":
+            return this.savedBlocks[b];
+            break;
+        default:
+            return null;
+    }
+}
+Game.prototype.parseColumn = function(c) {
+    var parsedColumn = [];
+    for(var i = 0, len = c.length; i < len; i++) {
+        parsedColumn.push(this.parseBlock(c[i]));
+    }
+    return parsedColumn;
+}
+Game.prototype.parseLevel = function(l) {
+    var parsedLevel = [];
+    for(var i = 0, len = l.length; i < len; i++) {
+        parsedLevel.push(this.parseColumn(l[i]));
+    }
+    return parsedLevel;
+}
+Game.prototype.parseWorld = function(w) {
+    var parsedWorld = [];
+    for(var i = 0, len = w.length; i < len; i++) {
+        parsedWorld.push(this.parseLevel(w[i]));
+    }
+    return parsedWorld;
 }
 
 
