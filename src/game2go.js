@@ -402,7 +402,6 @@ Draw.prototype.drawImage = Draw.prototype.image = Draw.prototype.img = function(
      //.createPattern()
      //.drawCustomFocusRing()
      //.drawSystemFocusRing()
-     //.drawImage()
      //.getImageData()
      //.getLineDash()
      //.isPointInPath()
