@@ -1,7 +1,7 @@
 var world = [
 	[ //Level 1
 		[ //Column 1
-			Block.TestA,
+			"TestA",
 			Block.TestB,
 			Block.TestA,
 			Block.TestB,

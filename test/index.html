@@ -21,6 +21,7 @@
 		</div>
 		<script type="text/javascript">
 			var game = new Game(document.getElementById("game-canvas"), {refreshRate: 20, speed:2});
+			game.saveBlocks(Block);
 			game.load(world);
 		</script>
 	</body>

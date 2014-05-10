@@ -76,7 +76,7 @@ Game = function(elem, options) {
     self.lastStartTime   = null;
     self.stopTime        = null;
     this.worldLoadTime   = null;
-    self.levelLoadTime   = null;
+    self.sceneLoadTime   = null;
     self.drawTimes       = [];
 
     self.savedBlocks     = {};
@@ -124,7 +124,7 @@ Game.prototype.stop = function() {
 Game.prototype.init = function(levelID) {
     this.initTime = new Date();
     this.levelNum = (levelID || 0);
-    this.loadLevel(this.levelNum);
+    this.loadScene(this.sceneNum);
     return this;
 }
 //The main Game Loop
@@ -193,7 +193,7 @@ Game.prototype.addWorld = function(world) {
     return this;
 }
 //Load in a world (=select this world to play)
-Game.prototype.load = Game.prototype.loadWorld = function(world) {
+Game.prototype.loadWorld = Game.prototype.load = function(world) {
     this.stop();
     this.worldLoadTime = new Date();
 //The index of the world is given
@@ -208,27 +208,28 @@ Game.prototype.load = Game.prototype.loadWorld = function(world) {
     }
     return this;
 }
-//Load in a level (=select this level to play)
-Game.prototype.loadLevel = function(level) {
-//Stop the game to avoid corruption
-    this.stop();
-    this.levelLoadTime = new Date();
-//The index of the game in the world is given
-    if(typeof level === "number") {
-        this.level = this.world[level];
-    }
-//The level object itself is given
-    else {
-        var parsedLevel = this.parseLevel(level);
-        this.world.push(parsedLevel);
-        this.level = parsedLevel;
-    }
+
+//Add a level to the current world
+Game.prototype.addScene = function(scene) {
+    var parsedScene = this.parseScene(scene)
+    this.world.push(parsedScene);
     return this;
 }
-//Add a level to the current world
-Game.prototype.addLevel = function(level) {
-    var parsedLevel = this.parseLevel(level)
-    this.world.push(parsedLevel);
+//Load in a level (=select this level to play)
+Game.prototype.loadScene = function(scene) {
+//Stop the game to avoid corruption
+    this.stop();
+    this.sceneLoadTime = new Date();
+//The index of the game in the world is given
+    if(typeof scene === "number") {
+        this.level = this.world[level];
+    }
+//The scene object itself is given
+    else {
+        var parsedScene = this.parseScene(scene);
+        this.world.push(parsedScene);
+        this.scene = parsedScene;
+    }
     return this;
 }
 
@@ -281,17 +282,17 @@ Game.prototype.parseColumn = function(c) {
     }
     return parsedColumn;
 }
-Game.prototype.parseLevel = function(l) {
-    var parsedLevel = [];
-    for(var i = 0, len = l.length; i < len; i++) {
-        parsedLevel.push(this.parseColumn(l[i]));
+Game.prototype.parseScene = function(s) {
+    var parsedScene = [];
+    for(var i = 0, len = s.length; i < len; i++) {
+        parsedScene.push(this.parseColumn(s[i]));
     }
     return parsedLevel;
 }
 Game.prototype.parseWorld = function(w) {
     var parsedWorld = [];
     for(var i = 0, len = w.length; i < len; i++) {
-        parsedWorld.push(this.parseLevel(w[i]));
+        parsedWorld.push(this.parseScene(w[i]));
     }
     return parsedWorld;
 }
