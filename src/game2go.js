@@ -209,20 +209,20 @@ Game.prototype.loadWorld = Game.prototype.load = function(world) {
     return this;
 }
 
-//Add a level to the current world
+//Add a scene to the current world
 Game.prototype.addScene = function(scene) {
     var parsedScene = this.parseScene(scene)
     this.world.push(parsedScene);
     return this;
 }
-//Load in a level (=select this level to play)
+//Load in a scene (=select this scene to play)
 Game.prototype.loadScene = function(scene) {
 //Stop the game to avoid corruption
     this.stop();
     this.sceneLoadTime = new Date();
 //The index of the game in the world is given
     if(typeof scene === "number") {
-        this.level = this.world[level];
+        this.scene = this.world[scene];
     }
 //The scene object itself is given
     else {
@@ -287,7 +287,7 @@ Game.prototype.parseScene = function(s) {
     for(var i = 0, len = s.length; i < len; i++) {
         parsedScene.push(this.parseColumn(s[i]));
     }
-    return parsedLevel;
+    return parsedScene;
 }
 Game.prototype.parseWorld = function(w) {
     var parsedWorld = [];
