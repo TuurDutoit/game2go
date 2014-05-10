@@ -96,11 +96,11 @@ Game = function(elem, options) {
  * ==== */
 
 //Start the game
-Game.prototype.start = function(levelID) {
+Game.prototype.start = function(sceneID) {
     this.lastStartTime = new Date();
     if(!this.hasStarted) {
         this.startTime = this.lastStartTime;
-        this.init(levelID);
+        this.init(sceneID);
     }
     this.hasStarted = true;
 
@@ -121,9 +121,9 @@ Game.prototype.stop = function() {
     return this;
 }
 //Initialization on first start()
-Game.prototype.init = function(levelID) {
+Game.prototype.init = function(sceneID) {
     this.initTime = new Date();
-    this.levelNum = (levelID || 0);
+    this.sceneNum = (sceneID || 0);
     this.loadScene(this.sceneNum);
     return this;
 }
@@ -172,7 +172,7 @@ Game.prototype.drawTerrain = function() {
 }
 //Update the drawBuffer
 Game.prototype.updateBuffer = function() {
-    this.drawBuffer = this.level.slice(Math.floor(this.offset/20), Math.ceil((this.offset + this.width)/20));
+    this.drawBuffer = this.scene.slice(Math.floor(this.offset/20), Math.ceil((this.offset + this.width)/20));
     return this;
 }
 //Clear the whole canvas
@@ -183,7 +183,7 @@ Game.prototype.clearCanvas = function() {
 
 
 
-/* LEVELS 
+/* WORLDS 
  * ====== */
 
 //Add a world to the game
