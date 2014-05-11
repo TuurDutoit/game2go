@@ -80,7 +80,8 @@ Game = function(elem, options) {
     self.drawTimes       = [];
 
     self.savedBlocks     = {};
-	self.blockSize =35;
+	self.blockSize = 35;
+	this.Draw.standardSize = this.blockSize;
 
 
 //Register some events
@@ -307,6 +308,7 @@ Game.prototype.parseWorld = function(w) {
 //This means that every block should draw inside a this.standardBlockSizexthis.standardBlockSize block (which is placed correctly on the canvas by Draw)
 var Draw = function(context, offsetX, offsetY) {
     var self     = this;
+	self.standardSize = 0;
     this.context = context;
     this.offsetX = offsetX || 0;
     this.offsetY = offsetY || 0;
