@@ -1,35 +1,51 @@
 //Request AnimationFrame polyfill
-    // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-    // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
-     
-    // requestAnimationFrame polyfill by Erik Möller. fixes from Paul Irish and Tino Zijdel
-     
-    // MIT license
-     
-    (function() {
-        var lastTime = 0;
-        var vendors = ['ms', 'moz', 'webkit', 'o'];
-        for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-            window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-            window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] 
-                                       || window[vendors[x]+'CancelRequestAnimationFrame'];
-        }
-     
-        if (!window.requestAnimationFrame)
-            window.requestAnimationFrame = function(callback, element) {
-                var currTime = new Date().getTime();
-                var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
-                  timeToCall);
-                lastTime = currTime + timeToCall;
-                return id;
-            };
-     
-        if (!window.cancelAnimationFrame)
-            window.cancelAnimationFrame = function(id) {
-                clearTimeout(id);
-            };
-    }());
+// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+// http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
+ 
+// requestAnimationFrame polyfill by Erik Möller. fixes from Paul Irish and Tino Zijdel
+ 
+// MIT license
+ 
+(function() {
+    var lastTime = 0;
+    var vendors = ['ms', 'moz', 'webkit', 'o'];
+    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] 
+                                   || window[vendors[x]+'CancelRequestAnimationFrame'];
+    }
+ 
+    if (!window.requestAnimationFrame)
+        window.requestAnimationFrame = function(callback, element) {
+            var currTime = new Date().getTime();
+            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+              timeToCall);
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+ 
+    if (!window.cancelAnimationFrame)
+        window.cancelAnimationFrame = function(id) {
+            clearTimeout(id);
+        };
+}());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -40,10 +56,9 @@
 
 var Game;
 
-//(function() { //Mask everything but Game object
+(function() { //Mask everything but Game object
 
 
-//The main Game constructor
 Game = function(elem, options) {
 
 //Pretty straightforward variables...
@@ -97,7 +112,7 @@ Game = function(elem, options) {
     document.addEventListener("resize", function() {
         self.width = self.canvas.offsetWidth;
         self.height = self.canvas.offsetHeight;
-    })
+    });
 
     return self;
 }
@@ -112,10 +127,10 @@ Game.prototype.start = function(sceneID) {
     if(!this.hasStarted) {
         this.startTime = this.lastStartTime;
         this.init(sceneID);
+        this.hasStarted = true;
     }
-    this.hasStarted = true;
 
-    if(!this.timer) {
+    if(!this.playing) {
         this.playing = true;
         var game = this;
         this.timer = window.requestAnimationFrame(function() {
@@ -133,6 +148,7 @@ Game.prototype.stop = function() {
 }
 //Initialization on first start()
 Game.prototype.init = function(sceneID) {
+    this.checkSAT();
     this.initTime = new Date();
     this.sceneNum = (sceneID || 0);
     this.loadScene(this.sceneNum);
@@ -140,12 +156,11 @@ Game.prototype.init = function(sceneID) {
 }
 //The main Game Loop
 Game.prototype.Loop = function() {
-    console.log("drawing frame " + this.frames);
 
 //Update frame
     var START = new Date();
     this.frames++;
-    this.offset += this.speed;
+    this.offset += this.speed; //For testing purposes.
     this.clearCanvas();
     this.updateBuffer();
     //this.positionPlayer();
@@ -164,7 +179,7 @@ Game.prototype.Loop = function() {
 
     return this;
 }
-//Draw the background (=blocks)
+//Draw the terrain (=blocks)
 Game.prototype.drawTerrain = function() {
     var column, i, j, leni, lenj;
     var self = this;
@@ -204,6 +219,9 @@ Game.prototype.drawPlayer = function() {
     this.Player.draw(this.Draw);
     return this;
 }
+
+
+/* DRAW UTILITIES */
 //Update the drawBuffer
 Game.prototype.updateBuffer = function() {
     this.drawBuffer = this.scene.slice(Math.floor(this.offset/this.blockSize), Math.ceil((this.offset + this.width)/this.blockSize));
@@ -280,6 +298,14 @@ Game.prototype.saveBlocks = function(blocks) {
         this.savedBlocks[name] = parsedBlock;
     }
     return this;
+}
+Game.prototype.checkSAT = function() {
+    if(SAT) {
+        return true;
+    }
+    else {
+        throw new Error("Make sure SAT.js is provided. You can find it here: https://github.com/jriecken/sat-js");
+    }
 }
 
 
@@ -511,4 +537,4 @@ Draw.prototype.drawImage = Draw.prototype.image = Draw.prototype.img = function(
 
 
 
-//})();
+})();
