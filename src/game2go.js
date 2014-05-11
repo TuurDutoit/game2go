@@ -80,7 +80,7 @@ Game = function(elem, options) {
     self.drawTimes       = [];
 
     self.savedBlocks     = {};
-	self.standardBlockSize =35;
+	self.blockSize =35;
 
 
 //Register some events
@@ -163,8 +163,8 @@ Game.prototype.drawTerrain = function() {
 
         for(j = column.length - 1; j >= 0; j--) {
 //Reuse offsetX and offsetY for memory efficiency
-            this.Draw.offsetX = ((i)*this.standardBlockSize) - (this.offset % this.standardBlockSize);
-            this.Draw.offsetY = h-((j+1)*this.standardBlockSize);
+            this.Draw.offsetX = ((i)*this.blockSize) - (this.offset % this.blockSize);
+            this.Draw.offsetY = h-((j+1)*this.blockSize);
             column[j](this.Draw);
         }
     }
@@ -173,7 +173,7 @@ Game.prototype.drawTerrain = function() {
 }
 //Update the drawBuffer
 Game.prototype.updateBuffer = function() {
-    this.drawBuffer = this.scene.slice(Math.floor(this.offset/this.standardBlockSize), Math.ceil((this.offset + this.width)/this.standardBlockSize));
+    this.drawBuffer = this.scene.slice(Math.floor(this.offset/this.blockSize), Math.ceil((this.offset + this.width)/this.blockSize));
     return this;
 }
 //Clear the whole canvas
