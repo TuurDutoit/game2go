@@ -48,7 +48,7 @@ Game = function(elem, options) {
 
 //Pretty straightforward variables...
     var self             = this;
-    self.options         = options || {};
+    self.options         = options || {}; var options = self.options;
     self.canvas          = elem;
     self.context         = self.canvas.getContext("2d");
     self.width           = self.canvas.offsetWidth;
@@ -81,6 +81,7 @@ Game = function(elem, options) {
     self.drawTimes       = [];
     self.savedBlocks     = {};
 
+    if(!options.Player) {options.Player = {}};
     self.Player          = {
         positionX: options.Player.positionX || 0,
         positionY: options.Player.positionY || 0,
@@ -147,9 +148,9 @@ Game.prototype.Loop = function() {
     this.offset += this.speed;
     this.clearCanvas();
     this.updateBuffer();
-    this.positionPlayer();
+    //this.positionPlayer();
     this.drawTerrain();
-    this.drawPlayer();
+    //this.drawPlayer();
     var END = new Date();
     this.drawTimes.push(END - START);
 
