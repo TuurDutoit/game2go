@@ -81,6 +81,16 @@ Game = function(elem, options) {
     self.drawTimes       = [];
     self.savedBlocks     = {};
 
+    self.Player          = {
+        positionX: options.Player.positionX || 0,
+        positionY: options.Player.positionY || 0,
+        width:     options.Player.width || self.blockSize,
+        height:    options.Player.height || self.blockSize * 2,
+        move:      options.Player.move,
+        collision: options.Player.collision,
+        draw:      options.Player.draw
+    };
+
 
 //Register some events
     document.addEventListener("resize", function() {
@@ -137,7 +147,9 @@ Game.prototype.Loop = function() {
     this.offset += this.speed;
     this.clearCanvas();
     this.updateBuffer();
+    this.positionPlayer();
     this.drawTerrain();
+    this.drawPlayer();
     var END = new Date();
     this.drawTimes.push(END - START);
 
@@ -169,6 +181,26 @@ Game.prototype.drawTerrain = function() {
         }
     }
 
+    return this;
+}
+
+Game.prototype.positionPlayer = function() {
+    var p = this.Player;
+    p.move(this);
+    var collisionTerrain = this.checkCollisionTerrain(p.positionX, p.positionY, p.width, p.height);
+    if(collisionTerrain) {
+        p.collision("terrain", collisionTerrain);
+    }
+    var collisionObject = this.checkCollisionObject(p.positionX, p.positionY, p.width, p.height);
+    if(collisionObject) {
+        p.collision("object", collisionObject);
+    }
+    return this;
+}
+Game.prototype.drawPlayer = function() {
+    this.Draw.positionX = this.Player.positionX;
+    this.Draw.positionY = this.Player.positionY;
+    this.Player.draw(this.Draw);
     return this;
 }
 //Update the drawBuffer
