@@ -164,6 +164,7 @@ Game.prototype.Loop = function() {
     this.clearCanvas();
     this.updateBuffer();
     //this.positionPlayer();
+	this.drawBackground();
     this.drawTerrain();
     //this.drawPlayer();
     var END = new Date();
@@ -180,6 +181,9 @@ Game.prototype.Loop = function() {
     return this;
 }
 //Draw the terrain (=blocks)
+Game.prototype.drawBackground = function(){
+    this.Draw.drawBackground(document.getElementById("background"),0-this.offset,0,820, 420);
+}
 Game.prototype.drawTerrain = function() {
     var column, i, j, leni, lenj;
     var self = this;
@@ -476,7 +480,9 @@ Draw.prototype.fullText = function(text, x, y, maxw) {
     this.strokeText(text, x+this.offsetX, y+this.offsetY, maxw);
     return this;
 }
-
+Draw.prototype.drawBackground = Draw.prototype.background = Draw.prototype.bg = function(img, dx, dy, dw, dh) {
+    this.context.drawImage(img, dx, dy, dw, dh);
+}
 Draw.prototype.drawImage = Draw.prototype.image = Draw.prototype.img = function(img, sx, sy, sw, sh, dx, dy, dw, dh) {
 //All args are given -> a sub-rectangle is specified
     if(dh) {
