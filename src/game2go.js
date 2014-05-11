@@ -47,13 +47,14 @@ var Game;
 Game = function(elem, options) {
 
 //Pretty straightforward variables...
-    var self     = this;
-    self.options = options || {};
-    self.canvas  = elem;
-    self.context = self.canvas.getContext("2d");
-    self.Draw    = new Draw(this.context);
-    self.width   = self.canvas.offsetWidth;
-    self.height  = self.canvas.offsetHeight;
+    var self             = this;
+    self.options         = options || {};
+    self.canvas          = elem;
+    self.context         = self.canvas.getContext("2d");
+    self.width           = self.canvas.offsetWidth;
+    self.height          = self.canvas.offsetHeight;
+    self.blockSize       = 35;
+    self.Draw            = new Draw(self.context, self.blockSize);
 
     self.hasStarted      = false;
     self.frames          = 0;
@@ -78,10 +79,7 @@ Game = function(elem, options) {
     this.worldLoadTime   = null;
     self.sceneLoadTime   = null;
     self.drawTimes       = [];
-
     self.savedBlocks     = {};
-	self.blockSize = 35;
-	this.Draw.standardSize = this.blockSize;
 
 
 //Register some events
@@ -131,6 +129,7 @@ Game.prototype.init = function(sceneID) {
 }
 //The main Game Loop
 Game.prototype.Loop = function() {
+    console.log("drawing frame " + this.frames);
 
 //Update frame
     var START = new Date();
@@ -305,13 +304,13 @@ Game.prototype.parseWorld = function(w) {
 //The main Draw object
 //An instance of this object is passed to the block functions
 //Draw reflects the Canvas API, but x/y-coordinates are mapped to their right square on the canvas
-//This means that every block should draw inside a this.standardBlockSizexthis.standardBlockSize block (which is placed correctly on the canvas by Draw)
-var Draw = function(context, offsetX, offsetY) {
-    var self     = this;
-	self.standardSize = 0;
-    this.context = context;
-    this.offsetX = offsetX || 0;
-    this.offsetY = offsetY || 0;
+//This means that every block should draw inside a Draw.blockSize x Draw.blockSize block (which is placed correctly on the canvas by Draw)
+var Draw = function(context, blockSize, offsetX, offsetY) {
+    var self       = this;
+	self.blockSize = blockSize || 35;
+    self.context   = context;
+    self.offsetX   = offsetX || 0;
+    self.offsetY   = offsetY || 0;
 
     return self;
 }
