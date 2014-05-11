@@ -80,6 +80,7 @@ Game = function(elem, options) {
     self.drawTimes       = [];
 
     self.savedBlocks     = {};
+	self.standardBlockSize =35;
 
 
 //Register some events
@@ -162,8 +163,8 @@ Game.prototype.drawTerrain = function() {
 
         for(j = column.length - 1; j >= 0; j--) {
 //Reuse offsetX and offsetY for memory efficiency
-            this.Draw.offsetX = ((i)*20) - (this.offset % 20);
-            this.Draw.offsetY = h-((j+1)*20);
+            this.Draw.offsetX = ((i)*this.standardBlockSize) - (this.offset % this.standardBlockSize);
+            this.Draw.offsetY = h-((j+1)*this.standardBlockSize);
             column[j](this.Draw);
         }
     }
@@ -172,7 +173,7 @@ Game.prototype.drawTerrain = function() {
 }
 //Update the drawBuffer
 Game.prototype.updateBuffer = function() {
-    this.drawBuffer = this.scene.slice(Math.floor(this.offset/20), Math.ceil((this.offset + this.width)/20));
+    this.drawBuffer = this.scene.slice(Math.floor(this.offset/this.standardBlockSize), Math.ceil((this.offset + this.width)/this.standardBlockSize));
     return this;
 }
 //Clear the whole canvas
@@ -303,7 +304,7 @@ Game.prototype.parseWorld = function(w) {
 //The main Draw object
 //An instance of this object is passed to the block functions
 //Draw reflects the Canvas API, but x/y-coordinates are mapped to their right square on the canvas
-//This means that every block should draw inside a 20x20 block (which is placed correctly on the canvas by Draw)
+//This means that every block should draw inside a this.standardBlockSizexthis.standardBlockSize block (which is placed correctly on the canvas by Draw)
 var Draw = function(context, offsetX, offsetY) {
     var self     = this;
     this.context = context;
