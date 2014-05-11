@@ -1,8 +1,8 @@
 var world = [
 	[ //Level 1
 		[ //Column 1
-			"TestA",
-			Block.TestB,
+			Block.Test,
+			Block.Test,
 			Block.TestA,
 			Block.TestB,
 			Block.TestA,
@@ -18,7 +18,7 @@ var world = [
 			Block.TestA,
 			Block.TestB,
 			Block.TestA,
-			Block.TestB
+			Block.Test
 		],
 		[
 			Block.TestB,
@@ -606,7 +606,7 @@ var world = [
 			Block.TestB
 		],
 		[
-			Block.TestB,
+			Block.Test,
 			Block.TestA,
 			Block.TestB,
 			Block.TestA,
