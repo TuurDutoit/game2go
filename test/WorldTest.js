@@ -1,5 +1,8 @@
 var WorldTest =  {
     name: "Test",
+	farBackground: null,
+	normalBackground: "background",
+	foreground: null,
     terrain: [ //Level 1
 		[ //Column 1
 			Block.Test,

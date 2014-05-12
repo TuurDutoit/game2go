@@ -191,17 +191,18 @@ Game.prototype.Loop = function() {
 //Draw the terrain (=blocks)
 Game.prototype.drawBackgrounds = function(){
 	// Normal Background:
-	if(this.hasNormalBackground){
-        this.context.drawImage(document.getElementById("background"),0-this.offset.x,0,820, 420);
+	if(this.scene.normalBackground != null){
+        this.context.drawImage(document.getElementById(this.scene.normalBackground),0-this.offset.x,0,820, 420);
+		
 	}
 	// Far 	  Background:
-	if(this.hasDeepBackground){
-	    this.context.drawImage(document.getElementById("background"),0-this.offset.x,0,820, 420);
+	if(this.scene.farBackground != null){
+	    this.context.drawImage(document.getElementById(this.scene.farBackground),0-this.offset.x,0,820, 420);
 	}
 }
 Game.prototype.drawForegrounds = function(){
-    if(this.hasForeground){
-	    this.context.drawImage(document.getElementById("background"),0-this.offset.x,0,820, 420);
+    if(this.scene.foreground != null){
+	    this.context.drawImage(document.getElementById(this.scene.foreground),0-this.offset.x,0,820, 420);
 	}
 }
 Game.prototype.drawTerrain = function() {
