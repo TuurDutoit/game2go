@@ -86,6 +86,7 @@ Game = function(elem, options) {
     self.drawBuffer      = [];
     self.worlds          = [];
     self.world           = [];
+	//this.world           = world;
     self.worldNum        = 0;
     self.scene           = null;
     self.sceneNum        = 0;
@@ -153,6 +154,7 @@ Game.prototype.stop = function() {
 }
 //Initialization on first start()
 Game.prototype.init = function(sceneID) {
+	this.world = world;
     this.checkSAT();
     this.initTime = new Date();
     this.sceneNum = (sceneID || 0);
@@ -246,7 +248,7 @@ Game.prototype.drawPlayer = function() {
 /* DRAW UTILITIES */
 //Update the drawBuffer
 Game.prototype.updateBuffer = function() {
-    this.drawBuffer = this.scene.slice(Math.floor(this.offset.x/this.blockSize), Math.ceil((this.offset.x + this.width)/this.blockSize));
+    this.drawBuffer = this.scene.terrain.slice(Math.floor(this.offset.x/this.blockSize), Math.ceil((this.offset.x + this.width)/this.blockSize));
     return this;
 }
 //Clear the whole canvas
