@@ -78,7 +78,7 @@ Game = function(elem, options) {
 	
     self.hasStarted      = false;
     self.frames          = 0;
-    self.offset          = 0;
+    self.offset          = {x: 0, y: 0};
     self.refreshRate     = self.options.refreshRate || 16;
     self.speed           = self.options.speed || 5;
     self.playing         = false;
@@ -165,7 +165,7 @@ Game.prototype.Loop = function() {
 //Update frame
     var START = new Date();
     this.frames++;
-    this.offset += this.speed; //For testing purposes.
+    this.offset.x += this.speed; //For testing purposes.
     this.clearCanvas();
     this.updateBuffer();
     //this.positionPlayer();
@@ -190,16 +190,16 @@ Game.prototype.Loop = function() {
 Game.prototype.drawBackgrounds = function(){
 	// Normal Background:
 	if(this.hasNormalBackground){
-        this.context.drawImage(document.getElementById("background"),0-this.offset,0,820, 420);
+        this.context.drawImage(document.getElementById("background"),0-this.offset.x,0,820, 420);
 	}
 	// Far 	  Background:
 	if(this.hasDeepBackground){
-	    this.context.drawImage(document.getElementById("background"),0-this.offset,0,820, 420);
+	    this.context.drawImage(document.getElementById("background"),0-this.offset.x,0,820, 420);
 	}
 }
 Game.prototype.drawForegrounds = function(){
     if(this.hasForeground){
-	    this.context.drawImage(document.getElementById("background"),0-this.offset,0,820, 420);
+	    this.context.drawImage(document.getElementById("background"),0-this.offset.x,0,820, 420);
 	}
 }
 Game.prototype.drawTerrain = function() {
@@ -213,7 +213,7 @@ Game.prototype.drawTerrain = function() {
 
         for(j = column.length - 1; j >= 0; j--) {
 //Reuse offsetX and offsetY for memory efficiency
-            this.Draw.offsetX = ((i)*this.blockSize) - (this.offset % this.blockSize);
+            this.Draw.offsetX = ((i)*this.blockSize) - (this.offset.x % this.blockSize);
             this.Draw.offsetY = h-((j+1)*this.blockSize);
             column[j](this.Draw);
         }
@@ -246,7 +246,7 @@ Game.prototype.drawPlayer = function() {
 /* DRAW UTILITIES */
 //Update the drawBuffer
 Game.prototype.updateBuffer = function() {
-    this.drawBuffer = this.scene.slice(Math.floor(this.offset/this.blockSize), Math.ceil((this.offset + this.width)/this.blockSize));
+    this.drawBuffer = this.scene.slice(Math.floor(this.offset.x/this.blockSize), Math.ceil((this.offset.x + this.width)/this.blockSize));
     return this;
 }
 //Clear the whole canvas
