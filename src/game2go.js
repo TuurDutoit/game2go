@@ -71,6 +71,9 @@ Game = function(elem, options) {
     self.blockSize       = 35;
     self.Draw            = new Draw(self.context, self.blockSize);
 
+	//Backgrounds:
+	self.hasFarBackground = false;
+	self.hasNormalBackground = false;
     self.hasStarted      = false;
     self.frames          = 0;
     self.offset          = 0;
@@ -164,7 +167,7 @@ Game.prototype.Loop = function() {
     this.clearCanvas();
     this.updateBuffer();
     //this.positionPlayer();
-	this.drawBackground();
+	this.drawBackgrounds();
     this.drawTerrain();
     //this.drawPlayer();
     var END = new Date();
@@ -181,8 +184,15 @@ Game.prototype.Loop = function() {
     return this;
 }
 //Draw the terrain (=blocks)
-Game.prototype.drawBackground = function(){
-    this.Draw.drawBackground(document.getElementById("background"),0-this.offset,0,820, 420);
+Game.prototype.drawBackgrounds = function(){
+	// Normal Background:
+	if(this.hasNormalBackground){
+        this.context.drawImage(document.getElementById("background"),0-this.offset,0,820, 420);
+	}
+	// Far 	  Background:
+	if(this.hasDeepBackground){
+	    this.context.drawImage(document.getElementById("background"),0-this.offset,0,820, 420);
+	}
 }
 Game.prototype.drawTerrain = function() {
     var column, i, j, leni, lenj;
@@ -479,9 +489,6 @@ Draw.prototype.fullText = function(text, x, y, maxw) {
     this.fillText(text, x+this.offsetX, y+this.offsetY, maxw);
     this.strokeText(text, x+this.offsetX, y+this.offsetY, maxw);
     return this;
-}
-Draw.prototype.drawBackground = Draw.prototype.background = Draw.prototype.bg = function(img, dx, dy, dw, dh) {
-    this.context.drawImage(img, dx, dy, dw, dh);
 }
 Draw.prototype.drawImage = Draw.prototype.image = Draw.prototype.img = function(img, sx, sy, sw, sh, dx, dy, dw, dh) {
 //All args are given -> a sub-rectangle is specified
