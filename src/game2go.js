@@ -73,7 +73,9 @@ Game = function(elem, options) {
 
 	//Backgrounds:
 	self.hasFarBackground = false;
-	self.hasNormalBackground = false;
+	self.hasNormalBackground = true;
+	self.hasForeground = false;
+	
     self.hasStarted      = false;
     self.frames          = 0;
     self.offset          = 0;
@@ -169,6 +171,7 @@ Game.prototype.Loop = function() {
     //this.positionPlayer();
 	this.drawBackgrounds();
     this.drawTerrain();
+	this.drawForegrounds()
     //this.drawPlayer();
     var END = new Date();
     this.drawTimes.push(END - START);
@@ -191,6 +194,11 @@ Game.prototype.drawBackgrounds = function(){
 	}
 	// Far 	  Background:
 	if(this.hasDeepBackground){
+	    this.context.drawImage(document.getElementById("background"),0-this.offset,0,820, 420);
+	}
+}
+Game.prototype.drawForegrounds = function(){
+    if(this.hasForeground){
 	    this.context.drawImage(document.getElementById("background"),0-this.offset,0,820, 420);
 	}
 }
