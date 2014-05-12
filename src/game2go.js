@@ -71,11 +71,11 @@ Game = function(elem, options) {
     self.blockSize       = 35;
     self.Draw            = new Draw(self.context, self.blockSize);
 
-	//Backgrounds:
-	self.hasFarBackground = false;
-	self.hasNormalBackground = true;
-	self.hasForeground = false;
-	
+    //Backgrounds:
+    self.hasFarBackground = false;
+    self.hasNormalBackground = true;
+    self.hasForeground = false;
+    
     self.hasStarted      = false;
     self.frames          = 0;
     self.offset          = {x: 0, y: 0};
@@ -86,7 +86,7 @@ Game = function(elem, options) {
     self.drawBuffer      = [];
     self.worlds          = [];
     self.world           = [];
-	//this.world           = world;
+    //this.world           = world;
     self.worldNum        = 0;
     self.scene           = null;
     self.sceneNum        = 0;
@@ -154,7 +154,7 @@ Game.prototype.stop = function() {
 }
 //Initialization on first start()
 Game.prototype.init = function(sceneID) {
-	this.world = world;
+    this.world = world;
     this.checkSAT();
     this.initTime = new Date();
     this.sceneNum = (sceneID || 0);
@@ -171,9 +171,9 @@ Game.prototype.Loop = function() {
     this.clearCanvas();
     this.updateBuffer();
     //this.positionPlayer();
-	this.drawBackgrounds();
+    this.drawBackgrounds();
     this.drawTerrain();
-	this.drawForegrounds()
+    this.drawForegrounds()
     //this.drawPlayer();
     var END = new Date();
     this.drawTimes.push(END - START);
@@ -190,20 +190,20 @@ Game.prototype.Loop = function() {
 }
 //Draw the terrain (=blocks)
 Game.prototype.drawBackgrounds = function(){
-	// Normal Background:
-	if(this.scene.normalBackground != null){
+    // Normal Background:
+    if(this.scene.normalBackground != null){
         this.context.drawImage(document.getElementById(this.scene.normalBackground),0-this.offset.x,0,820, 420);
-		
-	}
-	// Far 	  Background:
-	if(this.scene.farBackground != null){
-	    this.context.drawImage(document.getElementById(this.scene.farBackground),0-this.offset.x,0,820, 420);
-	}
+        
+    }
+    // Far       Background:
+    if(this.scene.farBackground != null){
+        this.context.drawImage(document.getElementById(this.scene.farBackground),0-this.offset.x,0,820, 420);
+    }
 }
 Game.prototype.drawForegrounds = function(){
     if(this.scene.foreground != null){
-	    this.context.drawImage(document.getElementById(this.scene.foreground),0-this.offset.x,0,820, 420);
-	}
+        this.context.drawImage(document.getElementById(this.scene.foreground),0-this.offset.x,0,820, 420);
+    }
 }
 Game.prototype.drawTerrain = function() {
     var column, i, j, leni, lenj;
@@ -391,7 +391,7 @@ Game.prototype.parseWorld = function(w) {
 //This means that every block should draw inside a Draw.blockSize x Draw.blockSize block (which is placed correctly on the canvas by Draw)
 var Draw = function(context, blockSize, offsetX, offsetY) {
     var self       = this;
-	self.blockSize = blockSize || 35;
+    self.blockSize = blockSize || 35;
     self.context   = context;
     self.offsetX   = offsetX || 0;
     self.offsetY   = offsetY || 0;

@@ -1,3 +1,3 @@
 var world = [
-	WorldTest
+    WorldTest
 ]
