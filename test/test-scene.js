@@ -1,8 +1,11 @@
 var testScene = {
     name: "Scene 1",
-    farBackground: null,
-    normalBackground: "background-scene1",
-    foreground: null,
+    Backgrounds: [
+        function(d) {
+            d.drawImage(document.getElementById("background-scene1"), 0, 0);
+        }
+    ],
+    Foregrounds: [],
     Terrain: [
         [ "Test", "TestB", "TestB", "TestA", "TestA" ],
         [ "TestA", "TestA", "TestA" ],
