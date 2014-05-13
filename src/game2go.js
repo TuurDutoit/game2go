@@ -156,7 +156,6 @@ Game.prototype.Loop = function() {
     var START = new Date();
     this.frames++;
     this.updatePlayer();
-    this.updateOffset();
     this.updateObjects();
     this.updateTerrain();
     this.clearCanvas();
@@ -182,13 +181,12 @@ Game.prototype.Loop = function() {
 
 //Functions used by Loop
 Game.prototype.updatePlayer = function() {
-    var p = this.Player;
-    p.update(p, this);
+    this.Player.update(this);
     return this;
 }
 Game.prototype.drawPlayer = function() {
-    this.Draw.offsetX = (this.width - this.Player.width) / 2;
-    this.Draw.offsetY = 245;
+    this.Draw.offsetX = this.Player.positionX;
+    this.Draw.offsetY = this.Player.positionY;
     this.Player.draw(this.Draw);
     return this;
 }
@@ -220,7 +218,7 @@ Game.prototype.drawTerrain = function() {
         for(j = column.length - 1; j >= 0; j--) {
 //Reuse offsetX and offsetY for memory efficiency
             this.Draw.offsetX = ((i)*this.blockSize) - (this.offsetX % this.blockSize);
-            this.Draw.offsetY = h-((j+1)*this.blockSize);
+            this.Draw.offsetY = h-((j+1)*this.blockSize) + this.offsetY;
             column[j](this.Draw);
         }
     }
@@ -232,25 +230,18 @@ Game.prototype.drawTerrain = function() {
 Game.prototype.drawBackgrounds = function(){
     // Normal Background:
     if(this.scene.normalBackground){
-        this.context.drawImage(document.getElementById(this.scene.normalBackground), 0-this.offsetX, 0, 820, 420);
+        this.context.drawImage(document.getElementById(this.scene.normalBackground), 0-this.offsetX, 0+this.offsetY, 820, 420);
         
     }
     // Far Background:
     if(this.scene.farBackground){
-        this.context.drawImage(document.getElementById(this.scene.farBackground), 0-this.offsetX, 0, 820, 420);
+        this.context.drawImage(document.getElementById(this.scene.farBackground), 0-this.offsetX, 0+this.offsetY, 820, 420);
     }
 }
 Game.prototype.drawForegrounds = function(){
     if(this.scene.foreground){
-        this.context.drawImage(document.getElementById(this.scene.foreground), 0-this.offsetX, 0, 820, 420);
+        this.context.drawImage(document.getElementById(this.scene.foreground), 0-this.offsetX, 0+this.offsetY, 820, 420);
     }
-}
-
-Game.prototype.updateOffset = function() {
-    // this.offsetX = this.Player.positionX;
-    // this.offsetY = this.Player.offsetY;
-    this.offsetX += 2;
-    return this;
 }
 
 Game.prototype.clearCanvas = function() {
