@@ -84,7 +84,6 @@ Game = function(elem, options) {
     self.playing         = false;
     
     self.drawBuffer      = [];
-    self.worlds          = [];
     self.world           = [];
     self.worldNum        = 0;
     self.scene           = null;
@@ -253,26 +252,12 @@ Game.prototype.clearCanvas = function() {
 /* WORLDS 
  * ====== */
 
-//Add a world to the game
-Game.prototype.addWorld = function(world) {
-    var parsedWorld = this.parseWorld(world);
-    this.worlds.push(parsedWorld);
-    return this;
-}
 //Load in a world (=select this world to play)
 Game.prototype.loadWorld = Game.prototype.load = function(world) {
     this.stop();
     this.worldLoadTime = new Date();
-//The index of the world is given
-    if(typeof world === "number") {
-        this.world = this.worlds[world];
-    }
-//The world itself is given
-    else {
-        var parsedWorld = this.parseWorld(world);
-        this.worlds.push(parsedWorld);
-        this.world = parsedWorld;
-    }
+
+    this.world = this.parseWorld(world);
     return this;
 }
 
