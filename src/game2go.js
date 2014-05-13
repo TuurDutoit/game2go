@@ -78,15 +78,14 @@ Game = function(elem, options) {
     
     self.hasStarted      = false;
     self.frames          = 0;
-    self.offset          = {x: 0, y: 0};
-    self.refreshRate     = self.options.refreshRate || 16;
+    self.offsetX         = 0;
+    self.offsetY         = 0;
     self.speed           = self.options.speed || 5;
     self.playing         = false;
     
     self.drawBuffer      = [];
     self.worlds          = [];
     self.world           = [];
-    //this.world           = world;
     self.worldNum        = 0;
     self.scene           = null;
     self.sceneNum        = 0;
@@ -108,8 +107,7 @@ Game = function(elem, options) {
         positionY: options.Player.positionY || 0,
         width:     options.Player.width || self.blockSize,
         height:    options.Player.height || self.blockSize * 2,
-        move:      options.Player.move,
-        collision: options.Player.collision,
+        update:    options.Player.update,
         draw:      options.Player.draw
     };
 
@@ -154,7 +152,6 @@ Game.prototype.stop = function() {
 }
 //Initialization on first start()
 Game.prototype.init = function(sceneID) {
-    this.world = world;
     this.checkSAT();
     this.initTime = new Date();
     this.sceneNum = (sceneID || 0);
@@ -167,14 +164,15 @@ Game.prototype.Loop = function() {
 //Update frame
     var START = new Date();
     this.frames++;
-    this.offset.x += this.speed; //For testing purposes.
+    //this.offset.x += this.speed; //For testing purposes.
     this.clearCanvas();
     this.updateBuffer();
-    //this.positionPlayer();
+    this.updatePlayer();
     this.drawBackgrounds();
     this.drawTerrain();
+    this.drawPlayer();
     this.drawForegrounds()
-    //this.drawPlayer();
+    
     var END = new Date();
     this.drawTimes.push(END - START);
 
@@ -225,17 +223,9 @@ Game.prototype.drawTerrain = function() {
     return this;
 }
 
-Game.prototype.positionPlayer = function() {
+Game.prototype.updatePlayer = function() {
     var p = this.Player;
-    p.move(this);
-    var collisionTerrain = this.checkCollisionTerrain(p.positionX, p.positionY, p.width, p.height);
-    if(collisionTerrain) {
-        p.collision("terrain", collisionTerrain);
-    }
-    var collisionObject = this.checkCollisionObject(p.positionX, p.positionY, p.width, p.height);
-    if(collisionObject) {
-        p.collision("object", collisionObject);
-    }
+    p.update();
     return this;
 }
 Game.prototype.drawPlayer = function() {
