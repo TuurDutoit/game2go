@@ -165,10 +165,12 @@ Game.prototype.Loop = function() {
     this.frames++;
     //this.offset.x += this.speed; //For testing purposes.
     this.clearCanvas();
-    this.updateBuffer();
     this.updatePlayer();
+    this.updateObjects();
+    this.updateTerrain();
     this.drawBackgrounds();
     this.drawTerrain();
+    this.drawObjects();
     this.drawPlayer();
     this.drawForegrounds()
     
@@ -185,43 +187,8 @@ Game.prototype.Loop = function() {
 
     return this;
 }
-//Draw the terrain (=blocks)
-Game.prototype.drawBackgrounds = function(){
-    // Normal Background:
-    if(this.scene.normalBackground != null){
-        this.context.drawImage(document.getElementById(this.scene.normalBackground),0-this.offset.x,0,820, 420);
-        
-    }
-    // Far       Background:
-    if(this.scene.farBackground != null){
-        this.context.drawImage(document.getElementById(this.scene.farBackground),0-this.offset.x,0,820, 420);
-    }
-}
-Game.prototype.drawForegrounds = function(){
-    if(this.scene.foreground != null){
-        this.context.drawImage(document.getElementById(this.scene.foreground),0-this.offset.x,0,820, 420);
-    }
-}
-Game.prototype.drawTerrain = function() {
-    var column, i, j, leni, lenj;
-    var self = this;
-    var h = game.height;
 
-//Loop DrawBuffer
-    for(i = this.drawBuffer.length - 1; i >= 0; i--) {
-        column = self.drawBuffer[i];
-
-        for(j = column.length - 1; j >= 0; j--) {
-//Reuse offsetX and offsetY for memory efficiency
-            this.Draw.offsetX = ((i)*this.blockSize) - (this.offset.x % this.blockSize);
-            this.Draw.offsetY = h-((j+1)*this.blockSize);
-            column[j](this.Draw);
-        }
-    }
-
-    return this;
-}
-
+//Functions used by Loop
 Game.prototype.updatePlayer = function() {
     var p = this.Player;
     p.update();
@@ -234,18 +201,71 @@ Game.prototype.drawPlayer = function() {
     return this;
 }
 
+Game.prototype.updateObjects = function() {
+    //Nothing in here, yet
 
-/* DRAW UTILITIES */
-//Update the drawBuffer
-Game.prototype.updateBuffer = function() {
-    this.drawBuffer = this.scene.terrain.slice(Math.floor(this.offset.x/this.blockSize), Math.ceil((this.offset.x + this.width)/this.blockSize));
     return this;
 }
-//Clear the whole canvas
+Game.prototype.drawObjects = function() {
+    //Nothing in here, yet
+
+    return this;
+}
+
+Game.prototype.updateTerrain = function() {
+    this.terrainBuffer = this.scene.terrain.slice(Math.floor(this.offset.x/this.blockSize), Math.ceil((this.offset.x + this.width)/this.blockSize));
+    return this;
+}
+Game.prototype.drawTerrain = function() {
+    var column, i, j, leni, lenj;
+    var self = this;
+    var h = game.height;
+
+//Loop terrainBuffer
+    for(i = self.terrainBuffer.length - 1; i >= 0; i--) {
+        column = self.terrainBuffer[i];
+
+        for(j = column.length - 1; j >= 0; j--) {
+//Reuse offsetX and offsetY for memory efficiency
+            this.Draw.offsetX = ((i)*this.blockSize) - (this.offsetX % this.blockSize);
+            this.Draw.offsetY = h-((j+1)*this.blockSize);
+            column[j](this.Draw);
+        }
+    }
+
+    return this;
+}
+
+//Draw the terrain (=blocks)
+Game.prototype.drawBackgrounds = function(){
+    // Normal Background:
+    if(this.scene.normalBackground){
+        this.context.drawImage(document.getElementById(this.scene.normalBackground), 0-this.offsetX, 0, 820, 420);
+        
+    }
+    // Far       Background:
+    if(this.scene.farBackground){
+        this.context.drawImage(document.getElementById(this.scene.farBackground), 0-this.offsetX, 0, 820, 420);
+    }
+}
+Game.prototype.drawForegrounds = function(){
+    if(this.scene.foreground){
+        this.context.drawImage(document.getElementById(this.scene.foreground), 0-this.offsetX, 0, 820, 420);
+    }
+}
+
 Game.prototype.clearCanvas = function() {
     this.context.clearRect(0, 0, this.width, this.height);
     return this;
 }
+
+
+
+
+
+
+
+
 
 
 
