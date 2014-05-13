@@ -77,9 +77,7 @@ Game = function(elem, options) {
     self.playing         = false;
     self.hadInit         = false;
 
-    self.speed           = self.options.speed || 5; //For testing
-    
-    self.terrainBuffer      = [];
+    self.terrainBuffer   = [];
     self.world           = [];
     self.scene           = null;
     self.sceneNum        = 0;
@@ -276,6 +274,7 @@ Game.prototype.clearCanvas = function() {
 //Load in a world (=select this world to play)
 Game.prototype.loadWorld = Game.prototype.load = function(world) {
     this.stop();
+    this.reset();
     this.worldLoadTime = new Date();
 
     this.world = this.parseWorld(world);
@@ -292,6 +291,7 @@ Game.prototype.addScene = function(scene) {
 Game.prototype.loadScene = function(scene) {
 //Stop the game to avoid corruption
     this.stop();
+    this.reset();
     this.sceneLoadTime = new Date();
 //The index of the game in the world is given
     if(typeof scene === "number") {
@@ -380,11 +380,6 @@ Game.prototype.parseWorld = function(w) {
     return parsedWorld;
 }
 
-
-
-
-/* UTILS
- * ===== */
 Game.prototype.cloneObject = function(obj) {
     var newObj = new Object();
     for(key in obj) {
@@ -393,6 +388,15 @@ Game.prototype.cloneObject = function(obj) {
     return newObj;
 }
 
+Game.reset = function() {
+    this.offsetX       = 0;
+    this.offsetY       = 0;
+    this.terrainBuffer = [];
+    this.scene         = [];
+    this.Player        = this.options.Player;
+
+    return this;
+}
 
 
 
