@@ -68,24 +68,19 @@ Game = function(elem, options) {
     self.context         = self.canvas.getContext("2d");
     self.width           = self.canvas.offsetWidth;
     self.height          = self.canvas.offsetHeight;
-    self.blockSize       = 35;
+    self.blockSize       = options.blockSize || 35;
     self.Draw            = new Draw(self.context, self.blockSize);
-
-    //Backgrounds:
-    self.hasFarBackground = false;
-    self.hasNormalBackground = true;
-    self.hasForeground = false;
     
-    self.hasStarted      = false;
     self.frames          = 0;
     self.offsetX         = 0;
     self.offsetY         = 0;
-    self.speed           = self.options.speed || 5;
     self.playing         = false;
+    self.hadInit         = false;
+
+    self.speed           = self.options.speed || 5; //For testing
     
-    self.drawBuffer      = [];
+    self.terrainBuffer      = [];
     self.world           = [];
-    self.worldNum        = 0;
     self.scene           = null;
     self.sceneNum        = 0;
 
@@ -127,10 +122,9 @@ Game = function(elem, options) {
 //Start the game
 Game.prototype.start = function(sceneID) {
     this.lastStartTime = new Date();
-    if(!this.hasStarted) {
-        this.startTime = this.lastStartTime;
+    if(!this.hadInit) {
         this.init(sceneID);
-        this.hasStarted = true;
+        this.hadInit = true;
     }
 
     if(!this.playing) {
@@ -163,11 +157,11 @@ Game.prototype.Loop = function() {
 //Update frame
     var START = new Date();
     this.frames++;
-    //this.offset.x += this.speed; //For testing purposes.
-    this.clearCanvas();
     this.updatePlayer();
     this.updateObjects();
     this.updateTerrain();
+    this.updateOffset();
+    this.clearCanvas();
     this.drawBackgrounds();
     this.drawTerrain();
     this.drawObjects();
@@ -191,7 +185,7 @@ Game.prototype.Loop = function() {
 //Functions used by Loop
 Game.prototype.updatePlayer = function() {
     var p = this.Player;
-    p.update();
+    p.update(p, this);
     return this;
 }
 Game.prototype.drawPlayer = function() {
@@ -213,7 +207,7 @@ Game.prototype.drawObjects = function() {
 }
 
 Game.prototype.updateTerrain = function() {
-    this.terrainBuffer = this.scene.terrain.slice(Math.floor(this.offset.x/this.blockSize), Math.ceil((this.offset.x + this.width)/this.blockSize));
+    this.terrainBuffer = this.scene.Terrain.slice(Math.floor(this.offsetX/this.blockSize), Math.ceil((this.offsetX + this.width)/this.blockSize));
     return this;
 }
 Game.prototype.drawTerrain = function() {
@@ -252,6 +246,13 @@ Game.prototype.drawForegrounds = function(){
     if(this.scene.foreground){
         this.context.drawImage(document.getElementById(this.scene.foreground), 0-this.offsetX, 0, 820, 420);
     }
+}
+
+Game.prototype.updateOffset = function() {
+    // this.offsetX = this.Player.positionX;
+    // this.offsetY = this.Player.offsetY;
+    this.offsetX += 2;
+    return this;
 }
 
 Game.prototype.clearCanvas = function() {
@@ -294,12 +295,12 @@ Game.prototype.loadScene = function(scene) {
     this.sceneLoadTime = new Date();
 //The index of the game in the world is given
     if(typeof scene === "number") {
-        this.scene = this.world[scene];
+        this.scene = this.world.Scenes[scene];
     }
 //The scene object itself is given
     else {
         var parsedScene = this.parseScene(scene);
-        this.world.push(parsedScene);
+        this.world.Scenes.push(parsedScene);
         this.scene = parsedScene;
     }
     return this;
@@ -363,18 +364,33 @@ Game.prototype.parseColumn = function(c) {
     return parsedColumn;
 }
 Game.prototype.parseScene = function(s) {
-    var parsedScene = [];
-    for(var i = 0, len = s.length; i < len; i++) {
-        parsedScene.push(this.parseColumn(s[i]));
+    var parsedScene = this.cloneObject(s);
+    parsedScene.Terrain = [];
+    for(var i = 0, len = s.Terrain.length; i < len; i++) {
+        parsedScene.Terrain.push(this.parseColumn(s.Terrain[i]));
     }
     return parsedScene;
 }
 Game.prototype.parseWorld = function(w) {
-    var parsedWorld = [];
-    for(var i = 0, len = w.length; i < len; i++) {
-        parsedWorld.push(this.parseScene(w[i]));
+    var parsedWorld = this.cloneObject(w);
+    parsedWorld.Scenes = [];
+    for(var i = 0, len = w.Scenes.length; i < len; i++) {
+        parsedWorld.Scenes.push(this.parseScene(w.Scenes[i]));
     }
     return parsedWorld;
+}
+
+
+
+
+/* UTILS
+ * ===== */
+Game.prototype.cloneObject = function(obj) {
+    var newObj = new Object();
+    for(key in obj) {
+        newObj[key] = obj[key];
+    }
+    return newObj;
 }
 
 
@@ -386,10 +402,10 @@ Game.prototype.parseWorld = function(w) {
 //This means that every block should draw inside a Draw.blockSize x Draw.blockSize block (which is placed correctly on the canvas by Draw)
 var Draw = function(context, blockSize, offsetX, offsetY) {
     var self       = this;
-    self.blockSize = blockSize || 35;
     self.context   = context;
     self.offsetX   = offsetX || 0;
     self.offsetY   = offsetY || 0;
+    self.blockSize = blockSize || 35;
 
     return self;
 }
