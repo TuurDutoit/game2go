@@ -156,9 +156,9 @@ Game.prototype.Loop = function() {
     var START = new Date();
     this.frames++;
     this.updatePlayer();
+    this.updateOffset();
     this.updateObjects();
     this.updateTerrain();
-    this.updateOffset();
     this.clearCanvas();
     this.drawBackgrounds();
     this.drawTerrain();
@@ -187,8 +187,8 @@ Game.prototype.updatePlayer = function() {
     return this;
 }
 Game.prototype.drawPlayer = function() {
-    this.Draw.positionX = this.Player.positionX;
-    this.Draw.positionY = this.Player.positionY;
+    this.Draw.offsetX = (this.width - this.Player.width) / 2;
+    this.Draw.offsetY = 245;
     this.Player.draw(this.Draw);
     return this;
 }
@@ -235,7 +235,7 @@ Game.prototype.drawBackgrounds = function(){
         this.context.drawImage(document.getElementById(this.scene.normalBackground), 0-this.offsetX, 0, 820, 420);
         
     }
-    // Far       Background:
+    // Far Background:
     if(this.scene.farBackground){
         this.context.drawImage(document.getElementById(this.scene.farBackground), 0-this.offsetX, 0, 820, 420);
     }
@@ -388,12 +388,20 @@ Game.prototype.cloneObject = function(obj) {
     return newObj;
 }
 
-Game.reset = function() {
+Game.prototype.reset = function() {
     this.offsetX       = 0;
     this.offsetY       = 0;
     this.terrainBuffer = [];
     this.scene         = [];
-    this.Player        = this.options.Player;
+    
+    this.Player        = {
+        positionX: options.Player.positionX || 0,
+        positionY: options.Player.positionY || 0,
+        width:     options.Player.width || self.blockSize,
+        height:    options.Player.height || self.blockSize * 2,
+        update:    options.Player.update,
+        draw:      options.Player.draw
+    };
 
     return this;
 }
