@@ -36,24 +36,24 @@ window.addEventListener("keyup", function(e) {
 
 var testPlayer = {
 	positionX: 193,
-	positionY: 175,
+	positionY: 220,
 	width: 35,
-	height: 70,
+	height: 60,
 	update: function(game) {
 		if(right) {
-			game.offsetX += 2;
+			game.offsetX += 3;
 		}
 		if(left) {
-			game.offsetX -= 2;
+			game.offsetX -= 3;
 		}
 		if(up) {
-			game.offsetY += 1;
+			game.offsetY += 3;
 		}
 		if(down) {
-			game.offsetY -= 1;
+			game.offsetY -= 3;
 		}
 	},
 	draw: function(d) {
-		d.fillStyle("#000000").fillRect(0, 0, 35, 70);
+		d.fillStyle("#000000").fillRect(0, 0, 35, 60);
 	}
 }
