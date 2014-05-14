@@ -7,12 +7,7 @@ var testScene = {
     ],
     Foregrounds: [],
     Terrain: [
-        [ {
-            noCollider: true,
-            draw: function(d) {
-                d.drawImage(document.getElementById("textureBrick"),0,0,d.blockSize,d.blockSize);
-            }
-          }, "TestC", "TestB", "TestA", "TestA" ],
+        [ "TestA", "TestA", "TestB", "TestA", "TestA" ],
         [ "TestA", "TestA", "TestA" ],
         [ "TestA", "TestA", "TestB"],
         [ "Test", "Test", "TestB", "TestA"],

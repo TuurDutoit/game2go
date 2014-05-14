@@ -1,19 +1,21 @@
 var Block = {
-    Test: function(d) {
-        d.drawImage(document.getElementById("image"),0,0,d.blockSize,d.blockSize);
+    Test: {
+        draw: function(d) {
+            d.drawImage(document.getElementById("image"),0,0,d.blockSize,d.blockSize);
+        }
     },
-    Empty: function(d) {
-    },
-    TestB: function(d) {
-        d.drawImage(document.getElementById("textureBrick"),0,0,d.blockSize,d.blockSize);
-    },
-    TestA: function(d) {
-        d.fillStyle("#FF0000").fillRect(0, 0, d.blockSize, d.blockSize);
-    },
-    TestC: {
+    Empty: {
         noCollider: true,
+        draw: function(d) {}
+    },
+    TestB: {
         draw: function(d) {
             d.drawImage(document.getElementById("textureBrick"),0,0,d.blockSize,d.blockSize);
+        }
+    },
+    TestA: {
+        draw: function(d) {
+            d.fillStyle("#FF0000").fillRect(0, 0, d.blockSize, d.blockSize);
         }
     }
 }

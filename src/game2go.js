@@ -93,7 +93,6 @@ Game = function(elem, options) {
     self.drawTimes       = [];
     self.savedBlocks     = {};
 
-    self.noColliderBlocks = "";
     self.terrainMatrix    = [];
     self.terrainColliders = [];
 
@@ -123,7 +122,6 @@ Game = function(elem, options) {
 
 //Start the game
 Game.prototype.start = function(sceneID) {
-    this.lastStartTime = new Date();
     if(!this.hadInit) {
         this.init(sceneID);
         this.hadInit = true;
@@ -131,6 +129,7 @@ Game.prototype.start = function(sceneID) {
 
     if(!this.playing) {
         this.playing = true;
+        this.lastStartTime = new Date();
         var game = this;
         this.timer = window.requestAnimationFrame(function() {
             game.Loop();
@@ -158,6 +157,7 @@ Game.prototype.Loop = function() {
 
 //Update frame
     var START = new Date();
+
     this.frames++;
     this.updatePlayer();
     this.updateObjects();
@@ -229,7 +229,7 @@ Game.prototype.drawTerrain = function() {
 //Reuse offsetX and offsetY for memory efficiency
             this.Draw.offsetX = (i*this.blockSize) - (this.offsetX % this.blockSize);
             this.Draw.offsetY = h-((j+1)*this.blockSize) + this.offsetY;
-            column[j](this.Draw);
+            column[j].draw(this.Draw);
         }
     }
 
@@ -281,13 +281,14 @@ Game.prototype.updateTerrainColliders = function() {
 Game.prototype.updateTerrainMatrix = function() {
     var terrainMatrix = [];
     var highest = this.getHighestColumnLength();
-    for(var i = 0, len = this.scene.Terrain.length; i < len; i++) {
-        var column = this.scene.Terrain[i];
+    var terrain = this.world.Scenes[this.sceneNum].Terrain;
+
+    for(var i = 0, len = terrain.length; i < len; i++) {
+        var column = terrain[i];
         var columnMatrix = [];
 
         for(var j = 0; j < highest; j++) {
-            //if(column[j] && !this.noColliderBlocks.indexOf({x: i, y: j})) {
-            if(column[j] && !this.noColliderBlocks.match("x:"+i+",y:"+j)) {
+            if(column[j] && !column[j].noCollider) {
                 columnMatrix.push(true);
             }
             else {
@@ -326,6 +327,8 @@ Game.prototype.loadWorld = Game.prototype.load = function(world) {
     this.worldLoadTime = new Date();
 
     this.world = world;
+    this.loadScene(0);
+
     return this;
 }
 
@@ -341,6 +344,7 @@ Game.prototype.loadScene = function(scene) {
     this.stop();
     this.reset();
     this.sceneLoadTime = new Date();
+
 //The index of the game in the world is given
     if(typeof scene === "number") {
         var parsedScene = this.parseScene(this.world.Scenes[scene]);
@@ -379,9 +383,10 @@ Game.prototype.checkSAT = function() {
 }
 Game.prototype.getHighestColumnLength = function() {
     var highestColumnLength = 0;
-    for(var i = 0, len = this.scene.Terrain.length; i < len; i++) {
-        if(this.scene.Terrain[i].length > highestColumnLength) {
-            highestColumnLength = this.scene.Terrain[i].length;
+    var t = this.scene.Terrain;
+    for(var i = 0, len = t.length; i < len; i++) {
+        if(t[i].length > highestColumnLength) {
+            highestColumnLength = t[i].length;
         }
     }
     return highestColumnLength;
@@ -402,30 +407,22 @@ Game.prototype.getAverageDrawTime = function() {
 }
 
 //Get parsed block
-Game.prototype.parseBlock = function(b, bindex, cindex) {
+Game.prototype.parseBlock = function(b) {
     switch (typeof b) {
-        case "function":
+        case "object":
             return b;
             break;
         case "string":
-            return this.parseBlock(this.savedBlocks[b], bindex, cindex);
+            return this.savedBlocks[b];
             break;
-        case "object":
-            if(b.noCollider){
-                //this.noColliderBlocks.push({x: cindex, y: bindex});
-                this.noColliderBlocks += ("x:"+cindex+",y:"+bindex+";");
-            }
-            return b.draw;
-            break;
-
         default:
             return null;
     }
 }
-Game.prototype.parseColumn = function(c, index) {
+Game.prototype.parseColumn = function(c) {
     var parsedColumn = [];
     for(var i = 0, len = c.length; i < len; i++) {
-        var parsedBlock = this.parseBlock(c[i], i, index);
+        var parsedBlock = this.parseBlock(c[i]);
         parsedColumn.push(parsedBlock);
     }
     return parsedColumn;
@@ -434,7 +431,7 @@ Game.prototype.parseScene = function(s) {
     var parsedScene = this.cloneObject(s);
     parsedScene.Terrain = [];
     for(var i = 0, len = s.Terrain.length; i < len; i++) {
-        parsedScene.Terrain.push(this.parseColumn(s.Terrain[i], i));
+        parsedScene.Terrain.push(this.parseColumn(s.Terrain[i]));
     }
     return parsedScene;
 }
@@ -452,7 +449,6 @@ Game.prototype.reset = function() {
     this.offsetY          = 0;
     this.terrainBuffer    = [];
     this.scene            = [];
-    this.noColliderBlocks = "";
     this.terrainMatrix    = [];
     this.terrainColliders = [];
     
