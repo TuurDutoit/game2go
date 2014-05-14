@@ -9,5 +9,11 @@ var Block = {
     },
     TestA: function(d) {
         d.fillStyle("#FF0000").fillRect(0, 0, d.blockSize, d.blockSize);
+    },
+    TestC: {
+        noCollider: true,
+        draw: function(d) {
+            d.drawImage(document.getElementById("textureBrick"),0,0,d.blockSize,d.blockSize);
+        }
     }
 }

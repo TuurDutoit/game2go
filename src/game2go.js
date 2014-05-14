@@ -93,6 +93,10 @@ Game = function(elem, options) {
     self.drawTimes       = [];
     self.savedBlocks     = {};
 
+    self.noColliderBlocks = "";
+    self.terrainMatrix    = [];
+    self.terrainColliders = [];
+
     if(!options.Player) {options.Player = {}};
     self.Player          = {
         positionX: options.Player.positionX || 0,
@@ -182,6 +186,12 @@ Game.prototype.Loop = function() {
 //Functions used by Loop
 Game.prototype.updatePlayer = function() {
     this.Player.update(this);
+    if(this.offsetX < 0) {
+        this.offsetX = 0;
+    }
+    if(this.offsetY < 0) {
+        this.offsetY = 0;
+    }
     return this;
 }
 Game.prototype.drawPlayer = function() {
@@ -217,7 +227,7 @@ Game.prototype.drawTerrain = function() {
 
         for(j = column.length - 1; j >= 0; j--) {
 //Reuse offsetX and offsetY for memory efficiency
-            this.Draw.offsetX = ((i)*this.blockSize) - (this.offsetX % this.blockSize);
+            this.Draw.offsetX = (i*this.blockSize) - (this.offsetX % this.blockSize);
             this.Draw.offsetY = h-((j+1)*this.blockSize) + this.offsetY;
             column[j](this.Draw);
         }
@@ -259,6 +269,47 @@ Game.prototype.clearCanvas = function() {
 
 
 
+/* COLLIDERS
+ * ========= */
+
+Game.prototype.updateTerrainColliders = function() {
+//this.terrainColliders conatins an array of SAT.Polygons
+    this.updateTerrainMatrix();
+    this.terrainColliders = this.getTerrainColliders();
+    return this;
+}
+Game.prototype.updateTerrainMatrix = function() {
+    var terrainMatrix = [];
+    var highest = this.getHighestColumnLength();
+    for(var i = 0, len = this.scene.Terrain.length; i < len; i++) {
+        var column = this.scene.Terrain[i];
+        var columnMatrix = [];
+
+        for(var j = 0; j < highest; j++) {
+            //if(column[j] && !this.noColliderBlocks.indexOf({x: i, y: j})) {
+            if(column[j] && !this.noColliderBlocks.match("x:"+i+",y:"+j)) {
+                columnMatrix.push(true);
+            }
+            else {
+                columnMatrix.push(false);
+            }
+        }
+        terrainMatrix.push(columnMatrix);
+    }
+
+    this.terrainMatrix = terrainMatrix;
+    return this;
+}
+Game.prototype.getTerrainColliders = function(tm) {
+//Get colliders from terrainMatrix (tm)
+
+    return [];
+}
+
+
+
+
+
 
 
 
@@ -274,7 +325,7 @@ Game.prototype.loadWorld = Game.prototype.load = function(world) {
     this.reset();
     this.worldLoadTime = new Date();
 
-    this.world = this.parseWorld(world);
+    this.world = world;
     return this;
 }
 
@@ -292,7 +343,8 @@ Game.prototype.loadScene = function(scene) {
     this.sceneLoadTime = new Date();
 //The index of the game in the world is given
     if(typeof scene === "number") {
-        this.scene = this.world.Scenes[scene];
+        var parsedScene = this.parseScene(this.world.Scenes[scene]);
+        this.scene = parsedScene;
     }
 //The scene object itself is given
     else {
@@ -300,20 +352,20 @@ Game.prototype.loadScene = function(scene) {
         this.world.Scenes.push(parsedScene);
         this.scene = parsedScene;
     }
+
+    this.updateTerrainColliders();
+
     return this;
 }
 
 //Save a block
 Game.prototype.saveBlock = function(name, b) {
-    var parsedBlock = this.parseBlock(b);
-    this.savedBlocks[name] = parsedBlock;
+    this.savedBlocks[name] = b;
     return this;
 }
 Game.prototype.saveBlocks = function(blocks) {
-    var parsedBlock;
     for(name in blocks) {
-        parsedBlock = this.parseBlock(blocks[name]);
-        this.savedBlocks[name] = parsedBlock;
+        this.savedBlocks[name] = blocks[name];
     }
     return this;
 }
@@ -324,6 +376,15 @@ Game.prototype.checkSAT = function() {
     else {
         throw new Error("Make sure SAT.js is provided. You can find it here: https://github.com/jriecken/sat-js");
     }
+}
+Game.prototype.getHighestColumnLength = function() {
+    var highestColumnLength = 0;
+    for(var i = 0, len = this.scene.Terrain.length; i < len; i++) {
+        if(this.scene.Terrain[i].length > highestColumnLength) {
+            highestColumnLength = this.scene.Terrain[i].length;
+        }
+    }
+    return highestColumnLength;
 }
 
 
@@ -341,22 +402,31 @@ Game.prototype.getAverageDrawTime = function() {
 }
 
 //Get parsed block
-Game.prototype.parseBlock = function(b) {
+Game.prototype.parseBlock = function(b, bindex, cindex) {
     switch (typeof b) {
         case "function":
             return b;
             break;
         case "string":
-            return this.savedBlocks[b];
+            return this.parseBlock(this.savedBlocks[b], bindex, cindex);
             break;
+        case "object":
+            if(b.noCollider){
+                //this.noColliderBlocks.push({x: cindex, y: bindex});
+                this.noColliderBlocks += ("x:"+cindex+",y:"+bindex+";");
+            }
+            return b.draw;
+            break;
+
         default:
             return null;
     }
 }
-Game.prototype.parseColumn = function(c) {
+Game.prototype.parseColumn = function(c, index) {
     var parsedColumn = [];
     for(var i = 0, len = c.length; i < len; i++) {
-        parsedColumn.push(this.parseBlock(c[i]));
+        var parsedBlock = this.parseBlock(c[i], i, index);
+        parsedColumn.push(parsedBlock);
     }
     return parsedColumn;
 }
@@ -364,17 +434,9 @@ Game.prototype.parseScene = function(s) {
     var parsedScene = this.cloneObject(s);
     parsedScene.Terrain = [];
     for(var i = 0, len = s.Terrain.length; i < len; i++) {
-        parsedScene.Terrain.push(this.parseColumn(s.Terrain[i]));
+        parsedScene.Terrain.push(this.parseColumn(s.Terrain[i], i));
     }
     return parsedScene;
-}
-Game.prototype.parseWorld = function(w) {
-    var parsedWorld = this.cloneObject(w);
-    parsedWorld.Scenes = [];
-    for(var i = 0, len = w.Scenes.length; i < len; i++) {
-        parsedWorld.Scenes.push(this.parseScene(w.Scenes[i]));
-    }
-    return parsedWorld;
 }
 
 Game.prototype.cloneObject = function(obj) {
@@ -386,12 +448,15 @@ Game.prototype.cloneObject = function(obj) {
 }
 
 Game.prototype.reset = function() {
-    this.offsetX       = 0;
-    this.offsetY       = 0;
-    this.terrainBuffer = [];
-    this.scene         = [];
+    this.offsetX          = 0;
+    this.offsetY          = 0;
+    this.terrainBuffer    = [];
+    this.scene            = [];
+    this.noColliderBlocks = "";
+    this.terrainMatrix    = [];
+    this.terrainColliders = [];
     
-    this.Player        = {
+    this.Player           = {
         positionX: options.Player.positionX || 0,
         positionY: options.Player.positionY || 0,
         width:     options.Player.width || self.blockSize,
