@@ -228,20 +228,26 @@ Game.prototype.drawTerrain = function() {
 
 //Draw the terrain (=blocks)
 Game.prototype.drawBackgrounds = function(){
-    // Normal Background:
-    if(this.scene.normalBackground){
-        this.context.drawImage(document.getElementById(this.scene.normalBackground), 0-this.offsetX, 0+this.offsetY, 820, 420);
-        
+    if(this.scene.Backgrounds instanceof Array) {
+        var b = this.scene.Backgrounds;
+        for(var i = 0, len = b.length; i < len; i++) {
+            this.Draw.offsetX = -this.offsetX;
+            this.Draw.offsetY = this.offsetY;
+            b[i](this.Draw);
+        }
     }
-    // Far Background:
-    if(this.scene.farBackground){
-        this.context.drawImage(document.getElementById(this.scene.farBackground), 0-this.offsetX, 0+this.offsetY, 820, 420);
-    }
+    return this;
 }
 Game.prototype.drawForegrounds = function(){
-    if(this.scene.foreground){
-        this.context.drawImage(document.getElementById(this.scene.foreground), 0-this.offsetX, 0+this.offsetY, 820, 420);
+    if(this.scene.Foregrounds instanceof Array) {
+        var f = this.scene.Foregrounds;
+        for(var i = 0, len = f.length; i < len; i++) {
+            this.Draw.offsetX = -this.offsetX;
+            this.Draw.offsetY = this.offsetY;
+            f[i](this.Draw);
+        }
     }
+    return this;
 }
 
 Game.prototype.clearCanvas = function() {
@@ -517,13 +523,13 @@ Draw.prototype.fullText = function(text, x, y, maxw) {
 }
 Draw.prototype.drawImage = Draw.prototype.image = Draw.prototype.img = function(img, sx, sy, sw, sh, dx, dy, dw, dh) {
 //All args are given -> a sub-rectangle is specified
-    if(dh) {
+    if(typeof dh === "number") {
         dx += this.offsetX;
         dy += this.offsetY;
         this.context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
     }
 //4 args are given -> a (x, y)-coordinate and dimensions are given
-    else if(sh) {
+    else if(typeof sh === "number") {
         dx = sx + this.offsetX;
         dy = sy + this.offsetY;
         dw = sw;
@@ -531,7 +537,7 @@ Draw.prototype.drawImage = Draw.prototype.image = Draw.prototype.img = function(
         this.context.drawImage(img, dx, dy, dw, dh);
     }
 //2 args are given -> just an (x, y)-coordinate is given
-    else if(sy) {
+    else if(typeof sy === "number") {
         dx = sx + this.offsetX;
         dy = sy + this.offsetY;
         this.context.drawImage(img, dx, dy);

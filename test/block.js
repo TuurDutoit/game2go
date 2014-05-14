@@ -5,7 +5,7 @@ var Block = {
     Empty: function(d) {
     },
     TestB: function(d) {
-        d.fillStyle("#00FF00").fillRect(0, 0, d.blockSize, d.blockSize);
+        d.drawImage(document.getElementById("textureBrick"),0,0,d.blockSize,d.blockSize);
     },
     TestA: function(d) {
         d.fillStyle("#FF0000").fillRect(0, 0, d.blockSize, d.blockSize);
