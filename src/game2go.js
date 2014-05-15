@@ -301,6 +301,20 @@ Game.prototype.updateTerrainMatrix = function() {
     this.terrainMatrix = terrainMatrix;
     return this;
 }
+Game.prototype.surroundMatrix = function(matrix, val) {
+    var m = this.cloneMatrix(matrix);
+    var height = this.getHighestColumnLength(matrix) + 2;
+    var extraColumn = this.getArray(height, val);
+
+    for(var i = 0, len = m.length; i < len; i++) {
+        m[i].unshift(val);
+        m[i].push(val);
+    }
+    m.unshift(extraColumn);
+    m.push(extraColumn);
+
+    return m;
+}
 Game.prototype.getTerrainColliders = function(tm) {
 //Get colliders from terrainMatrix (tm)
 
@@ -381,9 +395,9 @@ Game.prototype.checkSAT = function() {
         throw new Error("Make sure SAT.js is provided. You can find it here: https://github.com/jriecken/sat-js");
     }
 }
-Game.prototype.getHighestColumnLength = function() {
+Game.prototype.getHighestColumnLength = function(matrix) {
     var highestColumnLength = 0;
-    var t = this.scene.Terrain;
+    var t = matrix || this.scene.Terrain;
     for(var i = 0, len = t.length; i < len; i++) {
         if(t[i].length > highestColumnLength) {
             highestColumnLength = t[i].length;
@@ -442,6 +456,19 @@ Game.prototype.cloneObject = function(obj) {
         newObj[key] = obj[key];
     }
     return newObj;
+}
+Game.prototype.cloneArray = function(arr) {
+    return arr.slice(0);
+}
+Game.prototype.cloneMatrix = function(m) {
+    return m.map(function(arr) {return arr.slice(0)});
+}
+Game.prototype.getArray = function(length, value) {
+    var arr = [];
+    for(var i = 0; i < length; i++) {
+        arr.push(value);
+    }
+    return arr;
 }
 
 Game.prototype.reset = function() {
