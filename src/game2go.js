@@ -281,14 +281,14 @@ Game.prototype.updateTerrainColliders = function() {
 Game.prototype.updateTerrainMatrix = function() {
     var terrainMatrix = [];
     var highest = this.getHighestColumnLength();
-    var terrain = this.world.Scenes[this.sceneNum].Terrain;
+    var terrain = this.scene.Terrain;
 
     for(var i = 0, len = terrain.length; i < len; i++) {
         var column = terrain[i];
         var columnMatrix = [];
 
         for(var j = 0; j < highest; j++) {
-            if(column[j] && !column[j].noCollider) {
+            if(column[j] && column[j].hasCollider !== false) {
                 columnMatrix.push(true);
             }
             else {

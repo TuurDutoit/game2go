@@ -5,7 +5,7 @@ var Blocks = {
         }
     },
     Empty: {
-        noCollider: true,
+        hasCollider: false,
         draw: function(d) {}
     },
     Red: {
