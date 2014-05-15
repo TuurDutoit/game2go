@@ -317,7 +317,79 @@ Game.prototype.surroundMatrix = function(matrix, val) {
 }
 Game.prototype.getTerrainColliders = function(tm) {
 //Get colliders from terrainMatrix (tm)
-
+	var tm = this.terrainMatrix;
+	var FalseSurround = this.surroundMatrix(tm, false);
+	var TrueSurround = this.surroundMatrix(tm, true);
+    var ColliderPoints = tm;
+    for(var x = 1, len = tm.length - 1; x < len; x++) {
+        for(var y = 1; y < len; y++){
+			ColliderPoints[x - 1][y - 1] = false;
+            if(FalseSurround[x + 1][y] == false){
+                if(FalseSurround[x][y + 1] == false){
+                    ColliderPoints[x + 1 - 1][y + 1 - 1] = true;
+                }
+                if(FalseSurround[x][y - 1] == false){
+                    ColliderPoints[x + 1 - 1][y - 1] = true;
+                }
+            }
+            if(FalseSurround[x - 1][y] == false){
+                if(FalseSurround[x][y + 1] == false){
+                    ColliderPoints[x - 1][y + 1 - 1] = true;
+                }
+                if(FalseSurround[x][y - 1] == false){
+                    ColliderPoints[x - 1][y - 1] = true;
+                }
+            }
+            if(TrueSurround[x + 1][y + 1] == false){
+                ColliderPoints[x - 1][y - 1] = true;
+            }
+            if(TrueSurround[x + 1][y - 1] == false){
+                ColliderPoints[x - 1][y - 1] = true;
+            }
+            if(TrueSurround[x - 1][y - 1] == false){
+                ColliderPoints[x - 1][y - 1] = true;
+            }
+            if(TrueSurround[x - 1][y + 1] == false){
+                ColliderPoints[x - 1][y - 1] = true;
+            } 
+        }
+    }
+    /**for(var x = 1, len = tm.length - 1; x < len; x++) {
+        for(var y = 1; y < len; y++){
+            if(tm[x + 1][y] == false){
+                if(tm[x][y + 1] == false){
+                    ColliderPoints[x + 1][y + 1] = true;
+                }
+                if(tm[x][y - 1] == false){
+                    ColliderPoints[x + 1][y] = true;
+                }
+            }
+            if(tm[x - 1][y] == false){
+                if(tm[x][y + 1] == false){
+                    ColliderPoints[x][y + 1] = true;
+                }
+                if(tm[x][y - 1] == false){
+                    ColliderPoints[x][y] = true;
+                }
+            }
+            if(tm[x + 1][y + 1] == false){
+                ColliderPoints[x][y] = true;
+            }
+            if(tm[x + 1][y - 1] == false){
+                ColliderPoints[x][y] = true;
+            }
+            if(tm[x - 1][y - 1] == false){
+                ColliderPoints[x][y] = true;
+            }
+            if(tm[x - 1][y + 1] == false){
+                ColliderPoints[x][y] = true;
+            } 
+        }
+    }**/
+	alert(ColliderPoints[0][0]);
+	alert(ColliderPoints[0][1]);
+	alert(ColliderPoints[0][2]);
+	alert(ColliderPoints[0][3]);
     return [];
 }
 
