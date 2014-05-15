@@ -317,7 +317,6 @@ Game.prototype.surroundMatrix = function(matrix, val) {
 }
 Game.prototype.getTerrainColliders = function(tm) {
 //Get colliders from terrainMatrix (tm)
-
     return [];
 }
 
