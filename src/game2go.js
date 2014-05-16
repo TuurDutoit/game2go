@@ -1,57 +1,3 @@
-//Request AnimationFrame polyfill
-// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-// http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
- 
-// requestAnimationFrame polyfill by Erik Möller. fixes from Paul Irish and Tino Zijdel
- 
-// MIT license
- 
-(function() {
-    var lastTime = 0;
-    var vendors = ['ms', 'moz', 'webkit', 'o'];
-    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] 
-                                   || window[vendors[x]+'CancelRequestAnimationFrame'];
-    }
- 
-    if (!window.requestAnimationFrame)
-        window.requestAnimationFrame = function(callback, element) {
-            var currTime = new Date().getTime();
-            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
-              timeToCall);
-            lastTime = currTime + timeToCall;
-            return id;
-        };
- 
-    if (!window.cancelAnimationFrame)
-        window.cancelAnimationFrame = function(id) {
-            clearTimeout(id);
-        };
-}());
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Game2Go  **ITSELF**
- * =========================== */
 
 
 var Game;
@@ -128,7 +74,7 @@ Game.prototype.start = function(sceneID) {
         this.playing = true;
         this.lastStartTime = this.getTime();
         var game = this;
-        this.timer = window.requestAnimationFrame(function() {
+        this.timer = requestAnimationFrame(function() {
             game.Loop();
         })
     }
@@ -345,7 +291,7 @@ Game.prototype.getHighestColumnLength = function(matrix) {
 Game.prototype.requestLoop = function() {
     if(this.playing) {
         var game = this;
-        window.requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
             game.Loop();
         });
     }
@@ -594,14 +540,14 @@ Draw.prototype.drawImage = Draw.prototype.image = Draw.prototype.img = function(
 }
 
 
-/* NOT IMPLEMETED
+/* NOT IMPLEMETED in Draw
  * ==============*/
  //->Security
      //.rotate()
      //.translate()
      //.scale()
      //.scrollPathIntoView()
- //->Too complex/not enough time --> look into them!
+ //->Too complex/not enough time --> I'll look into them!
  //TODO
      //.createImageData()
      //.createLinearGradient()
@@ -626,6 +572,44 @@ Draw.prototype.drawImage = Draw.prototype.image = Draw.prototype.img = function(
 
 
 
+
+
+
+
+
+
+
+
+//Request AnimationFrame polyfill
+//Adapted from:
+
+// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+// http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
+// requestAnimationFrame polyfill by Erik Möller. fixes from Paul Irish and Tino Zijdel
+// MIT license
+
+var requestAnimationFrame, cancelAnimationFrame;
+var lastTime = 0;
+var vendors = ['ms', 'moz', 'webkit', 'o'];
+for(var x = 0; x < vendors.length && !requestAnimationFrame; ++x) {
+    requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+    cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+}
+if (!requestAnimationFrame) {
+    requestAnimationFrame = function(callback, element) {
+        var currTime = new Date().getTime();
+        var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+        var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+          timeToCall);
+        lastTime = currTime + timeToCall;
+        return id;
+    };
+}
+if (!cancelAnimationFrame) {
+    cancelAnimationFrame = function(id) {
+        clearTimeout(id);
+    };
+}
 
 
 })();
