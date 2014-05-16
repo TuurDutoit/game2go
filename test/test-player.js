@@ -52,6 +52,9 @@ var testPlayer = {
 		if(down) {
 			game.offsetY -= 3;
 		}
+
+		if(game.offsetX < 0) {game.offsetX = 0;}
+		if(game.offsetY < 0) {game.offsetY = 0;}
 	},
 	draw: function(d) {
 		d.fillStyle("#000000").fillRect(0, 0, 35, 60);

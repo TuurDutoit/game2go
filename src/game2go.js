@@ -77,18 +77,18 @@ Game = function(elem, options) {
     self.playing         = false;
     self.hadInit         = false;
 
-    self.terrainBuffer   = [];
-    self.world           = [];
+    self.world           = null;
     self.scene           = null;
     self.sceneNum        = 0;
+    self.terrainBuffer   = [];
 
     self.timer           = null;
-    self.createTime      = new Date();
+    self.createTime      = this.getTime();
     self.initTime        = null;
     self.startTime       = null;
     self.lastStartTime   = null;
     self.stopTime        = null;
-    this.worldLoadTime   = null;
+    self.worldLoadTime   = null;
     self.sceneLoadTime   = null;
     self.drawTimes       = [];
     self.savedBlocks     = {};
@@ -126,7 +126,7 @@ Game.prototype.start = function(sceneID) {
 
     if(!this.playing) {
         this.playing = true;
-        this.lastStartTime = new Date();
+        this.lastStartTime = this.getTime();
         var game = this;
         this.timer = window.requestAnimationFrame(function() {
             game.Loop();
@@ -137,14 +137,14 @@ Game.prototype.start = function(sceneID) {
 }
 //Stop the game
 Game.prototype.stop = function() {
-    this.stopTime = new Date();
+    this.stopTime = this.getTime();
     this.playing = false;
     return this;
 }
 //Initialization on first start()
 Game.prototype.init = function(sceneID) {
     this.checkSAT();
-    this.initTime = new Date();
+    this.initTime = this.getTime();
     this.sceneNum = (sceneID || 0);
     this.loadScene(this.sceneNum);
     return this;
@@ -153,7 +153,7 @@ Game.prototype.init = function(sceneID) {
 Game.prototype.Loop = function() {
 
 //Update frame
-    var START = new Date();
+    var START = this.getTime();
 
     this.frames++;
     this.updatePlayer();
@@ -166,16 +166,8 @@ Game.prototype.Loop = function() {
     this.drawPlayer();
     this.drawForegrounds()
     
-    var END = new Date();
-    this.drawTimes.push(END - START);
-
-//Request next frame
-    if(this.playing) {
-        var game = this;
-        this.timer = window.requestAnimationFrame(function() {
-            game.Loop();
-        });
-    }
+    this.drawTimes.push(this.getTime() - START);
+    this.requestLoop();
 
     return this;
 }
@@ -183,12 +175,6 @@ Game.prototype.Loop = function() {
 //Functions used by Loop
 Game.prototype.updatePlayer = function() {
     this.Player.update(this);
-    if(this.offsetX < 0) {
-        this.offsetX = 0;
-    }
-    if(this.offsetY < 0) {
-        this.offsetY = 0;
-    }
     return this;
 }
 Game.prototype.drawPlayer = function() {
@@ -215,12 +201,11 @@ Game.prototype.updateTerrain = function() {
 }
 Game.prototype.drawTerrain = function() {
     var column, i, j, leni, lenj;
-    var self = this;
     var h = game.height;
 
 //Loop terrainBuffer
-    for(i = self.terrainBuffer.length - 1; i >= 0; i--) {
-        column = self.terrainBuffer[i];
+    for(i = this.terrainBuffer.length - 1; i >= 0; i--) {
+        column = this.terrainBuffer[i];
 
         for(j = column.length - 1; j >= 0; j--) {
 //Reuse offsetX and offsetY for memory efficiency
@@ -235,6 +220,7 @@ Game.prototype.drawTerrain = function() {
 
 //Draw the terrain (=blocks)
 Game.prototype.drawBackgrounds = function(){
+//Check if any backgrounds are given
     if(this.scene.Backgrounds instanceof Array) {
         var b = this.scene.Backgrounds;
         for(var i = 0, len = b.length; i < len; i++) {
@@ -246,6 +232,7 @@ Game.prototype.drawBackgrounds = function(){
     return this;
 }
 Game.prototype.drawForegrounds = function(){
+//Check if any backgrounds are given
     if(this.scene.Foregrounds instanceof Array) {
         var f = this.scene.Foregrounds;
         for(var i = 0, len = f.length; i < len; i++) {
@@ -280,18 +267,21 @@ Game.prototype.clearCanvas = function() {
 Game.prototype.loadWorld = Game.prototype.load = function(world) {
     this.stop();
     this.reset();
-    this.worldLoadTime = new Date();
+    this.worldLoadTime = this.getTime();
 
     this.world = world;
     this.loadScene(0);
 
     return this;
 }
+Game.prototype.addWorld = function(world) {
+    this.world = world;
+    return this;
+}
 
 //Add a scene to the current world
 Game.prototype.addScene = function(scene) {
-    var parsedScene = this.parseScene(scene)
-    this.world.push(parsedScene);
+    this.world.push(scene);
     return this;
 }
 //Load in a scene (=select this scene to play)
@@ -299,7 +289,7 @@ Game.prototype.loadScene = function(scene) {
 //Stop the game to avoid corruption
     this.stop();
     this.reset();
-    this.sceneLoadTime = new Date();
+    this.sceneLoadTime = this.getTime();
 
 //The index of the game in the world is given
     if(typeof scene === "number") {
@@ -351,13 +341,15 @@ Game.prototype.getHighestColumnLength = function(matrix) {
 /* UTILS
  * ===== */
 
-//Get the average draw time (of all frames)
-Game.prototype.getAverageDrawTime = function() {
-    var sum = 0, i;
-    for(i = this.drawTimes.length - 1; i >= 0; i--) {
-        sum += this.drawTimes[i];
+//Request an AnimationFrame
+Game.prototype.requestLoop = function() {
+    if(this.playing) {
+        var game = this;
+        window.requestAnimationFrame(function() {
+            game.Loop();
+        });
     }
-    return (sum / this.drawTimes.length);
+    return this;
 }
 
 //Get parsed block
@@ -390,8 +382,40 @@ Game.prototype.parseScene = function(s) {
     return parsedScene;
 }
 
+Game.prototype.reset = function() {
+    this.offsetX          = 0;
+    this.offsetY          = 0;
+    this.terrainBuffer    = [];
+    this.scene            = [];
+    
+    this.Player           = {
+        positionX: options.Player.positionX || 0,
+        positionY: options.Player.positionY || 0,
+        width:     options.Player.width || self.blockSize,
+        height:    options.Player.height || self.blockSize * 2,
+        update:    options.Player.update,
+        draw:      options.Player.draw
+    };
+
+    return this;
+}
+
+//Get the average draw time (of all frames)
+Game.prototype.getAverageDrawTime = function() {
+    var sum = 0;
+    for(var i = this.drawTimes.length - 1; i >= 0; i--) {
+        sum += this.drawTimes[i];
+    }
+    return (sum / this.drawTimes.length);
+}
+
+
+
+
+/* MISCELLEANOUS
+ * ============= */
 Game.prototype.cloneObject = function(obj) {
-    var newObj = new Object();
+    var newObj = {};
     for(key in obj) {
         newObj[key] = obj[key];
     }
@@ -410,24 +434,21 @@ Game.prototype.getArray = function(length, value) {
     }
     return arr;
 }
-
-Game.prototype.reset = function() {
-    this.offsetX          = 0;
-    this.offsetY          = 0;
-    this.terrainBuffer    = [];
-    this.scene            = [];
-    
-    this.Player           = {
-        positionX: options.Player.positionX || 0,
-        positionY: options.Player.positionY || 0,
-        width:     options.Player.width || self.blockSize,
-        height:    options.Player.height || self.blockSize * 2,
-        update:    options.Player.update,
-        draw:      options.Player.draw
-    };
-
-    return this;
+Game.prototype.getTime = function() {
+    if(window.performance && window.performance.now) {
+        return window.performance.now();
+    }
+    else {
+        return new Date();
+    }
 }
+
+
+
+
+
+
+
 
 
 
