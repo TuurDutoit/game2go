@@ -1,6 +1,6 @@
-
-
 var Game;
+
+
 
 (function() { //Mask everything but Game object
 
@@ -8,39 +8,40 @@ var Game;
 Game = function(elem, options) {
 
 //Pretty straightforward variables...
-    var self             = this;
-    self.options         = options || {}; var options = self.options;
-    self.canvas          = elem;
-    self.context         = self.canvas.getContext("2d");
-    self.width           = self.canvas.offsetWidth;
-    self.height          = self.canvas.offsetHeight;
-    self.blockSize       = options.blockSize || 35;
-    self.Draw            = new Draw(self.context, self.blockSize);
+    var self              = this;
+    self.options          = options || {}; var options = self.options;
+    self.canvas           = elem;
+    self.context          = self.canvas.getContext("2d");
+    self.width            = self.canvas.offsetWidth;
+    self.height           = self.canvas.offsetHeight;
+    self.blockSize        = options.blockSize || 35;
+    self.Draw             = new Draw(self.context, self.blockSize);
     
-    self.frames          = 0;
-    self.offsetX         = 0;
-    self.offsetY         = 0;
-    self.playing         = false;
-    self.hadInit         = false;
+    self.frames           = 0;
+    self.offsetX          = 0;
+    self.offsetY          = 0;
+    self.playing          = false;
+    self.hadInit          = false;
 
-    self.world           = null;
-    self.scene           = null;
-    self.sceneNum        = 0;
-    self.terrainBuffer   = [];
+    self.world            = null;
+    self.scene            = null;
+    self.sceneNum         = 0;
+    self.terrainBuffer    = [];
+    self.terrainColliders = [];
 
-    self.timer           = null;
-    self.createTime      = this.getTime();
-    self.initTime        = null;
-    self.startTime       = null;
-    self.lastStartTime   = null;
-    self.stopTime        = null;
-    self.worldLoadTime   = null;
-    self.sceneLoadTime   = null;
-    self.drawTimes       = [];
-    self.savedBlocks     = {};
+    self.timer            = null;
+    self.createTime       = this.getTime();
+    self.initTime         = null;
+    self.startTime        = null;
+    self.lastStartTime    = null;
+    self.stopTime         = null;
+    self.worldLoadTime    = null;
+    self.sceneLoadTime    = null;
+    self.drawTimes        = [];
+    self.savedBlocks      = {};
 
     if(!options.Player) {options.Player = {}};
-    self.Player          = {
+    self.Player           = {
         positionX: options.Player.positionX || 0,
         positionY: options.Player.positionY || 0,
         width:     options.Player.width || self.blockSize,
@@ -195,6 +196,25 @@ Game.prototype.clearCanvas = function() {
     return this;
 }
 
+Game.prototype.updateTerrainColliders = function() {
+    var terrain = this.scene.Terrain;
+    var colliders = [];
+    var w = this.blockSize;
+    var column, j;
+
+    for(var i = 0, len = terrain.length; i < len; i++) {
+        column = terrain[i];
+        for(var j = 0, lenj = column.length; j < lenj; j++) {
+            var x = i * w;
+            var y = this.height - (j * w);
+            colliders.push(new SAT.Box(new SAT.Vector(x, y), w, w).toPolygon());
+        }
+    }
+
+    this.terrainColliders = colliders;
+    return this;
+}
+
 
 
 
@@ -333,6 +353,7 @@ Game.prototype.reset = function() {
     this.offsetY          = 0;
     this.terrainBuffer    = [];
     this.scene            = [];
+    this.terrainColliders = [];
     
     this.Player           = {
         positionX: options.Player.positionX || 0,
