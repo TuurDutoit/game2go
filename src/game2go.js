@@ -81,6 +81,7 @@ Game = function(elem, options) {
     self.scene           = null;
     self.sceneNum        = 0;
     self.terrainBuffer   = [];
+	self.objectList		 = [];
 
     self.timer           = null;
     self.createTime      = this.getTime();
@@ -128,6 +129,7 @@ Game.prototype.start = function(sceneID) {
         this.playing = true;
         this.lastStartTime = this.getTime();
         var game = this;
+		this.startObjects();
         this.timer = window.requestAnimationFrame(function() {
             game.Loop();
         })
@@ -183,15 +185,32 @@ Game.prototype.drawPlayer = function() {
     this.Player.draw(this.Draw);
     return this;
 }
-
+Game.prototype.startObjects = function() {
+    //Nothing in here, yet
+		if(this.scene.Objects.length > 0){
+			for(var i = 0, len = this.scene.Objects.length; i < len; i++) {
+				this.scene.Objects[i].Start();
+			}
+		}
+		return this;
+}
 Game.prototype.updateObjects = function() {
     //Nothing in here, yet
-
-    return this;
+		if(this.scene.Objects.length > 0){
+			for(var i = 0, len = this.scene.Objects.length; i < len; i++) {
+				this.scene.Objects[i].Update();
+			}
+		}
+		return this;
 }
 Game.prototype.drawObjects = function() {
     //Nothing in here, yet
-
+	if(this.scene.Objects.length > 0){
+			alert("Test");
+			for(var i = 0, len = this.scene.Objects.length; i < len; i++) {
+				this.scene.Objects[i].Draw(this.Draw, this.OffsetX, this.OffsetY);
+			}
+	}
     return this;
 }
 
@@ -587,6 +606,22 @@ Draw.prototype.drawImage = Draw.prototype.image = Draw.prototype.img = function(
     else if(typeof sy === "number") {
         dx = sx + this.offsetX;
         dy = sy + this.offsetY;
+        this.context.drawImage(img, dx, dy);
+    }
+
+    return this;
+}
+Draw.prototype.drawImageNoOffset = function(img, sx, sy, sw, sh, dx, dy, dw, dh) {
+//All args are given -> a sub-rectangle is specified
+    if(typeof dh === "number") {
+        this.context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+    }
+//4 args are given -> a (x, y)-coordinate and dimensions are given
+    else if(typeof sh === "number") {
+        this.context.drawImage(img, dx, dy, dw, dh);
+    }
+//2 args are given -> just an (x, y)-coordinate is given
+    else if(typeof sy === "number") {
         this.context.drawImage(img, dx, dy);
     }
 
