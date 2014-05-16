@@ -93,9 +93,6 @@ Game = function(elem, options) {
     self.drawTimes       = [];
     self.savedBlocks     = {};
 
-    self.terrainMatrix    = [];
-    self.terrainColliders = [];
-
     if(!options.Player) {options.Player = {}};
     self.Player          = {
         positionX: options.Player.positionX || 0,
@@ -419,8 +416,6 @@ Game.prototype.reset = function() {
     this.offsetY          = 0;
     this.terrainBuffer    = [];
     this.scene            = [];
-    this.terrainMatrix    = [];
-    this.terrainColliders = [];
     
     this.Player           = {
         positionX: options.Player.positionX || 0,
