@@ -8,4 +8,5 @@ var options = {
 
 var game = new Game(document.getElementById("game-canvas"), options);
 game.saveBlocks(Blocks);
-game.load(testWorld);
+//game.load(testWorld);
+game.addWorld(testWorld);
