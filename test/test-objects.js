@@ -1,16 +1,14 @@
-var ObjectTest;
-
-ObjectTest = function(){
-	var self = this;
-	self.sprite = "image";
-	self.positionX = 0;
-	self.positionY = 0;
-	return self;
+var ObjectTest = function(){
+	this.sprite = "image";
+	return this;
 }
 ObjectTest.prototype.Init = function() {
+	this.positionX = 15;
+	this.positionY = 15;
 }
 ObjectTest.prototype.Update = function() {
+	this.positionX += 1;
 }
-ObjectTest.prototype.Draw = function(D, OffsetX, OffsetY) {
-	D.drawImage(document.getElementById(this.sprite), this.positionX, this.positionY);
+ObjectTest.prototype.Draw = function(d) {
+	d.drawImage(document.getElementById(this.sprite), 0, 0);
 }

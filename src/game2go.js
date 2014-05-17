@@ -81,7 +81,6 @@ Game = function(elem, options) {
     self.scene           = null;
     self.sceneNum        = 0;
     self.terrainBuffer   = [];
-    self.objectList		 = [];
 
     self.timer           = null;
     self.createTime      = this.getTime();
@@ -186,30 +185,32 @@ Game.prototype.drawPlayer = function() {
     return this;
 }
 Game.prototype.initObjects = function() {
-    //Nothing in here, yet
-		if(this.scene.Objects.length > 0){
-			for(var i = 0, len = this.scene.Objects.length; i < len; i++) {
-				this.scene.Objects[i].Init();
-			}
-		}
-		return this;
+    var objects = this.scene.Objects;
+	for(var i = 0, len = objects.length; i < len; i++) {
+        if(objects[i].Init) {
+            objects[i].Init();
+        }
+	}
+	return this;
 }
 Game.prototype.updateObjects = function() {
-    //Nothing in here, yet
-		if(this.scene.Objects.length > 0){
-			for(var i = 0, len = this.scene.Objects.length; i < len; i++) {
-				this.scene.Objects[i].Update();
-			}
-		}
-		return this;
+    var objects = this.scene.Objects;
+	for(var i = 0, len = objects.length; i < len; i++) {
+        if(objects[i].Update) {
+            this.scene.Objects[i].Update();
+        }
+	}
+	return this;
 }
 Game.prototype.drawObjects = function() {
-    //Nothing in here, yet
-	if(this.scene.Objects.length > 0){
-			alert("Test");
-			for(var i = 0, len = this.scene.Objects.length; i < len; i++) {
-				this.scene.Objects[i].Draw(this.Draw, this.OffsetX, this.OffsetY);
-			}
+    var objects = this.scene.Objects;
+	for(var i = 0, len = objects.length; i < len; i++) {
+        if(objects[i].Draw) {
+            var object = objects[i];
+            this.Draw.offsetX = this.offsetX + object.positionX;
+            this.Draw.offsetY = this.offsetY + object.positionY;
+            objects[i].Draw(this.Draw);
+        }
 	}
     return this;
 }
