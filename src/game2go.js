@@ -81,7 +81,7 @@ Game = function(elem, options) {
     self.scene           = null;
     self.sceneNum        = 0;
     self.terrainBuffer   = [];
-	self.objectList		 = [];
+    self.objectList		 = [];
 
     self.timer           = null;
     self.createTime      = this.getTime();
@@ -611,19 +611,8 @@ Draw.prototype.drawImage = Draw.prototype.image = Draw.prototype.img = function(
 
     return this;
 }
-Draw.prototype.drawImageNoOffset = function(img, sx, sy, sw, sh, dx, dy, dw, dh) {
-//All args are given -> a sub-rectangle is specified
-    if(typeof dh === "number") {
-        this.context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
-    }
-//4 args are given -> a (x, y)-coordinate and dimensions are given
-    else if(typeof sh === "number") {
-        this.context.drawImage(img, dx, dy, dw, dh);
-    }
-//2 args are given -> just an (x, y)-coordinate is given
-    else if(typeof sy === "number") {
-        this.context.drawImage(img, dx, dy);
-    }
+Draw.prototype.drawImageNoOffset = function() {
+    this.context.drawImage.apply(this.context, arguments);
 
     return this;
 }
@@ -658,6 +647,7 @@ Draw.prototype.drawImageNoOffset = function(img, sx, sy, sw, sh, dx, dy, dw, dh)
 
  //.fullRect()
  //.fullText()
+ //.drawImageNoOffset()
 
 
 

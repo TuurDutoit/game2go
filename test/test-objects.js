@@ -12,5 +12,5 @@ ObjectTest.prototype.Start = function() {
 ObjectTest.prototype.Update = function() {
 }
 ObjectTest.prototype.Draw = function(D, OffsetX, OffsetY) {
-	D.drawImageNoOffset(document.getElementById(this.sprite), this.positionX, this.positionY);
+	D.drawImage(document.getElementById(this.sprite), this.positionX, this.positionY);
 }
