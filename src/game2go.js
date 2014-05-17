@@ -74,11 +74,7 @@ Game.prototype.start = function(sceneID) {
     if(!this.playing) {
         this.playing = true;
         this.lastStartTime = this.getTime();
-        this.initObjects();
-        var game = this;
-        this.timer = requestAnimationFrame(function() {
-            game.Loop();
-        });
+        this.requestLoop();
     }
 
     return this;
@@ -154,8 +150,8 @@ Game.prototype.drawObjects = function() {
 	for(var i = 0, len = objects.length; i < len; i++) {
         if(objects[i].Draw) {
             var object = objects[i];
-            this.Draw.offsetX = this.offsetX + object.positionX;
-            this.Draw.offsetY = this.offsetY + object.positionY;
+            this.Draw.offsetX = object.positionX - this.offsetX;
+            this.Draw.offsetY = object.positionY - this.offsetY;
             objects[i].Draw(this.Draw);
         }
 	}
@@ -288,6 +284,8 @@ Game.prototype.loadScene = function(scene) {
         this.world.Scenes.push(parsedScene);
         this.scene = parsedScene;
     }
+
+    this.initObjects();
 
     return this;
 }
