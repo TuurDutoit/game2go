@@ -14,10 +14,11 @@ ObjectTest.prototype.Draw = function(d) {
 	d.drawImage(document.getElementById(this.spriteID), 0, 0);
 }
 
-var ObjectFireBall = function(x, y , angle){
+var ObjectFireBall = function(x, y , angle, speed){
 	this.spriteID = "image";
 	this.positionX = x;
 	this.positionY = y;
+	this.speed = speed;
 	this.angle = angle;
 	return this;
 }
@@ -27,8 +28,8 @@ ObjectFireBall.prototype.Init = function() {
 	this.plusY = Math.sin(this.angleRadian);
 }
 ObjectFireBall.prototype.Update = function() {
-	this.positionX += this.plusX;
-	this.positionY -= this.plusY;
+	this.positionX += this.plusX * this.speed;
+	this.positionY -= this.plusY * this.speed;
 }
 ObjectFireBall.prototype.Draw = function(d) {
 	d.drawImage(document.getElementById(this.spriteID), 0, 0);
