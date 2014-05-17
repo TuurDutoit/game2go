@@ -7,7 +7,7 @@ ObjectTest = function(){
 	self.positionY = 0;
 	return self;
 }
-ObjectTest.prototype.Start = function() {
+ObjectTest.prototype.Init = function() {
 }
 ObjectTest.prototype.Update = function() {
 }

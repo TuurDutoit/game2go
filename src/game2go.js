@@ -128,11 +128,11 @@ Game.prototype.start = function(sceneID) {
     if(!this.playing) {
         this.playing = true;
         this.lastStartTime = this.getTime();
+        this.initObjects();
         var game = this;
-		this.startObjects();
         this.timer = window.requestAnimationFrame(function() {
             game.Loop();
-        })
+        });
     }
 
     return this;
@@ -185,11 +185,11 @@ Game.prototype.drawPlayer = function() {
     this.Player.draw(this.Draw);
     return this;
 }
-Game.prototype.startObjects = function() {
+Game.prototype.initObjects = function() {
     //Nothing in here, yet
 		if(this.scene.Objects.length > 0){
 			for(var i = 0, len = this.scene.Objects.length; i < len; i++) {
-				this.scene.Objects[i].Start();
+				this.scene.Objects[i].Init();
 			}
 		}
 		return this;
