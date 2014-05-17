@@ -74,10 +74,11 @@ Game.prototype.start = function(sceneID) {
     if(!this.playing) {
         this.playing = true;
         this.lastStartTime = this.getTime();
+        this.initObjects();
         var game = this;
         this.timer = requestAnimationFrame(function() {
             game.Loop();
-        })
+        });
     }
 
     return this;
@@ -130,15 +131,34 @@ Game.prototype.drawPlayer = function() {
     this.Player.draw(this.Draw);
     return this;
 }
-
+Game.prototype.initObjects = function() {
+    var objects = this.scene.Objects;
+	for(var i = 0, len = objects.length; i < len; i++) {
+        if(objects[i].Init) {
+            objects[i].Init();
+        }
+	}
+	return this;
+}
 Game.prototype.updateObjects = function() {
-    //Nothing in here, yet
-
-    return this;
+    var objects = this.scene.Objects;
+	for(var i = 0, len = objects.length; i < len; i++) {
+        if(objects[i].Update) {
+            this.scene.Objects[i].Update();
+        }
+	}
+	return this;
 }
 Game.prototype.drawObjects = function() {
-    //Nothing in here, yet
-
+    var objects = this.scene.Objects;
+	for(var i = 0, len = objects.length; i < len; i++) {
+        if(objects[i].Draw) {
+            var object = objects[i];
+            this.Draw.offsetX = this.offsetX + object.positionX;
+            this.Draw.offsetY = this.offsetY + object.positionY;
+            objects[i].Draw(this.Draw);
+        }
+	}
     return this;
 }
 
@@ -559,6 +579,11 @@ Draw.prototype.drawImage = Draw.prototype.image = Draw.prototype.img = function(
 
     return this;
 }
+Draw.prototype.drawImageNoOffset = function() {
+    this.context.drawImage.apply(this.context, arguments);
+
+    return this;
+}
 
 
 /* NOT IMPLEMETED in Draw
@@ -590,6 +615,7 @@ Draw.prototype.drawImage = Draw.prototype.image = Draw.prototype.img = function(
 
  //.fullRect()
  //.fullText()
+ //.drawImageNoOffset()
 
 
 
