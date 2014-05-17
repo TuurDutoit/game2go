@@ -5,7 +5,7 @@ var testScene = {
             d.drawImage(document.getElementById("background-scene1"), 0, 0);
         }
     ],
-	Objects: [new ObjectTest(), new ObjectTestNoOffset()],
+	Objects: [new ObjectTest(), new ObjectTestNoOffset(), new ObjectFireBall(100, 100 , 90)],
     Foregrounds: [],
     Terrain: [
         [ "Bricks", "Bricks", "Bricks", "Bricks"],
