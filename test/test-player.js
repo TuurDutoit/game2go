@@ -39,6 +39,8 @@ var testPlayer = {
 	positionY: 220,
 	width: 35,
 	height: 60,
+	hp: 100,
+	money: 50,
 	update: function(game) {
 		if(right) {
 			game.offsetX += 3;
@@ -55,6 +57,14 @@ var testPlayer = {
 
 		if(game.offsetX < 0) {game.offsetX = 0;}
 		if(game.offsetY < 0) {game.offsetY = 0;}
+	},
+	damage: function(damage) {
+		if(testPlayer.hp - damage > 0){
+			testPlayer.hp -= damage;
+		}
+		else{
+			//Player is killed
+		}
 	},
 	draw: function(d) {
 		d.fillStyle("#000000").fillRect(0, 0, 35, 60);
