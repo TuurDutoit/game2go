@@ -23,8 +23,6 @@ var ObjectFireBall = function(x, y , angle){
 }
 ObjectFireBall.prototype.Init = function() {
 	this.angleRadian = (this.angle * Math.PI)/180;
-	//alert(this.angle);
-	//alert("Test");
 	this.plusX = Math.cos(this.angleRadian);
 	this.plusY = Math.sin(this.angleRadian);
 }
