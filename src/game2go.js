@@ -150,8 +150,8 @@ Game.prototype.drawObjects = function() {
 	for(var i = 0, len = objects.length; i < len; i++) {
         if(objects[i].Draw) {
             var object = objects[i];
-            this.Draw.offsetX = -this.offsetX + object.positionX
-            this.Draw.offsetY =  this.offsetY + object.positionY;
+            this.Draw.offsetX = (-this.offsetX || 0) + object.positionX
+            this.Draw.offsetY =  (this.offsetY || 0) + object.positionY;
             objects[i].Draw(this.Draw);
         }
 	}
