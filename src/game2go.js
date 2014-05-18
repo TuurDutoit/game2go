@@ -189,7 +189,7 @@ Game.prototype.drawBackgrounds = function(){
         var backgrounds = this.scene.Backgrounds;
         for(var i = 0, len = backgrounds.length; i < len; i++) {
             var b = backgrounds[i];
-            this.Draw.offsetX = -this.offsetX + b.positionX;
+            this.Draw.offsetX = -this.offsetX + (b.positionX || 0);
             this.Draw.offsetY = this.height - ((b.positionY || 0) - this.offsetY) - (b.height || 0);
             b.Draw(this.Draw);
         }
@@ -199,11 +199,12 @@ Game.prototype.drawBackgrounds = function(){
 Game.prototype.drawForegrounds = function(){
 //Check if any backgrounds are given
     if(this.scene.Foregrounds instanceof Array) {
-        var f = this.scene.Foregrounds;
-        for(var i = 0, len = f.length; i < len; i++) {
-            this.Draw.offsetX = -this.offsetX;
-            this.Draw.offsetY = 0;
-            f[i](this.Draw);
+        var foregrounds = this.scene.Foregrounds;
+        for(var i = 0, len = foregrounds.length; i < len; i++) {
+            var f = foregrounds[i];
+            this.Draw.offsetX = -this.offsetX + (f.positionX || 0);
+            this.Draw.offsetY = this.height - ((f.positionY || 0) - this.offsetY) - (f.height || 0);
+            f.Draw(this.Draw);
         }
     }
     return this;
