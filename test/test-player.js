@@ -1,33 +1,33 @@
-var right = false, left = false, up = false, down = false;
+var direction = [0,0];
 window.addEventListener("keydown", function(e) {
 	switch(e.keyCode) {
 		case 40:
-			down = true;
+			direction[1] = -1;
 			break;
 		case 39:
-			right = true;
+			direction[0] = 1;
 			break;
 		case 38:
-			up = true;
+			direction[1] = 1;
 			break;
 		case 37:
-			left = true;
+			direction[0] = -1;
 			break;
 	}
 });
 window.addEventListener("keyup", function(e) {
 	switch(e.keyCode) {
 		case 40:
-			down = false;
+			direction[1] = 0;
 			break;
 		case 39:
-			right = false;
+			direction[0] = 0;
 			break;
 		case 38:
-			up = false;
+			direction[1] = 0;
 			break;
 		case 37:
-			left = false;
+			direction[0] = 0;
 			break;
 	}
 })
@@ -41,20 +41,10 @@ var testPlayer = {
 	height: 60,
 	hp: 100,
 	money: 50,
+	speed: 20,
 	update: function(game) {
-		if(right) {
-			game.offsetX += 3;
-		}
-		if(left) {
-			game.offsetX -= 3;
-		}
-		if(up) {
-			game.offsetY += 3;
-		}
-		if(down) {
-			game.offsetY -= 3;
-		}
-
+		game.offsetX += direction[0] * testPlayer.speed;
+		game.offsetY += direction[1] * testPlayer.speed;
 		if(game.offsetX < 0) {game.offsetX = 0;}
 		if(game.offsetY < 0) {game.offsetY = 0;}
 	},
