@@ -2,19 +2,47 @@ var direction = [0,0];
 window.addEventListener("keydown", function(e) {
 	switch(e.keyCode) {
 		case 40:
+            if(direction[0] == 0 && direction[1] == 0){
+                testPlayer.currentFrameCounter = 0;
+                testPlayer.currentFrame = 0;
+            }
 			direction[1] = -1;
+            testPlayer.currentAnimation = "runningRight";
 			break;
 		case 39:
+            if(direction[0] == 0 && direction[1] == 0){
+                testPlayer.currentFrameCounter = 0;
+                testPlayer.currentFrame = 0;
+            }
+            testPlayer.directionFacing = "right";
 			direction[0] = 1;
+            testPlayer.currentAnimation = "runningRight";
+           // testPlayer.currentFrameCounter = 0;
+           // testPlayer.currentFrame = 0;
 			break;
 		case 38:
+            if(direction[0] == 0 && direction[1] == 0){
+                testPlayer.currentFrameCounter = 0;
+                testPlayer.currentFrame = 0;
+            }
 			direction[1] = 1;
+            testPlayer.currentAnimation = "runningRight";
+            //testPlayer.currentFrameCounter = 0;
+            //testPlayer.currentFrame = 0;
 			break;
 		case 37:
+            if(direction[0] == 0 && direction[1] == 0){
+                testPlayer.currentFrameCounter = 0;
+                testPlayer.currentFrame = 0;
+            }
+            testPlayer.directionFacing = "left";
 			direction[0] = -1;
+            testPlayer.currentAnimation = "runningLeft";
+            //testPlayer.currentFrameCounter = 0;
+            //testPlayer.currentFrame = 0;
 			break;
-	}
-});
+        }
+    });
 window.addEventListener("keyup", function(e) {
 	switch(e.keyCode) {
 		case 40:
@@ -37,15 +65,30 @@ var log = false;
 
 
 var testPlayer = {
+    sprite: {image:"mario", sizeX: 16, sizeY: 32, frames: {standardRight: [[80,0]], standardLeft: [[736,0]], runningRight: [[112,0],[127,0],[112,0], [96,0]], runningLeft: [[704,0],[720,0],[704,0], [688,0]]}},
 	positionX: 193,
 	positionY: 140,
 	width: 35,
 	height: 60,
 	hp: 100,
 	money: 50,
+    currentAnimation: "standardRight",
+    currentFrame: 0,
+    currentFrameCounter: 0,
+    directionFacing: "right",
 	speed: 5,
 	update: function(game) {
 		var p = game.Player;
+        if(direction[0] == 0 && direction[1] == 0){
+            if(testPlayer.directionFacing == "right"){
+                testPlayer.currentAnimation = "standardRight";
+            }
+            else{
+                testPlayer.currentAnimation = "standardLeft";
+            }
+        }
+        testPlayer.currentFrameCounter += 0.1;
+        testPlayer.currentFrame = (parseInt(testPlayer.currentFrameCounter)) % testPlayer.sprite.frames[testPlayer.currentAnimation].length;
 		game.offsetX += direction[0] * testPlayer.speed;
 		game.offsetY += direction[1] * testPlayer.speed;
 		
@@ -71,7 +114,7 @@ var testPlayer = {
 		}
 	},
 	draw: function(d) {
-		d.fillStyle("#000000").fillRect(0, 0, 35, 60);
+		d.drawImage(document.getElementById(testPlayer.sprite.image), testPlayer.sprite.frames[testPlayer.currentAnimation][testPlayer.currentFrame][0], testPlayer.sprite.frames[testPlayer.currentAnimation][testPlayer.currentFrame][1], testPlayer.sprite.sizeX , testPlayer.sprite.sizeY, 0, 0, testPlayer.width, testPlayer.height);
 	},
 	getPositionX: function(game) {
 		return game.offsetX + testPlayer.positionX;
