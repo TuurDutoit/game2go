@@ -266,6 +266,14 @@ Game.prototype.getTerrainColliders = function(x, y, w, h) {
 
     return colliders;
 }
+Game.getTerrainCollidersObject = function(object) {
+    return this.getTerrainColliders(object.positionX, object.positionY, object.width, object.height);
+}
+
+Game.prototype.testPolygonPolygon = SAT.testPolygonPolygon;
+Game.prototype.testCirclePolygon = SAT.testCirclePolygon;
+Game.prototype.testPolygonCircle = SAT.testPolygonCircle;
+Game.prototype.testCircleCircle = SAT.testCircleCircle;
 
 
 
