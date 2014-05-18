@@ -15,7 +15,9 @@ ObjectTest.prototype.Draw = function(d) {
 }
 
 var ObjectFireBall = function(x, y , size, angle, speed){
-	this.spriteID = "spritesheet";
+	this.sprite =  {image:"spritesheet", size: 16, frames: [ [[0,16],[16,16],[32,16]], [[0,48],[16,48],[32,48]]]}
+	this.currentAnimation = 1;
+	this.currentFrame = 0;
 	this.positionX = x;
 	this.positionY = y;
 	this.speed = speed;
@@ -29,11 +31,17 @@ ObjectFireBall.prototype.Init = function() {
 	this.plusY = Math.sin(this.angleRadian);
 }
 ObjectFireBall.prototype.Update = function() {
+	if(this.currentFrame + 1 < this.sprite.frames[this.currentAnimation].length){
+		this.currentFrame += 1;
+	}
+	else{
+		this.currentFrame = 0;
+	}
 	this.positionX += this.plusX * this.speed;
 	this.positionY -= this.plusY * this.speed;
 }
 ObjectFireBall.prototype.Draw = function(d) {
-	d.drawImage(document.getElementById(this.spriteID), 16, 16, 16 , 16, 0, 0, this.size, this.size);
+	d.drawImage(document.getElementById(this.sprite.image), this.sprite.frames[this.currentAnimation][this.currentFrame][0], this.sprite.frames[this.currentAnimation][this.currentFrame][1], this.sprite.size , this.sprite.size, 0, 0, this.size, this.size);
 }
 
 var ObjectTestNoOffset = function() {
