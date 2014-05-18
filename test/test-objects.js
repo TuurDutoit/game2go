@@ -15,8 +15,8 @@ ObjectTest.prototype.Draw = function(d) {
 }
 
 var ObjectFireBall = function(x, y , size, angle, speed){
-	this.sprite =  {image:"spritesheet", size: 8, frames: [ [[96,144],[104,144],[96,152], [104,152]]]}
-	this.currentAnimation = 0;
+	this.sprite =  {image:"spritesheet", size: 8, frames: {standard: [[96,144],[104,144],[96,152], [104,152]]}}
+	this.currentAnimation = "standard";
 	this.currentFrame = 0;
 	this.positionX = x;
 	this.positionY = y;
