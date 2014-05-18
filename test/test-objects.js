@@ -14,12 +14,13 @@ ObjectTest.prototype.Draw = function(d) {
 	d.drawImage(document.getElementById(this.spriteID), 0, 0);
 }
 
-var ObjectFireBall = function(x, y , angle, speed){
-	this.spriteID = "image";
+var ObjectFireBall = function(x, y , size, angle, speed){
+	this.spriteID = "spritesheet";
 	this.positionX = x;
 	this.positionY = y;
 	this.speed = speed;
 	this.angle = angle;
+	this.size  = size;
 	return this;
 }
 ObjectFireBall.prototype.Init = function() {
@@ -32,7 +33,7 @@ ObjectFireBall.prototype.Update = function() {
 	this.positionY -= this.plusY * this.speed;
 }
 ObjectFireBall.prototype.Draw = function(d) {
-	d.drawImage(document.getElementById(this.spriteID), 0, 0);
+	d.drawImage(document.getElementById(this.spriteID), 16, 16, 16 , 16, 0, 0, this.size, this.size);
 }
 
 var ObjectTestNoOffset = function() {
