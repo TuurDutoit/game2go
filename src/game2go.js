@@ -141,7 +141,9 @@ Game.prototype.updateObjects = function() {
     var objects = this.scene.Objects;
 	for(var i = 0, len = objects.length; i < len; i++) {
         if(objects[i].Update) {
-            objects[i].Update();
+            if(objects[i].Update()){
+                objects.splice(i, 1);
+            }
         }
 	}
 	return this;

@@ -7,7 +7,7 @@ window.addEventListener("keydown", function(e) {
                 testPlayer.currentFrame = 0;
             }
 			direction[1] = -1;
-            testPlayer.currentAnimation = "runningRight";
+            //testPlayer.currentAnimation = "";
 			break;
 		case 39:
             if(direction[0] == 0 && direction[1] == 0){
@@ -26,7 +26,7 @@ window.addEventListener("keydown", function(e) {
                 testPlayer.currentFrame = 0;
             }
 			direction[1] = 1;
-            testPlayer.currentAnimation = "runningRight";
+           // testPlayer.currentAnimation = "runningRight";
             //testPlayer.currentFrameCounter = 0;
             //testPlayer.currentFrame = 0;
 			break;
