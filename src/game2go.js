@@ -40,16 +40,12 @@ Game = function(elem, options) {
     self.sceneLoadTime    = null;
     self.drawTimes        = [];
     self.savedBlocks      = {};
-
-    if(!options.Player) {options.Player = {}};
-    self.Player           = {
-        positionX: options.Player.positionX || 0,
-        positionY: options.Player.positionY || 0,
-        width:     options.Player.width || self.blockSize,
-        height:    options.Player.height || self.blockSize * 2,
-        update:    options.Player.update,
-        draw:      options.Player.draw
-    };
+    
+    self.Player = self.options.Player || {};
+    if(!self.Player.positionX) self.Player.positionX = 0;
+    if(!self.Player.positionY) self.Player.positionY = 0;
+    if(!self.Player.width) self.Player.width = self.blockSize;
+    if(!self.Player.height) self.Player.height = self.blockSize;
 
 
 //Register some events
@@ -214,6 +210,9 @@ Game.prototype.clearCanvas = function() {
     this.context.clearRect(0, 0, this.width, this.height);
     return this;
 }
+
+
+
 
 
 
