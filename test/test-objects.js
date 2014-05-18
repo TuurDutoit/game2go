@@ -18,11 +18,11 @@ var ObjectFireBall = function(x, y , size, angle, speed){
 	this.sprite =  {image:"spritesheet", size: 8, frames: {standard: [[96,144],[104,144],[96,152], [104,152]]}}
 	this.currentAnimation = "standard";
 	this.currentFrame = 0;
-	this.positionX = x;
-	this.positionY = y;
-	this.speed = speed;
-	this.angle = angle;
-	this.size  = size;
+	this.positionX = x || 0;
+	this.positionY = y || 0;
+	this.speed = speed || 3;
+	this.angle = angle || 0;
+	this.size  = size || 35;
 	return this;
 }
 ObjectFireBall.prototype.Init = function() {
@@ -31,12 +31,7 @@ ObjectFireBall.prototype.Init = function() {
 	this.plusY = Math.sin(this.angleRadian);
 }
 ObjectFireBall.prototype.Update = function() {
-	if(this.currentFrame + 1 < this.sprite.frames[this.currentAnimation].length){
-		this.currentFrame += 1;
-	}
-	else{
-		this.currentFrame = 0;
-	}
+	this.currentFrame = (this.currentFrame + 1) % this.sprite.frames[this.currentAnimation].length;
 	this.positionX += this.plusX * this.speed;
 	this.positionY -= this.plusY * this.speed;
 }
