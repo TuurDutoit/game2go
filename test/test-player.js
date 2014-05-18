@@ -102,7 +102,17 @@ var testPlayer = {
 
 			pc.pos.x -= res.overlapV.x;
 			pc.pos.y -= res.overlapV.y;
-		})
+
+			if(game.offsetX < 0) {
+				game.offsetX = 0;
+				pc.pos.x = testPlayer.positionX;
+			}
+		});
+
+		if(game.offsetX < 0) {
+			game.offsetX = 0;
+		}
+
 	},
 	damage: function(damage) {
 		if(testPlayer.hp - damage > 0){
