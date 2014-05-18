@@ -141,7 +141,7 @@ Game.prototype.updateObjects = function() {
     var objects = this.scene.Objects;
 	for(var i = 0, len = objects.length; i < len; i++) {
         if(objects[i].Update) {
-            this.scene.Objects[i].Update();
+            objects[i].Update();
         }
 	}
 	return this;
@@ -151,9 +151,9 @@ Game.prototype.drawObjects = function() {
 	for(var i = 0, len = objects.length; i < len; i++) {
         if(objects[i].Draw) {
             var object = objects[i];
-            this.Draw.offsetX = (-this.offsetX || 0) + object.positionX
-            this.Draw.offsetY =  (this.offsetY || 0) + object.positionY;
-            objects[i].Draw(this.Draw);
+            this.Draw.offsetX = (-this.offsetX || 0) + object.positionX;
+            this.Draw.offsetY = this.height - (object.positionY - this.offsetY) - object.height;
+            object.Draw(this.Draw);
         }
 	}
     return this;
