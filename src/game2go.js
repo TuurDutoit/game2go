@@ -115,13 +115,13 @@ Game.prototype.Loop = function() {
 
 //Functions used by Loop
 Game.prototype.updatePlayer = function() {
-    this.Player.update(this);
+    this.Player.Update(this);
     return this;
 }
 Game.prototype.drawPlayer = function() {
     this.Draw.offsetX = this.Player.positionX;
     this.Draw.offsetY = this.height - this.Player.positionY - (this.Player.height || this.blockSize);
-    this.Player.draw(this.Draw);
+    this.Player.Draw(this.Draw);
     return this;
 }
 Game.prototype.initObjects = function() {
@@ -173,7 +173,7 @@ Game.prototype.drawTerrain = function() {
 //Reuse offsetX and offsetY for memory efficiency
             this.Draw.offsetX = (i*this.blockSize) - (this.offsetX % this.blockSize);
             this.Draw.offsetY = h-((j+1)*this.blockSize) + this.offsetY;
-            column[j].draw(this.Draw);
+            column[j].Draw(this.Draw);
         }
     }
 

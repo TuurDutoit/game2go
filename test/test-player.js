@@ -78,7 +78,7 @@ var testPlayer = {
     directionFacing: "right",
 	speed: 5,
     collider: null,
-	update: function(game) {
+	Update: function(game) {
 		var p = game.Player;
         if(direction[0] == 0 && direction[1] == 0){
             if(testPlayer.directionFacing == "right"){
@@ -124,7 +124,7 @@ var testPlayer = {
 			alert("Game Over!");
 		}
 	},
-	draw: function(d) {
+	Draw: function(d) {
 		d.drawImage(document.getElementById(testPlayer.sprite.image), testPlayer.sprite.frames[testPlayer.currentAnimation][testPlayer.currentFrame][0], testPlayer.sprite.frames[testPlayer.currentAnimation][testPlayer.currentFrame][1], testPlayer.sprite.sizeX , testPlayer.sprite.sizeY, 0, 0, testPlayer.width, testPlayer.height);
 	},
 	getPositionX: function(game) {
