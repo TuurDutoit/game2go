@@ -7,7 +7,7 @@ window.addEventListener("keydown", function(e) {
                 testPlayer.currentFrame = 0;
             }
 			direction[1] = -1;
-            testPlayer.currentAnimation = "runningRight";
+            //testPlayer.currentAnimation = "";
 			break;
 		case 39:
             if(direction[0] == 0 && direction[1] == 0){
@@ -26,7 +26,7 @@ window.addEventListener("keydown", function(e) {
                 testPlayer.currentFrame = 0;
             }
 			direction[1] = 1;
-            testPlayer.currentAnimation = "runningRight";
+           // testPlayer.currentAnimation = "runningRight";
             //testPlayer.currentFrameCounter = 0;
             //testPlayer.currentFrame = 0;
 			break;
@@ -77,6 +77,7 @@ var testPlayer = {
     currentFrameCounter: 0,
     directionFacing: "right",
 	speed: 5,
+    collider: null,
 	update: function(game) {
 		var p = game.Player;
         if(direction[0] == 0 && direction[1] == 0){
@@ -94,18 +95,18 @@ var testPlayer = {
 		
 		var po = {positionX: testPlayer.getPositionX(game), positionY: testPlayer.getPositionY(game), width: p.width, height: p.height};
 		var tc = game.getTerrainCollidersObject(po);
-		var pc = new SAT.Box(new SAT.Vector(po.positionX, po.positionY), po.width, po.height).toPolygon();
-
-		game.checkCollisionAll(pc, tc, function(res) {
+		testPlayer.collider = new SAT.Box(new SAT.Vector(po.positionX, po.positionY), po.width, po.height).toPolygon();
+        console.log(testPlayer.hp);
+		game.checkCollisionAll(testPlayer.collider, tc, function(res) {
 			game.offsetX -= res.overlapV.x;
 			game.offsetY -= res.overlapV.y;
 
-			pc.pos.x -= res.overlapV.x;
-			pc.pos.y -= res.overlapV.y;
+			testPlayer.collider.pos.x -= res.overlapV.x;
+			testPlayer.collider.pos.y -= res.overlapV.y;
 
 			if(game.offsetX < 0) {
 				game.offsetX = 0;
-				pc.pos.x = testPlayer.positionX;
+				testPlayer.collider.pos.x = testPlayer.positionX;
 			}
 		});
 
