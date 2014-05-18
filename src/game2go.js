@@ -235,7 +235,11 @@ Game.prototype.updateTerrainColliders = function() {
         column = terrain[i];
         var columnColliders = [];
         for(var j = 0, lenj = column.length; j < lenj; j++) {
-            if(column[j] && column[j].hasCollider !== false) {
+            var block = column[j];
+            if(block.collider) {
+                columnColliders.push(block.collider);
+            }
+            else if(block && block.hasCollider !== false) {
                 var x = i * w;
                 var y = j * w;
                 columnColliders.push(new SAT.Box(new SAT.Vector(x, y), w, w).toPolygon());
