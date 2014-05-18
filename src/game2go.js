@@ -232,15 +232,39 @@ Game.prototype.updateTerrainColliders = function() {
 
     for(var i = 0, len = terrain.length; i < len; i++) {
         column = terrain[i];
+        var columnColliders = [];
         for(var j = 0, lenj = column.length; j < lenj; j++) {
             var x = i * w;
             var y = this.height - (j * w);
-            colliders.push(new SAT.Box(new SAT.Vector(x, y), w, w).toPolygon());
+            columnColliders.push(new SAT.Box(new SAT.Vector(x, y), w, w).toPolygon());
         }
+
+        colliders.push(columnColliders);
     }
 
     this.terrainColliders = colliders;
     return this;
+}
+
+Game.prototype.getTerrainColliders = function(x, y, w, h) {
+    if(arguments.length === 2) {
+        var h = game.height;
+        var w = y;
+        var y = 0;
+    }
+
+    var colliders = [];
+    var columns = this.terrainColliders.slice(Math.floor(x / this.blockSize), Math.ceil((x + w) / this.blockSize));
+
+    var yi = Math.floor(y / this.blockSize);
+    var hi = Math.ceil((y + h) / this.blockSize);
+
+    for(var i = 0, len = columns.length; i < len; i++) {
+        colliders = colliders.concat(columns[i].slice(yi, hi));
+    }
+
+
+    return colliders;
 }
 
 
@@ -298,6 +322,7 @@ Game.prototype.loadScene = function(scene) {
     }
 
     this.updateGameHeight();
+    this.updateTerrainColliders();
     this.initObjects();
 
     return this;
@@ -390,6 +415,7 @@ Game.prototype.reset = function() {
     this.terrainBuffer    = [];
     this.scene            = [];
     this.terrainColliders = [];
+    this.gameHeight       = 0;
     
     this.Player           = {
         positionX: options.Player.positionX || 0,
