@@ -41,7 +41,7 @@ var testPlayer = {
 	height: 60,
 	hp: 100,
 	money: 50,
-	speed: 20,
+	speed: 5,
 	update: function(game) {
 		game.offsetX += direction[0] * testPlayer.speed;
 		game.offsetY += direction[1] * testPlayer.speed;
