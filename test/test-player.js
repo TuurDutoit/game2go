@@ -49,17 +49,17 @@ var testPlayer = {
 		game.offsetX += direction[0] * testPlayer.speed;
 		game.offsetY += direction[1] * testPlayer.speed;
 		
-		var po = {positionX: game.offsetX + p.positionX, positionY: game.offsetY + p.positionY, width: p.width, height: p.height};
+		var po = {positionX: testPlayer.getPositionX(game), positionY: testPlayer.getPositionY(game), width: p.width, height: p.height};
 		var tc = game.getTerrainCollidersObject(po);
 		var pc = new SAT.Box(new SAT.Vector(po.positionX, po.positionY), po.width, po.height).toPolygon();
 
-		for(var i = 0, len = tc.length; i < len; i++) {
-			var r = new SAT.Response();
-			if(SAT.testPolygonPolygon(pc, tc[i], r)) {
-				game.offsetX -= r.overlapV.x;
-				game.offsetY -= r.overlapV.y;
-			}
-		}
+		game.checkCollisionAll(pc, tc, function(res) {
+			game.offsetX -= res.overlapV.x;
+			game.offsetY -= res.overlapV.y;
+
+			pc.pos.x -= res.overlapV.x;
+			pc.pos.y -= res.overlapV.y;
+		})
 	},
 	damage: function(damage) {
 		if(testPlayer.hp - damage > 0){
@@ -72,5 +72,11 @@ var testPlayer = {
 	},
 	draw: function(d) {
 		d.fillStyle("#000000").fillRect(0, 0, 35, 60);
+	},
+	getPositionX: function(game) {
+		return game.offsetX + testPlayer.positionX;
+	},
+	getPositionY: function(game) {
+		return game.offsetY + testPlayer.positionY;
 	}
 }

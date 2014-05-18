@@ -255,7 +255,44 @@ Game.prototype.getTerrainColliders = function(x, w) {
     return colliders;
 }
 Game.prototype.getTerrainCollidersObject = function(object) {
-    return this.getTerrainColliders(object.positionX, object.positionY, object.width, object.height);
+    return this.getTerrainColliders(object.positionX, object.width);
+}
+
+Game.prototype.checkCollision = function(A, B, res) {
+    if(A instanceof SAT.Box) var A = A.toPolygon();
+    if(B instanceof SAT.Box) var B = B.toPolygon();
+
+    if(A instanceof SAT.Polygon) {
+        if(B instanceof SAT.Polygon) {
+            return SAT.testPolygonPolygon(A, B, res);
+        }
+        else {
+            return SAT.testPolygonCircle(A, B, res);
+        }
+    }
+    else if(A instanceof SAT.Circle) {
+        if(B instanceof SAT.Polygon) {
+            return SAT.testCirclePolygon(A, B, res);
+        }
+        else {
+            return SAT.testCircleCircle(A, B, res);
+        }
+    }
+}
+Game.prototype.checkCollisionAll = function(A, B, cb) {
+    var result = [];
+    for(var i = 0, len = B.length; i < len; i++) {
+        var collider = B[i];
+        var res = new SAT.Response();
+        if(this.checkCollision(A, collider, res)) {
+            result.push(res);
+            if(cb) {
+                cb(res);
+            }
+        }
+    }
+
+    return result;
 }
 
 
