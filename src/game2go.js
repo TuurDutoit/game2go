@@ -234,9 +234,11 @@ Game.prototype.updateTerrainColliders = function() {
         column = terrain[i];
         var columnColliders = [];
         for(var j = 0, lenj = column.length; j < lenj; j++) {
-            var x = i * w;
-            var y = this.height - (j * w);
-            columnColliders.push(new SAT.Box(new SAT.Vector(x, y), w, w).toPolygon());
+            if(column[j] && column[j].hasCollider !== false) {
+                var x = i * w;
+                var y = j * w;
+                columnColliders.push(new SAT.Box(new SAT.Vector(x, y), w, w).toPolygon());
+            }
         }
 
         colliders.push(columnColliders);
@@ -246,34 +248,27 @@ Game.prototype.updateTerrainColliders = function() {
     return this;
 }
 
-Game.prototype.getTerrainColliders = function(x, y, w, h) {
-    if(arguments.length === 2) {
-        var h = game.height;
-        var w = y;
-        var y = 0;
-    }
-
-    var colliders = [];
+Game.prototype.getTerrainColliders = function(x, w) {
     var columns = this.terrainColliders.slice(Math.floor(x / this.blockSize), Math.ceil((x + w) / this.blockSize));
-
-    var yi = Math.floor(y / this.blockSize);
-    var hi = Math.ceil((y + h) / this.blockSize);
-
-    for(var i = 0, len = columns.length; i < len; i++) {
-        colliders = colliders.concat(columns[i].slice(yi, hi));
-    }
-
+    var colliders = this.flattenMatrix(columns);
 
     return colliders;
 }
-Game.getTerrainCollidersObject = function(object) {
+Game.prototype.getTerrainCollidersObject = function(object) {
     return this.getTerrainColliders(object.positionX, object.positionY, object.width, object.height);
 }
 
+
+/* SAT Methods and Constructors */
+Game.prototype.Vector  = SAT.Vector;
+Game.prototype.Polygon = SAT.Polygon;
+Game.prototype.Circle  = SAT.Circle;
+Game.prototype.Box     = SAT.Box;
+
 Game.prototype.testPolygonPolygon = SAT.testPolygonPolygon;
-Game.prototype.testCirclePolygon = SAT.testCirclePolygon;
-Game.prototype.testPolygonCircle = SAT.testPolygonCircle;
-Game.prototype.testCircleCircle = SAT.testCircleCircle;
+Game.prototype.testCirclePolygon  = SAT.testCirclePolygon;
+Game.prototype.testPolygonCircle  = SAT.testPolygonCircle;
+Game.prototype.testCircleCircle   = SAT.testCircleCircle;
 
 
 
@@ -463,6 +458,13 @@ Game.prototype.cloneArray = function(arr) {
 }
 Game.prototype.cloneMatrix = function(m) {
     return m.map(function(arr) {return arr.slice(0)});
+}
+Game.prototype.flattenMatrix = function(m) {
+    var array = [];
+    for(var i = 0, len = m.length; i < len; i++) {
+        array = array.concat(m[i]);
+    }
+    return array;
 }
 Game.prototype.getArray = function(length, value) {
     var arr = [];

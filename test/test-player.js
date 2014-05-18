@@ -32,6 +32,8 @@ window.addEventListener("keyup", function(e) {
 	}
 })
 
+var log = false;
+
 
 
 var testPlayer = {
@@ -43,10 +45,21 @@ var testPlayer = {
 	money: 50,
 	speed: 5,
 	update: function(game) {
+		var p = game.Player;
 		game.offsetX += direction[0] * testPlayer.speed;
 		game.offsetY += direction[1] * testPlayer.speed;
-		if(game.offsetX < 0) {game.offsetX = 0;}
-		if(game.offsetY < 0) {game.offsetY = 0;}
+		
+		var po = {positionX: game.offsetX + p.positionX, positionY: game.offsetY + p.positionY, width: p.width, height: p.height};
+		var tc = game.getTerrainCollidersObject(po);
+		var pc = new SAT.Box(new SAT.Vector(po.positionX, po.positionY), po.width, po.height).toPolygon();
+
+		for(var i = 0, len = tc.length; i < len; i++) {
+			var r = new SAT.Response();
+			if(SAT.testPolygonPolygon(pc, tc[i], r)) {
+				game.offsetX -= r.overlapV.x;
+				game.offsetY -= r.overlapV.y;
+			}
+		}
 	},
 	damage: function(damage) {
 		if(testPlayer.hp - damage > 0){
