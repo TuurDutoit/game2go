@@ -249,6 +249,25 @@ Game.prototype.updateTerrainColliders = function() {
     return this;
 }
 
+Game.prototype.updateObjectColliders = function() {
+    var colliders = [];
+    var objects = this.scene.Objects;
+    
+    for(var i = 0, len = objects.length; i < len; i++) {
+        var object = objects[i];
+        if(object.collider) {
+            colliders.push(object.collider);
+        }
+        else if(object.hasCollider !== false) {
+            var collider = new SAT.Box( new SAT.Vector(object.x, object.y), object.width, object height);
+            colliders.push(collider);
+        }
+    }
+    
+    this.objectColliders = colliders;
+    return this;
+}
+
 Game.prototype.getTerrainColliders = function(x, w) {
     var columns = this.terrainColliders.slice(Math.floor(x / this.blockSize), Math.ceil((x + w) / this.blockSize));
     var colliders = this.flattenMatrix(columns);
