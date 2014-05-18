@@ -2,32 +2,32 @@ var direction = [0,0];
 window.addEventListener("keydown", function(e) {
 	switch(e.keyCode) {
 		case 40:
-			direction = [0,-1];
+			direction[1] = -1;
 			break;
 		case 39:
-			direction = [1,0];
+			direction[0] = 1;
 			break;
 		case 38:
-			direction = [0,1];
+			direction[1] = 1;
 			break;
 		case 37:
-			direction = [-1,0];
+			direction[0] = -1;
 			break;
 	}
 });
 window.addEventListener("keyup", function(e) {
 	switch(e.keyCode) {
 		case 40:
-			direction = [0,0];
+			direction[1] = 0;
 			break;
 		case 39:
-			direction = [0,0];
+			direction[0] = 0;
 			break;
 		case 38:
-			direction = [0,0];
+			direction[1] = 0;
 			break;
 		case 37:
-			direction = [0,0];
+			direction[0] = 0;
 			break;
 	}
 })
