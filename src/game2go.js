@@ -28,6 +28,7 @@ Game = function(elem, options) {
     self.sceneNum         = 0;
     self.terrainBuffer    = [];
     self.terrainColliders = [];
+    self.gameHeight       = 0;
 
     self.timer            = null;
     self.createTime       = this.getTime();
@@ -212,6 +213,15 @@ Game.prototype.clearCanvas = function() {
     return this;
 }
 
+
+
+
+
+
+
+/* COLLIDERS
+ * ========= */
+
 Game.prototype.updateTerrainColliders = function() {
     var terrain = this.scene.Terrain;
     var colliders = [];
@@ -285,6 +295,7 @@ Game.prototype.loadScene = function(scene) {
         this.scene = parsedScene;
     }
 
+    this.updateGameHeight();
     this.initObjects();
 
     return this;
@@ -318,6 +329,11 @@ Game.prototype.getHighestColumnLength = function(matrix) {
         }
     }
     return highestColumnLength;
+}
+
+Game.prototype.updateGameHeight = function() {
+    this.gameHeight = this.getHighestColumnLength() * this.blockSize;
+    return this;
 }
 
 
