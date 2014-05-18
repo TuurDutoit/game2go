@@ -44,8 +44,8 @@ Game = function(elem, options) {
     self.Player = self.options.Player || {};
     if(!self.Player.positionX) self.Player.positionX = 0;
     if(!self.Player.positionY) self.Player.positionY = 0;
-    if(!self.Player.width) self.Player.width = self.blockSize;
-    if(!self.Player.height) self.Player.height = self.blockSize;
+    if(!self.Player.width)     self.Player.width = self.blockSize;
+    if(!self.Player.height)    self.Player.height = self.blockSize;
 
 
 //Register some events
