@@ -124,7 +124,7 @@ Game.prototype.updatePlayer = function() {
 }
 Game.prototype.drawPlayer = function() {
     this.Draw.offsetX = this.Player.positionX;
-    this.Draw.offsetY = this.Player.positionY;
+    this.Draw.offsetY = this.height - this.Player.positionY - (this.Player.height || this.blockSize);
     this.Player.draw(this.Draw);
     return this;
 }
@@ -151,8 +151,8 @@ Game.prototype.drawObjects = function() {
 	for(var i = 0, len = objects.length; i < len; i++) {
         if(objects[i].Draw) {
             var object = objects[i];
-            this.Draw.offsetX = (-this.offsetX || 0) + object.positionX;
-            this.Draw.offsetY = this.height - (object.positionY - this.offsetY) - object.height;
+            this.Draw.offsetX = -this.offsetX + object.positionX;
+            this.Draw.offsetY = this.height - (object.positionY - this.offsetY) - (object.height || this.blockSize);
             object.Draw(this.Draw);
         }
 	}

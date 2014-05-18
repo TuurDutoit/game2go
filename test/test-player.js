@@ -36,7 +36,7 @@ window.addEventListener("keyup", function(e) {
 
 var testPlayer = {
 	positionX: 193,
-	positionY: 220,
+	positionY: 140,
 	width: 35,
 	height: 60,
 	hp: 100,
