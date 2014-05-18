@@ -186,11 +186,12 @@ Game.prototype.drawTerrain = function() {
 Game.prototype.drawBackgrounds = function(){
 //Check if any backgrounds are given
     if(this.scene.Backgrounds instanceof Array) {
-        var b = this.scene.Backgrounds;
-        for(var i = 0, len = b.length; i < len; i++) {
-            this.Draw.offsetX = -this.offsetX;
-            this.Draw.offsetY = this.offsetY;
-            b[i](this.Draw);
+        var backgrounds = this.scene.Backgrounds;
+        for(var i = 0, len = backgrounds.length; i < len; i++) {
+            var b = backgrounds[i];
+            this.Draw.offsetX = -this.offsetX + b.positionX;
+            this.Draw.offsetY = this.height - ((b.positionY || 0) - this.offsetY) - (b.height || 0);
+            b.Draw(this.Draw);
         }
     }
     return this;
@@ -201,7 +202,7 @@ Game.prototype.drawForegrounds = function(){
         var f = this.scene.Foregrounds;
         for(var i = 0, len = f.length; i < len; i++) {
             this.Draw.offsetX = -this.offsetX;
-            this.Draw.offsetY = this.offsetY;
+            this.Draw.offsetY = 0;
             f[i](this.Draw);
         }
     }

@@ -1,8 +1,11 @@
 var testScene = {
     name: "Scene 1",
     Backgrounds: [
-        function(d) {
-            d.drawImage(document.getElementById("background-scene1"), 0, 0);
+        {
+            height: 420, width: 840, positionX: 0, positionY: 0,
+            Draw: function(d) {
+                d.drawImage(document.getElementById("background-scene1"), 0, 0);
+            }
         }
     ],
 	Objects: [new ObjectTest(), new ObjectTestNoOffset(), new ObjectFireBall(100, 100 , 35, 20, 3)],
