@@ -64,6 +64,7 @@ var testPlayer = {
 		}
 		else{
 			//Player is killed
+			alert("Game Over!");
 		}
 	},
 	draw: function(d) {
