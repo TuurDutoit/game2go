@@ -42,7 +42,7 @@ Game = function(elem, options) {
     self.drawTimes        = [];
     self.savedBlocks      = {};
     
-    self._events = [];
+    self._events = {};
     
     self.Player = self.options.Player || {};
     if(!self.Player.positionX) self.Player.positionX = 0;
