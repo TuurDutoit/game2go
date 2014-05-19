@@ -325,6 +325,13 @@ Game.prototype.checkCollisionAll = function(A, B, cb) {
 
 
 /* SAT Methods and Constructors */
+Game.prototype.classes = {
+    Vector: SAT.Vector,
+    Polygon: SAT.Polygon,
+    Circle: SAT.Circle,
+    Box: SAT.Box
+}
+/*
 Game.prototype.Vector  = SAT.Vector;
 Game.prototype.Polygon = SAT.Polygon;
 Game.prototype.Circle  = SAT.Circle;
@@ -334,7 +341,7 @@ Game.prototype.testPolygonPolygon = SAT.testPolygonPolygon;
 Game.prototype.testCirclePolygon  = SAT.testCirclePolygon;
 Game.prototype.testPolygonCircle  = SAT.testPolygonCircle;
 Game.prototype.testCircleCircle   = SAT.testCircleCircle;
-
+*/
 
 
 
