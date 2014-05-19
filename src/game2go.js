@@ -42,6 +42,8 @@ Game = function(elem, options) {
     self.drawTimes        = [];
     self.savedBlocks      = {};
     
+    self._events = [];
+    
     self.Player = self.options.Player || {};
     if(!self.Player.positionX) self.Player.positionX = 0;
     if(!self.Player.positionY) self.Player.positionY = 0;
@@ -552,6 +554,42 @@ Game.prototype.getTime = function() {
     }
 }
 
+
+
+
+
+
+/* EVENTS
+ * ====== */
+Game.prototype.on = function(event, cb) {
+    if(this._events[event]) {
+        this._events[event].push(cb);
+    }
+    else {
+        this._events[event] = [cb];
+    }
+    return this;
+}
+Game.prototype.emit = function(event, args) {
+    var events = this._events[event];
+    if(events) {
+        for(var i = 0, len = events.length; i < len; i++) {
+            events[i].apply(this, args);
+        }
+    }
+    return this;
+}
+Game.prototype.removeListener = function(event, cb) {
+    var events = this._events[event];
+    if(events) {
+        events.splice(events.indexOf(cb), 1);
+    }
+    return this;
+}
+Game.prototype.removeEvent = function(event) {
+    this._events[event] = undefined;
+    return this;
+}
 
 
 
