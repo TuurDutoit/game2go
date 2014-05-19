@@ -300,7 +300,7 @@ Game.prototype.updateObjectColliders = function() {
             colliders.push(object.collider);
         }
         else if(object.hasCollider !== false) {
-            var collider = new SAT.Box( new SAT.Vector(object.x, object.y), object.width, object height);
+            var collider = new SAT.Box( new SAT.Vector(object.positionX, object.positionX), object.width, object.height);
             colliders.push(collider);
         }
     }
@@ -439,6 +439,7 @@ Game.prototype.loadScene = function(scene) {
     this.updateTerrainColliders();
     this.initObjects();
 
+    this.emit("resetplayer", [this]);
     this.emit("loadscene", [this, scene]);
 
     return this;
@@ -547,6 +548,7 @@ Game.prototype.parseScene = function(s) {
 
 Game.prototype.reset = function() {
     this.emit("beforereset", [this]);
+
     this.offsetX          = 0;
     this.offsetY          = 0;
     this.terrainBuffer    = [];
@@ -555,15 +557,8 @@ Game.prototype.reset = function() {
     this.objectColliders  = [];
     this.gameHeight       = 0;
     this.gameWidth        = 0;
-    
-    this.Player           = {
-        positionX: options.Player.positionX || 0,
-        positionY: options.Player.positionY || 0,
-        width:     options.Player.width || self.blockSize,
-        height:    options.Player.height || self.blockSize * 2,
-        update:    options.Player.update,
-        draw:      options.Player.draw
-    };
+    //Reset Player on 'resetplayer' event, fired in loadScene
+
     this.emit("reset", [this]);
 
     return this;

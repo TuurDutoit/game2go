@@ -96,7 +96,6 @@ var testPlayer = {
 		var po = {positionX: testPlayer.getPositionX(game), positionY: testPlayer.getPositionY(game), width: p.width, height: p.height};
 		var tc = game.getTerrainCollidersObject(po);
 		testPlayer.collider = new SAT.Box(new SAT.Vector(po.positionX, po.positionY), po.width, po.height).toPolygon();
-        console.log(testPlayer.hp);
 		game.checkCollisionAll(testPlayer.collider, tc, function(res) {
 			game.offsetX -= res.overlapV.x;
 			game.offsetY -= res.overlapV.y;
