@@ -83,11 +83,13 @@ So, This was just a basic intro to the engine, I will try to add some more docum
 
 ###TODO
 
+We'll try to keep this up-to-date, but we aren't perfect :smiley:. For a more up-to-date version, check the issue tracker, [on Github
+][2]
 - [ ] Collisions for objects
   - [x] Add .updateObjectColliders()
   - [ ] Think of a way to easily implement collisions for object (and their respective consequences/callbacks)
   - [ ] Implement that
-- [ ] Easier positioning of Player
+- [ ] Better positioning of Player
   - [ ] Think about most easy, clear and semantic way of position the game and the player
   - [ ] Implement that concept
 - [ ] Animations / Frames
@@ -119,3 +121,4 @@ So, This was just a basic intro to the engine, I will try to add some more docum
 
 
 [1]: https://raw.githubusercontent.com/TuurDutoit/game2go/master/src/game2go.js
+[2]: https://github.com/TuurDutoit/game2go/issues
