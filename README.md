@@ -1,7 +1,7 @@
 Game2Go
 =======
 
-Game2go is a simple, but very fast 2d sidescroller engine, written in javascript. In just a few lines of code, you can create a basic game.
+Game2go is a simple, but very fast 2d sidescroller engine, written in javascript. In just a few lines of code, you can create a basic game. - By GOAT! studios
 
 
 ###Let's start
