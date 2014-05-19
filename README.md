@@ -81,5 +81,41 @@ So, This was just a basic intro to the engine, I will try to add some more docum
 
 
 
+###TODO
+
+- [ ] Collisions for objects
+  - [x] Add .updateObjectColliders()
+  - [ ] Think of a way to easily implement collisions for object (and their respective consequences/callbacks)
+  - [ ] Implement that
+- [ ] Easier positioning of Player
+  - [ ] Think about most easy, clear and semantic way of position the game and the player
+  - [ ] Implement that concept
+- [ ] Animations / Frames
+  - [ ] Add an Animation class
+  - [ ] Add a Frame class
+  - [ ] Add .savAnimation()
+- [ ] Sprites
+  - [ ] Research image clipping with canvas
+  - [ ] Create a Sprite class
+  - [ ] Add .saveSprite()
+- [ ] Add/Remove/Hide Blocks/Objects/Backgrounds/Foregrounds
+  - [ ] Add Object
+  - [ ] Remove Object
+  - [ ] Hide Object
+  - [ ] Add Block
+  - [ ] Remove Block
+  - [ ] Hide Block
+  - [ ] Add Background
+  - [ ] Remove Background
+  - [ ] Hide Background
+  - [ ] Add Foreground
+  - [ ] Remove Foreground
+  - [ ] Hide Foreground
+- [ ] Static (relative to canvas) Objects/Backgrounds/Foregrounds
+  - [ ] Objects
+  - [ ] Backgrounds
+  - [ ] Foregrounds
+
+
 
 [1]: https://raw.githubusercontent.com/TuurDutoit/game2go/master/src/game2go.js
