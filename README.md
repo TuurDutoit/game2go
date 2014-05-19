@@ -93,7 +93,7 @@ So, This was just a basic intro to the engine, I will try to add some more docum
 - [ ] Animations / Frames
   - [ ] Add an Animation class
   - [ ] Add a Frame class
-  - [ ] Add .savAnimation()
+  - [ ] Add .saveAnimation()
 - [ ] Sprites
   - [ ] Research image clipping with canvas
   - [ ] Create a Sprite class
