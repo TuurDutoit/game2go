@@ -67,23 +67,26 @@ Game = function(elem, options) {
 
 //Start the game
 Game.prototype.start = function(sceneID) {
-    this.emit("start", [this]);
+    this.emit("beforestart", [this, arguments]);
     if(!this.hadInit) {
         this.init(sceneID);
         this.hadInit = true;
     }
 
     if(!this.playing) {
-        this.emit("play", [this]);
+        this.emit("beforeplay", [this, arguments]);
         this.playing = true;
         this.lastStartTime = this.getTime();
         this.requestLoop();
+        this.emit("play", [this, arguments]);
     }
+    this.emit("start", [this, arguments]);
 
     return this;
 }
 //Stop the game
 Game.prototype.stop = function() {
+    this.emit("beforestop", [this]);
     this.stopTime = this.getTime();
     this.playing = false;
     this.emit("stop", [this]);
@@ -92,11 +95,11 @@ Game.prototype.stop = function() {
 //Initialization on first start()
 Game.prototype.init = function(sceneID) {
     this.checkSAT();
-    this.emit("beforeinit", [this]);
+    this.emit("beforeinit", [this, arguments]);
     this.initTime = this.getTime();
     this.sceneNum = (sceneID || 0);
     this.loadScene(this.sceneNum);
-    this.emit("init", [this]);
+    this.emit("init", [this, arguments]);
     return this;
 }
 //The main Game Loop
@@ -206,7 +209,8 @@ Game.prototype.drawTerrain = function() {
 }
 
 //Draw the terrain (=blocks)
-Game.prototype.drawBackgrounds = function(){
+Game.prototype.drawBackgrounds = function() {
+    this.emit("beforedrawbackgrounds", [this]);
 //Check if any backgrounds are given
     if(this.scene.Backgrounds instanceof Array) {
         var backgrounds = this.scene.Backgrounds;
@@ -217,9 +221,11 @@ Game.prototype.drawBackgrounds = function(){
             b.Draw(this.Draw);
         }
     }
+    this.emit("drawbackgrounds", [this]);
     return this;
 }
-Game.prototype.drawForegrounds = function(){
+Game.prototype.drawForegrounds = function() {
+    this.emit("beforedrawforegrounds", [this]);
 //Check if any backgrounds are given
     if(this.scene.Foregrounds instanceof Array) {
         var foregrounds = this.scene.Foregrounds;
@@ -230,11 +236,14 @@ Game.prototype.drawForegrounds = function(){
             f.Draw(this.Draw);
         }
     }
+    this.emit("drawforegrounds", [this]);
     return this;
 }
 
 Game.prototype.clearCanvas = function() {
+    this.emit("beforeclearcanvas", [this]);
     this.context.clearRect(0, 0, this.width, this.height);
+    this.emit("afterclearcanvas");
     return this;
 }
 
@@ -251,6 +260,7 @@ Game.prototype.clearCanvas = function() {
  * ========= */
 
 Game.prototype.updateTerrainColliders = function() {
+    this.emit("beforeupdateterraincolliders", [this]);
     var terrain = this.scene.Terrain;
     var colliders = [];
     var w = this.blockSize;
@@ -275,10 +285,12 @@ Game.prototype.updateTerrainColliders = function() {
     }
 
     this.terrainColliders = colliders;
+    this.emit("updateterraincolliders", [this]);
     return this;
 }
 
 Game.prototype.updateObjectColliders = function() {
+    this.emit("beforeupdateobjectcolliders", [this]);
     var colliders = [];
     var objects = this.scene.Objects;
     
@@ -294,6 +306,7 @@ Game.prototype.updateObjectColliders = function() {
     }
     
     this.objectColliders = colliders;
+    this.emit("updateobjectcolliders", [this]);
     return this;
 }
 
@@ -327,6 +340,7 @@ Game.prototype.checkCollision = function(A, B, res) {
             return SAT.testCircleCircle(A, B, res);
         }
     }
+
 }
 Game.prototype.checkCollisionAll = function(A, B, cb) {
     var result = [];
@@ -350,19 +364,13 @@ Game.prototype.classes = {
     Vector: SAT.Vector,
     Polygon: SAT.Polygon,
     Circle: SAT.Circle,
-    Box: SAT.Box
-}
-/*
-Game.prototype.Vector  = SAT.Vector;
-Game.prototype.Polygon = SAT.Polygon;
-Game.prototype.Circle  = SAT.Circle;
-Game.prototype.Box     = SAT.Box;
+    Box: SAT.Box,
 
-Game.prototype.testPolygonPolygon = SAT.testPolygonPolygon;
-Game.prototype.testCirclePolygon  = SAT.testCirclePolygon;
-Game.prototype.testPolygonCircle  = SAT.testPolygonCircle;
-Game.prototype.testCircleCircle   = SAT.testCircleCircle;
-*/
+    testPolygonPolygon: SAT.testPolygonPolygon,
+    testCirclePolygon : SAT.testCirclePolygon,
+    testPolygonCircle : SAT.testPolygonCircle,
+    testCircleCircle  : SAT.testCircleCircle
+}
 
 
 
@@ -379,27 +387,34 @@ Game.prototype.testCircleCircle   = SAT.testCircleCircle;
 
 //Load in a world (=select this world to play)
 Game.prototype.loadWorld = Game.prototype.load = function(world) {
+    this.emit("beforeloadworld", [this, world]);
     this.stop();
     this.reset();
     this.worldLoadTime = this.getTime();
 
     this.world = world;
     this.loadScene(0);
+    this.emit("loadworld", [this, world]);
 
     return this;
 }
 Game.prototype.addWorld = function(world) {
+    this.emit("beforeaddworld", [this, world]);
     this.world = world;
+    this.emit("addworld", [this, world]);
     return this;
 }
 
 //Add a scene to the current world
 Game.prototype.addScene = function(scene) {
+    this.emit("beforeaddscene", [this, scene])
     this.world.push(scene);
+    this.emit("addscene", [this, scene]);
     return this;
 }
 //Load in a scene (=select this scene to play)
 Game.prototype.loadScene = function(scene) {
+    this.emit("beforeloadscene", [this, scene]);
 //Stop the game to avoid corruption
     this.stop();
     this.reset();
@@ -417,32 +432,42 @@ Game.prototype.loadScene = function(scene) {
         this.scene = parsedScene;
     }
 
+    this.emit("beforeupdateloadscene", [this, scene]);
+
     this.updateGameHeight();
     this.updateGameWidth();
     this.updateTerrainColliders();
     this.initObjects();
+
+    this.emit("loadscene", [this, scene]);
 
     return this;
 }
 
 //Save a block
 Game.prototype.saveBlock = function(name, b) {
+    this.emit("beforesaveblock", [this, name, b]);
     this.savedBlocks[name] = b;
+    this.emit("saveblock", [this, name, b]);
     return this;
 }
 Game.prototype.saveBlocks = function(blocks) {
+    this.emit("beforesaveblocks", [this, blocks]);
     for(name in blocks) {
         this.savedBlocks[name] = blocks[name];
     }
+    this.emit("saveblocks", [this, blocks]);
     return this;
 }
 Game.prototype.checkSAT = function() {
+    this.emit("beforechecksat", [this]);
     if(SAT) {
         return true;
     }
     else {
         throw new Error("Make sure SAT.js is provided. You can find it here: https://github.com/jriecken/sat-js");
     }
+    this.emit("checksat", [this]);
 }
 Game.prototype.getHighestColumnLength = function(matrix) {
     var highestColumnLength = 0;
@@ -456,11 +481,15 @@ Game.prototype.getHighestColumnLength = function(matrix) {
 }
 
 Game.prototype.updateGameHeight = function() {
+    this.emit("beforeupdategameheight", [this]);
     this.gameHeight = this.getHighestColumnLength() * this.blockSize;
+    this.emit("updategameheight", [this]);
     return this;
 }
 Game.prototype.updateGameWidth = function() {
+    this.emit("beforeupdategamewidth", [this]);
     this.gameWidth = this.scene.Terrain.length * this.blockSize;
+    this.emit("updategamewidth", [this]);
     return this;
 }
 
@@ -482,6 +511,7 @@ Game.prototype.requestLoop = function() {
 
 //Get parsed block
 Game.prototype.parseBlock = function(b) {
+    this.emit("beforeparseblock", [this, b]);
     switch (typeof b) {
         case "object":
             return b;
@@ -492,25 +522,31 @@ Game.prototype.parseBlock = function(b) {
         default:
             return null;
     }
+    this.emit("parseblock", [this, b]);
 }
 Game.prototype.parseColumn = function(c) {
+    this.emit("beforeparsecolumn", [this, c]);
     var parsedColumn = [];
     for(var i = 0, len = c.length; i < len; i++) {
         var parsedBlock = this.parseBlock(c[i]);
         parsedColumn.push(parsedBlock);
     }
+    this.emit("parsecolumn", [this, c]);
     return parsedColumn;
 }
 Game.prototype.parseScene = function(s) {
+    this.emit("beforeparsescene", [this, s]);
     var parsedScene = this.cloneObject(s);
     parsedScene.Terrain = [];
     for(var i = 0, len = s.Terrain.length; i < len; i++) {
         parsedScene.Terrain.push(this.parseColumn(s.Terrain[i]));
     }
+    this.emit("parsescene", [this, s]);
     return parsedScene;
 }
 
 Game.prototype.reset = function() {
+    this.emit("beforereset", [this]);
     this.offsetX          = 0;
     this.offsetY          = 0;
     this.terrainBuffer    = [];
@@ -528,6 +564,7 @@ Game.prototype.reset = function() {
         update:    options.Player.update,
         draw:      options.Player.draw
     };
+    this.emit("reset", [this]);
 
     return this;
 }
