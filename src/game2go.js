@@ -67,12 +67,14 @@ Game = function(elem, options) {
 
 //Start the game
 Game.prototype.start = function(sceneID) {
+    this.emit("start", [this]);
     if(!this.hadInit) {
         this.init(sceneID);
         this.hadInit = true;
     }
 
     if(!this.playing) {
+        this.emit("play", [this]);
         this.playing = true;
         this.lastStartTime = this.getTime();
         this.requestLoop();
@@ -84,14 +86,17 @@ Game.prototype.start = function(sceneID) {
 Game.prototype.stop = function() {
     this.stopTime = this.getTime();
     this.playing = false;
+    this.emit("stop", [this]);
     return this;
 }
 //Initialization on first start()
 Game.prototype.init = function(sceneID) {
     this.checkSAT();
+    this.emit("beforeinit", [this]);
     this.initTime = this.getTime();
     this.sceneNum = (sceneID || 0);
     this.loadScene(this.sceneNum);
+    this.emit("init", [this]);
     return this;
 }
 //The main Game Loop
@@ -99,6 +104,7 @@ Game.prototype.Loop = function() {
 
 //Update frame
     var START = this.getTime();
+    this.emit("beforeframe", [this]);
 
     this.frames++;
     this.updatePlayer();
@@ -112,6 +118,7 @@ Game.prototype.Loop = function() {
     this.drawForegrounds()
     
     this.drawTimes.push(this.getTime() - START);
+    this.emit("frame", [this]);
     this.requestLoop();
 
     return this;
@@ -119,53 +126,66 @@ Game.prototype.Loop = function() {
 
 //Functions used by Loop
 Game.prototype.updatePlayer = function() {
+    this.emit("beforeupdateplayer", [this]);
     this.Player.Update(this);
+    this.emit("updateplayer", [this]);
     return this;
 }
 Game.prototype.drawPlayer = function() {
+    this.emit("beforedrawplayer", [this]);
     this.Draw.offsetX = this.Player.positionX;
     this.Draw.offsetY = this.height - this.Player.positionY - (this.Player.height || this.blockSize);
     this.Player.Draw(this.Draw);
+    this.emit("drawplayer", [this]);
     return this;
 }
 Game.prototype.initObjects = function() {
+    this.emit("beforeinitobjects", [this]);
     var objects = this.scene.Objects;
-	for(var i = 0, len = objects.length; i < len; i++) {
+   	for(var i = 0, len = objects.length; i < len; i++) {
         if(objects[i].Init) {
             objects[i].Init();
         }
-	}
-	return this;
+	   }
+	   this.emit("initobjects", [this]);
+	   return this;
 }
 Game.prototype.updateObjects = function() {
+    this.emit("beforeupdateobjects", [this]);
     var objects = this.scene.Objects;
-	for(var i = 0, len = objects.length; i < len; i++) {
+   	for(var i = 0, len = objects.length; i < len; i++) {
         if(objects[i].Update) {
             if(objects[i].Update()){
                 objects.splice(i, 1);
             }
         }
-	}
-	return this;
+	   }
+	   this.emit("updateobjects", [this]);
+	   return this;
 }
 Game.prototype.drawObjects = function() {
+    this.emit("beforedrawobjects", [this]);
     var objects = this.scene.Objects;
-	for(var i = 0, len = objects.length; i < len; i++) {
+	   for(var i = 0, len = objects.length; i < len; i++) {
         if(objects[i].Draw) {
             var object = objects[i];
             this.Draw.offsetX = -this.offsetX + object.positionX;
             this.Draw.offsetY = this.height - (object.positionY - this.offsetY) - (object.height || this.blockSize);
             object.Draw(this.Draw);
         }
-	}
+   	}
+   	this.emit("drawobjects", [this]);
     return this;
 }
 
 Game.prototype.updateTerrain = function() {
+    this.emit("beforeupdateterrain", [this]);
     this.terrainBuffer = this.scene.Terrain.slice(Math.floor(this.offsetX/this.blockSize), Math.ceil((this.offsetX + this.width)/this.blockSize));
+    this.emit("updateterrain", [this]);
     return this;
 }
 Game.prototype.drawTerrain = function() {
+    this.emit("beforedrawterrain", [this]);
     var column, i, j, leni, lenj;
     var h = game.height;
 
@@ -180,6 +200,7 @@ Game.prototype.drawTerrain = function() {
             column[j].Draw(this.Draw);
         }
     }
+    this.emit("drawterrain", [this]);
 
     return this;
 }
