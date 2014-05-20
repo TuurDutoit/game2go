@@ -468,9 +468,10 @@ Game.prototype.saveBlocks = function(blocks) {
     return this;
 }
 
-Game.prototype.Animation = function(name, frames) {
+Game.prototype.Animation = function(name, sprites, time) {
     this.name = name;
-    this.frames = Game.parseFrames(frames);
+    this.sprites = this.parseSprites(sprites);
+    this.updateTime = time || 500;
     return this;
 }
 Game.prototype.Sprite = function(img, x,y , w, h) {
@@ -490,16 +491,16 @@ Game prototype.parseSprites = function(sprites) {
     }
     return result;
 }
-Game.prototype.parseFrames = function(frames) {
-    if(!animation) {var animation = name; var name = animation.name;}
+Game.prototype.parseSprites = function(sprites) {
     var result = [];
-    for(i in frames) {
-        var f = frames[i];
-        result[i] = new Sprite(f.img || f.image, f.x || f.positionX, f.y || f.positionY, f.w || f.width, f.h || f.height);
+    for(i in sprites) {
+        var s = sprites[i];
+        result[i] = new Sprite(s.img || s.image, s.x || s.positionX, s.y || s.positionY, s.w || s.width, s.h || s.height);
     }
     return result;
 }
 Game.prototype.saveAnimation(name, animation) {
+    if(!animation) {var animation = name; var name = animation.name;}
     this.animations[name] = animation;
     
     return this;
