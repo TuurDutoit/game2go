@@ -57,6 +57,7 @@ ObjectFireBall.prototype.Move = function(x,y, game) {
     var positionY =  this.positionY;
     var colliderX =  this.collider.pos.x;
     var colliderY =  this.collider.pos.y;
+    var res = new SAT.Response();
     game.checkCollisionAll(this.collider, tc, function(res) {
         positionX -= res.overlapV.x;
         positionY -= res.overlapV.y;
@@ -65,14 +66,15 @@ ObjectFireBall.prototype.Move = function(x,y, game) {
     });
     for(i = 0; i < game.scene.Objects.length; i++){
         if(game.scene.Objects[i].hasCollider){
-            console.log(game.scene.Objects[i].collider);
+           // console.log(game.scene.Objects[i].collider);
             //if(game.scene.Ojects[i].positionX*game.scene.Ojects[i].positionX + game.scene.Ojects[i].positionY*game.scene.Ojects[i].positionY <= 200){
-                game.checkCollision(this.collider, game.scene.Objects[i].collider, function(res) {
+                game.checkCollision(this.collider, game.scene.Objects[i].collider, res);
+                //{
                     positionX -= res.overlapV.x;
                     positionY -= res.overlapV.y;
                     colliderX -= res.overlapV.x;
                     colliderY -= res.overlapV.y;
-                });
+               // });
             //}
         }
     }
