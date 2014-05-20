@@ -3,6 +3,7 @@ var Game;
 
 
 (function() { //Mask everything but Game object
+var Classes = {};
 
 
 Game = function(elem, options) {
@@ -357,27 +358,6 @@ Game.prototype.checkCollisionAll = function(A, B, cb) {
 
     return result;
 }
-
-
-/* SAT Methods and Constructors */
-Game.prototype.classes = {
-    Vector: SAT.Vector,
-    Polygon: SAT.Polygon,
-    Circle: SAT.Circle,
-    Box: SAT.Box,
-
-
-
-    testPolygonPolygon: SAT.testPolygonPolygon,
-    testCirclePolygon : SAT.testCirclePolygon,
-    testPolygonCircle : SAT.testPolygonCircle,
-    testCircleCircle  : SAT.testCircleCircle
-}
-
-
-
-
-
 
 
 
@@ -893,6 +873,14 @@ Draw.prototype.drawImageNoOffset = function() {
  //.fullRect()
  //.fullText()
  //.drawImageNoOffset()
+ 
+ 
+ 
+ 
+/* ADD SAT
+ * ======= */
+Game prototype.SAT = SAT;
+Game.SAT = SAT;
 
 
 
