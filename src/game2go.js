@@ -452,7 +452,8 @@ Game.prototype.saveBlocks = function(blocks) {
 var Animation = function(name, sprites, options) {
     if(!options) var options = {};
     this.name       = name;
-    this.sprites    = Game.prototype.parseSprites(sprites);
+    this.sprites    = Game.prototype.parseSprites(sprites, options.image || options.img);
+    this.options    = options;
     this.autoStart  = options.start || options.autoStart || true;
     this.interval   = options.time || 500;
 
@@ -549,11 +550,18 @@ var Sprite = function(img, x, y, w, h) {
     return this;
 }
 Game.prototype.Sprite = Sprite;
-Game.prototype.parseSprites = function(sprites) {
+Game.prototype.parseSprite = function(s, img) {
+    if(s instanceof Game.prototype.Sprite) {
+        return s;
+    }
+    else {
+        return new Game.prototype.Sprite(s.img || s.image || img, s.x || s.positionX, s.y || s.positionY, s.w || s.width, s.h || s.height);
+    }
+}
+Game.prototype.parseSprites = function(sprites, img) {
     var result = [];
     for(var i = 0, len = sprites.length; i < len; i++) {
-        var s = sprites[i];
-        result.push(new Game.prototype.Sprite(s.img || s.image, s.x || s.positionX, s.y || s.positionY, s.w || s.width, s.h || s.height));
+        result.push(this.parseSprite(sprites[i], img));
     }
     return result;
 }
