@@ -3,7 +3,6 @@ var Game;
 
 
 (function() { //Mask everything but Game object
-var Classes = {};
 
 
 Game = function(elem, options) {
@@ -53,10 +52,11 @@ Game = function(elem, options) {
 
 
 //Register some events
-    document.addEventListener("resize", function() {
+    document.addEventListener("resize", function(e) {
+        self.emit("beforeresize", [self, e]);
         self.width = self.canvas.offsetWidth;
         self.height = self.canvas.offsetHeight;
- 
+        self.emit("resize", [self, e]);
     });
 
     return self;
@@ -463,7 +463,7 @@ Game.prototype.Sprite = function(img, x,y , w, h) {
     
     return this;
 }
-Game prototype.parseSprites = function(sprites) {
+Game.prototype.parseSprites = function(sprites) {
     var result = [];
     for(var i = 0, len = sprites.length; i < len; i++) {
         var s = sprites[i];
@@ -471,23 +471,16 @@ Game prototype.parseSprites = function(sprites) {
     }
     return result;
 }
-Game.prototype.parseSprites = function(sprites) {
-    var result = [];
-    for(i in sprites) {
-        var s = sprites[i];
-        result[i] = new Sprite(s.img || s.image, s.x || s.positionX, s.y || s.positionY, s.w || s.width, s.h || s.height);
-    }
-    return result;
-}
-Game.prototype.saveAnimation(name, animation) {
+Game.prototype.saveAnimation = function(name, animation) {
     if(!animation) {var animation = name; var name = animation.name;}
+
     this.animations[name] = animation;
     
     return this;
 }
 Game.prototype.saveAnimations = function(animations) {
     for(var i = 0, len = animations.length; i < len; i++) {
-        this.saveAnimation(animations[i];
+        this.saveAnimation(animations[i]);
     }
     return this;
 }
