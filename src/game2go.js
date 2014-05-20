@@ -366,6 +366,8 @@ Game.prototype.classes = {
     Circle: SAT.Circle,
     Box: SAT.Box,
 
+
+
     testPolygonPolygon: SAT.testPolygonPolygon,
     testCirclePolygon : SAT.testCirclePolygon,
     testPolygonCircle : SAT.testPolygonCircle,
@@ -445,6 +447,11 @@ Game.prototype.loadScene = function(scene) {
     return this;
 }
 
+
+
+/* SAVES
+ * ===== */
+
 //Save a block
 Game.prototype.saveBlock = function(name, b) {
     this.emit("beforesaveblock", [this, name, b]);
@@ -460,6 +467,55 @@ Game.prototype.saveBlocks = function(blocks) {
     this.emit("saveblocks", [this, blocks]);
     return this;
 }
+
+Game.prototype.Animation = function(name, frames) {
+    this.name = name;
+    this.frames = Game.parseFrames(frames);
+    return this;
+}
+Game.prototype.Sprite = function(img, x,y , w, h) {
+    this.img = img;
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    
+    return this;
+}
+Game prototype.parseSprites = function(sprites) {
+    var result = [];
+    for(var i = 0, len = sprites.length; i < len; i++) {
+        var s = sprites[i];
+        result.push(new Game.Sprite(s.img || s.image, s.x || s.positionX, s.y || s.positionY, s.w || s.width, s.h || s.height));
+    }
+    return result;
+}
+Game.prototype.parseFrames = function(frames) {
+    if(!animation) {var animation = name; var name = animation.name;}
+    var result = [];
+    for(i in frames) {
+        var f = frames[i];
+        result[i] = new Sprite(f.img || f.image, f.x || f.positionX, f.y || f.positionY, f.w || f.width, f.h || f.height);
+    }
+    return result;
+}
+Game.prototype.saveAnimation(name, animation) {
+    this.animations[name] = animation;
+    
+    return this;
+}
+Game.prototype.saveAnimations = function(animations) {
+    for(var i = 0, len = animations.length; i < len; i++) {
+        this.saveAnimation(animations[i];
+    }
+    return this;
+}
+
+
+
+
+
+
 Game.prototype.checkSAT = function() {
     this.emit("beforechecksat", [this]);
     if(SAT) {
