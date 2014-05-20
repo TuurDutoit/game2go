@@ -30,6 +30,7 @@ Game = function(elem, options) {
     self.terrainColliders = [];
     self.objectColliders  = [];
     self.gameHeight       = 0;
+    self.gameWidth        = 0;
 
     self.timer            = null;
     self.createTime       = this.getTime();
