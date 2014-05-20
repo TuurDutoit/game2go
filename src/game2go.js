@@ -40,9 +40,9 @@ Game = function(elem, options) {
     self.stopTime         = null;
     self.worldLoadTime    = null;
     self.sceneLoadTime    = null;
+
     self.drawTimes        = [];
     self.savedBlocks      = {};
-    
     self._events = {};
     
     self.Player = self.options.Player || {};
@@ -449,26 +449,78 @@ Game.prototype.saveBlocks = function(blocks) {
     return this;
 }
 
-Game.prototype.Animation = function(name, sprites, time) {
-    this.name = name;
-    this.sprites = this.parseSprites(sprites);
-    this.updateTime = time || 500;
+var Animation = function(name, sprites, options) {
+    if(!options) var options = {};
+    this.name       = name;
+    this.sprites    = Game.prototype.parseSprites(sprites);
+    this.autoStart  = options.start || options.autoStart || true;
+    this.interval   = options.time || 500;
+
+    this.startTime     = null;
+    this.lastStartTime = null;
+    this.lastPauseTime = null;
+    this.lastStopTime  = null;
+    this.pauseTime     = 0;
+
+    this.running       = false;
+    this.paused        = false;
+
+
     return this;
 }
-Game.prototype.Sprite = function(img, x,y , w, h) {
-    this.img = img;
-    this.x = x;
-    this.y = y;
-    this.w = w;
-    this.h = h;
-    
+Animation.prototype.start = function() {
+    var time = Game.getTime();
+    if(this.startTime === null) {
+        this.startTime = time;
+    }
+    if(this.paused) {
+        this.pauseTime += time - this.lastPauseTime;
+        this.paused     = false;
+    }
+    if(!this.running) {
+        this.lastStartTime = time;
+        this.running       = true;
+    }
     return this;
 }
-Game.prototype.parseSprites = function(sprites) {
+Animation.prototype.pause = function() {
+    if(this.running && !this.paused) {
+        this.lastPauseTime = Game.getTime();
+        this.paused        = true;
+    }
+    return this;
+}
+Animation.prototype.stop = function() {
+    this.lastStopTime  = Game.getTime();
+    this.running       = false;
+    this.paused        = false;
+    this.pauseTime     = 0;
+
+    this.startTime     = null;
+    this.lastStartTime = null;
+    this.lastPauseTime = null;
+
+    return this;
+}
+Animation.prototype.reset = function() {
+    this.stop().start();
+    return this;
+}
+Animation.prototype.getRunningTime = function() {
+    return (Game.getTime() - this.startTime - this.pausedTime);
+}
+Animation.prototype.getSprite = function() {
+    return this.sprites[Math.floor(this.getRunningTime() / this.interval)];
+}
+Game.prototype.Animation = Animation;
+
+Game.prototype.parseAnimation = function(anim) {
+    return new this.Animation(anim.name, anim.sprites, anim.options);
+}
+Game.prototype.parseAnimations = function(anims) {
     var result = [];
-    for(var i = 0, len = sprites.length; i < len; i++) {
-        var s = sprites[i];
-        result.push(new Game.Sprite(s.img || s.image, s.x || s.positionX, s.y || s.positionY, s.w || s.width, s.h || s.height));
+    for(var i = 0, len = anims.length; i < len; i++) {
+        result.push(this.parseAnimation(anims[i]));
     }
     return result;
 }
@@ -484,6 +536,26 @@ Game.prototype.saveAnimations = function(animations) {
         this.saveAnimation(animations[i]);
     }
     return this;
+}
+
+
+var Sprite = function(img, x, y, w, h) {
+    this.img = img;
+    this.x   = x;
+    this.y   = y;
+    this.w   = w;
+    this.h   = h;
+    
+    return this;
+}
+Game.prototype.Sprite = Sprite;
+Game.prototype.parseSprites = function(sprites) {
+    var result = [];
+    for(var i = 0, len = sprites.length; i < len; i++) {
+        var s = sprites[i];
+        result.push(new Game.prototype.Sprite(s.img || s.image, s.x || s.positionX, s.y || s.positionY, s.w || s.width, s.h || s.height));
+    }
+    return result;
 }
 
 
@@ -873,7 +945,7 @@ Draw.prototype.drawImageNoOffset = function() {
  
 /* ADD SAT
  * ======= */
-Game prototype.SAT = SAT;
+Game.prototype.SAT = SAT;
 Game.SAT = SAT;
 
 

@@ -23,9 +23,10 @@ ObjectTest.prototype.Draw = function(d) {
 
 
 var ObjectFireBall = function(x, y , size, angle, speed, damage){
-	this.sprite =  {image:"spritesheet", size: 8, frames: {standard: [[96,144],[104,144],[96,152], [104,152]]}}
-	this.currentAnimation = "standard";
-	this.currentFrame = 0;
+	// this.sprite =  {image:"spritesheet", size: 8, frames: {standard: [[96,144],[104,144],[96,152], [104,152]]}}
+	this.Animation = {name: "Fireball-normal", frames: [{x:96, y:144, w:8, h:8}, {x:104, y:144, w:8, h:8}, {x:96, y:152, w:8, h:8}, {x:104, y:152, w:8, h:8}], time: 250};
+	// this.currentAnimation = "standard";
+	// this.currentFrame = 0;
 	this.positionX = x || 0;
 	this.positionY = y || 0;
 	this.speed = speed || 3;
