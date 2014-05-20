@@ -8,7 +8,7 @@ var testScene = {
             }
         }
     ],
-	Objects: [new ObjectTest(), new ObjectTestNoOffset(), new ObjectFireBall(100, 100 , 35, 20, 3)],
+	Objects: [new ObjectTest(), new ObjectTestNoOffset(), new ObjectFireBall(100, 190 , 35, -5, 3, 10)],
     Foregrounds: [],
     Terrain: [
         [ "Bricks", "Bricks", "Bricks", "Bricks"],
