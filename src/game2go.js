@@ -14,7 +14,7 @@ Game = function(elem, options) {
     self.context          = self.canvas.getContext("2d");
     self.width            = self.canvas.offsetWidth;
     self.height           = self.canvas.offsetHeight;
-    self.blockSize        = options.blockSize || 35;
+    self.blockSize        = options.blockSize || 36;
     self.Draw             = new Draw(self.context, self.blockSize);
     
     self.frames           = 0;
@@ -320,6 +320,8 @@ Game.prototype.getTerrainCollidersObject = function(object) {
     return this.getTerrainColliders(object.positionX, object.width);
 }
 Game.prototype.getObjectColliders = function(x, w) {
+    if(typeof w !== "number") {var Collider = x; var x = Collider.pos.x; var w = this.getPolygonWidth(Collider);}
+    
     var colliders = [];
     var objects = this.objectColliders;
     var xw = x + w;
@@ -327,9 +329,10 @@ Game.prototype.getObjectColliders = function(x, w) {
     for(var i = 0, len = objects.length; i < len; i++) {
         var o = objects[i];
         var ow = this.getPolygonWidth(object);
-        if((x > o.pos.x && x < o.pos.x+ow) ||
-           (xw > o.pos.x && xw < o.pos.x+ow) ||
-           (x < o.pos.x && xw > o.pos.x+ ow)) {
+        if(((x > o.pos.x && x < o.pos.x+ow) ||
+            (xw > o.pos.x && xw < o.pos.x+ow) ||
+            (x < o.pos.x && xw > o.pos.x+ ow))
+           && o !== Collider) {
                colliders.push(object);
          }
      }
