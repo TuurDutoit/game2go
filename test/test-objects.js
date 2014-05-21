@@ -27,15 +27,16 @@ var ObjectFireBall = function(x, y , size, angle, speed, damage){
 	this.animation = {name: "Fireball-normal", frames: [{x:96, y:144, w:8, h:8}, {x:104, y:144, w:8, h:8}, {x:96, y:152, w:8, h:8}, {x:104, y:152, w:8, h:8}], time: 250};
 	// this.currentAnimation = "standard";
 	// this.currentFrame = 0;
-	this.positionX = x || 0;
-	this.positionY = y || 0;
-	this.speed = speed || 3;
-	this.angle = angle || 0;
-	this.size  = size || 35;
-    this.damage  = damage || 10;
-	this.height = this.size;
-	this.width = this.size;
+	this.positionX = x      || 0;
+	this.positionY = y      || 0;
+	this.speed     = speed  || 3;
+	this.angle     = angle  || 0;
+	this.size      = size   || 35;
+    this.damage    = damage || 10;
+	this.height    = this.size;
+	this.width     = this.size;
     this.destroyed = false;
+    
 	return this;
 }
 ObjectFireBall.prototype.Init = function() {
