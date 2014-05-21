@@ -471,7 +471,7 @@ var Animation = function(name, sprites, options) {
     return this;
 }
 Animation.prototype.start = function() {
-    var time = Game.getTime();
+    var time = Game.prototype.getTime();
     if(this.startTime === null) {
         this.startTime = time;
     }
@@ -487,13 +487,13 @@ Animation.prototype.start = function() {
 }
 Animation.prototype.pause = function() {
     if(this.running && !this.paused) {
-        this.lastPauseTime = Game.getTime();
+        this.lastPauseTime = Game.prototype.getTime();
         this.paused        = true;
     }
     return this;
 }
 Animation.prototype.stop = function() {
-    this.lastStopTime  = Game.getTime();
+    this.lastStopTime  = Game.prototype.getTime();
     this.running       = false;
     this.paused        = false;
     this.pauseTime     = 0;
@@ -509,10 +509,10 @@ Animation.prototype.reset = function() {
     return this;
 }
 Animation.prototype.getRunningTime = function() {
-    return (Game.getTime() - this.startTime - this.pausedTime);
+    return (Game.prototype.getTime() - this.startTime - (this.pausedTime || 0));
 }
 Animation.prototype.getSprite = function() {
-    return this.sprites[Math.floor(this.getRunningTime() / this.interval)];
+    return this.sprites[Math.floor(this.getRunningTime() / this.interval) % this.sprites.length];
 }
 Game.prototype.Animation = Animation;
 
