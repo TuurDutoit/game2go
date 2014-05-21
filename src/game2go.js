@@ -121,8 +121,7 @@ Game.prototype.Loop = function() {
     this.drawTerrain();
     this.drawObjects();
     this.drawPlayer();
-    this.drawForegrounds()
-    
+    this.drawForegrounds();
     this.drawTimes.push(this.getTime() - START);
     this.emit("frame", [this]);
     this.requestLoop();
@@ -302,7 +301,7 @@ Game.prototype.updateObjectColliders = function() {
     this.emit("beforeupdateobjectcolliders", [this]);
     var colliders = [];
     var objects = this.scene.Objects;
-    
+    console.log("blub");
     for(var i = 0, len = objects.length; i < len; i++) {
         var object = objects[i];
         if(object.collider) {
@@ -329,25 +328,28 @@ Game.prototype.getTerrainCollidersObject = function(object) {
     return this.getTerrainColliders(object.positionX, object.width);
 }
 Game.prototype.getObjectColliders = function(x, w) {
-    if(typeof w !== "number") {var Collider = x; var x = Collider.pos.x; var w = this.getPolygonWidth(Collider);}
+    //if(typeof w !== "number") {var Collider = x; var x = Collider.pos.x; var w = this.getPolygonWidth(Collider);}
     
     var colliders = [];
     var objects = this.objectColliders;
     var xw = x + w;
-    
+    //console.log(objects);
     for(var i = 0, len = objects.length; i < len; i++) {
         var o = objects[i];
         var ow = this.getPolygonWidth(object);
-        if(((x > o.pos.x && x < o.pos.x+ow) ||
-            (xw > o.pos.x && xw < o.pos.x+ow) ||
-            (x < o.pos.x && xw > o.pos.x+ ow))
-           && o !== Collider) {
+        console.log("e");
+       // if(((x > o.pos.x && x < o.pos.x+ow) ||
+        //    (xw > o.pos.x && xw < o.pos.x+ow) ||
+        //    (x < o.pos.x && xw > o.pos.x+ ow))
+         //  && o !== Collider) {
                colliders.push(object);
-         }
+         //}
      }
      return colliders;
 }
-
+Game.prototype.getObjectCollidersObject = function(object) {
+    return this.getObjectColliders(object.positionX, object.width);
+}
 Game.prototype.checkCollision = function(A, B, res) {
     if(A instanceof SAT.Box) var A = A.toPolygon();
     if(B instanceof SAT.Box) var B = B.toPolygon();
