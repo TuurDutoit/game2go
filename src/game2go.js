@@ -128,6 +128,12 @@ Game.prototype.Loop = function() {
 }
 
 //Functions used by Loop
+Game.prototype.initPlayer = function() {
+    this.emit("beforeinitplayer", [this]);
+    if(this.Player.Init) this.Player.Init(this);
+    this.emit("initplayer", [this]);
+    return this;
+}
 Game.prototype.updatePlayer = function() {
     this.emit("beforeupdateplayer", [this]);
     this.Player.Update(this);
