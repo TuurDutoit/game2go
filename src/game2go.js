@@ -319,6 +319,22 @@ Game.prototype.getTerrainColliders = function(x, w) {
 Game.prototype.getTerrainCollidersObject = function(object) {
     return this.getTerrainColliders(object.positionX, object.width);
 }
+Game.prototype.getObjectColliders = function(x, w) {
+    var colliders = [];
+    var objects = this.objectColliders;
+    var xw = x + w;
+    
+    for(var i = 0, len = objects.length; i < len; i++) {
+        var o = objects[i];
+        var ow = this.getPolygonWidth(object);
+        if((x > o.pos.x && x < o.pos.x+ow) ||
+           (xw > o.pos.x && xw < o.pos.x+ow) ||
+           (x < o.pos.x && xw > o.pos.x+ ow)) {
+               colliders.push(object);
+         }
+     }
+     return colliders;
+}
 
 Game.prototype.checkCollision = function(A, B, res) {
     if(A instanceof SAT.Box) var A = A.toPolygon();
