@@ -30,6 +30,7 @@ Game = function(elem, options) {
     self.terrainColliders = [];
     self.objectColliders  = [];
     self.gameHeight       = 0;
+    self.gameWidth        = 0;
 
     self.timer            = null;
     self.createTime       = this.getTime();
@@ -39,10 +40,11 @@ Game = function(elem, options) {
     self.stopTime         = null;
     self.worldLoadTime    = null;
     self.sceneLoadTime    = null;
+
     self.drawTimes        = [];
     self.savedBlocks      = {};
-    
-    self._events = {};
+    self.animations       = {};
+    self._events          = {};
     
     self.Player = self.options.Player || {};
     if(!self.Player.positionX) self.Player.positionX = 0;
@@ -52,10 +54,11 @@ Game = function(elem, options) {
 
 
 //Register some events
-    document.addEventListener("resize", function() {
+    document.addEventListener("resize", function(e) {
+        self.emit("beforeresize", [self, e]);
         self.width = self.canvas.offsetWidth;
         self.height = self.canvas.offsetHeight;
- 
+        self.emit("resize", [self, e]);
     });
 
     return self;
@@ -384,25 +387,6 @@ Game.prototype.checkCollisionAll = function(A, B, cb) {
 }
 
 
-/* SAT Methods and Constructors */
-Game.prototype.classes = {
-    Vector: SAT.Vector,
-    Polygon: SAT.Polygon,
-    Circle: SAT.Circle,
-    Box: SAT.Box,
-
-    testPolygonPolygon: SAT.testPolygonPolygon,
-    testCirclePolygon : SAT.testCirclePolygon,
-    testPolygonCircle : SAT.testPolygonCircle,
-    testCircleCircle  : SAT.testCircleCircle
-}
-
-
-
-
-
-
-
 
 
 
@@ -470,6 +454,11 @@ Game.prototype.loadScene = function(scene) {
     return this;
 }
 
+
+
+/* SAVES
+ * ===== */
+
 //Save a block
 Game.prototype.saveBlock = function(name, b) {
     this.emit("beforesaveblock", [this, name, b]);
@@ -485,6 +474,129 @@ Game.prototype.saveBlocks = function(blocks) {
     this.emit("saveblocks", [this, blocks]);
     return this;
 }
+
+var Animation = function(name, sprites, options) {
+    if(!options) var options = {};
+    this.name       = name;
+    this.sprites    = Game.prototype.parseSprites(sprites, options.image || options.img);
+    this.options    = options;
+    this.autoStart  = options.start || options.autoStart || true;
+    this.interval   = options.time || 500;
+
+    this.startTime     = null;
+    this.lastStartTime = null;
+    this.lastPauseTime = null;
+    this.lastStopTime  = null;
+    this.pauseTime     = 0;
+
+    this.running       = false;
+    this.paused        = false;
+
+
+    return this;
+}
+Animation.prototype.start = function() {
+    var time = Game.prototype.getTime();
+    if(this.startTime === null) {
+        this.startTime = time;
+    }
+    if(this.paused) {
+        this.pauseTime += time - this.lastPauseTime;
+        this.paused     = false;
+    }
+    if(!this.running) {
+        this.lastStartTime = time;
+        this.running       = true;
+    }
+    return this;
+}
+Animation.prototype.pause = function() {
+    if(this.running && !this.paused) {
+        this.lastPauseTime = Game.prototype.getTime();
+        this.paused        = true;
+    }
+    return this;
+}
+Animation.prototype.stop = function() {
+    this.lastStopTime  = Game.prototype.getTime();
+    this.running       = false;
+    this.paused        = false;
+    this.pauseTime     = 0;
+
+    this.startTime     = null;
+    this.lastStartTime = null;
+    this.lastPauseTime = null;
+
+    return this;
+}
+Animation.prototype.reset = function() {
+    this.stop().start();
+    return this;
+}
+Animation.prototype.getRunningTime = function() {
+    return (Game.prototype.getTime() - this.startTime - (this.pausedTime || 0));
+}
+Animation.prototype.getSprite = function() {
+    return this.sprites[Math.floor(this.getRunningTime() / this.interval) % this.sprites.length];
+}
+Game.prototype.Animation = Animation;
+
+Game.prototype.parseAnimation = function(anim) {
+    return new this.Animation(anim.name, anim.sprites, anim.options);
+}
+Game.prototype.parseAnimations = function(anims) {
+    var result = [];
+    for(var i = 0, len = anims.length; i < len; i++) {
+        result.push(this.parseAnimation(anims[i]));
+    }
+    return result;
+}
+Game.prototype.saveAnimation = function(name, animation) {
+    if(!animation) {var animation = name; var name = animation.name;}
+
+    this.animations[name] = animation;
+    
+    return this;
+}
+Game.prototype.saveAnimations = function(animations) {
+    for(var i = 0, len = animations.length; i < len; i++) {
+        this.saveAnimation(animations[i]);
+    }
+    return this;
+}
+
+
+var Sprite = function(img, x, y, w, h) {
+    this.img = img;
+    this.x   = x;
+    this.y   = y;
+    this.w   = w;
+    this.h   = h;
+    
+    return this;
+}
+Game.prototype.Sprite = Sprite;
+Game.prototype.parseSprite = function(s, img) {
+    if(s instanceof Game.prototype.Sprite) {
+        return s;
+    }
+    else {
+        return new Game.prototype.Sprite(s.img || s.image || img, s.x || s.positionX, s.y || s.positionY, s.w || s.width, s.h || s.height);
+    }
+}
+Game.prototype.parseSprites = function(sprites, img) {
+    var result = [];
+    for(var i = 0, len = sprites.length; i < len; i++) {
+        result.push(this.parseSprite(sprites[i], img));
+    }
+    return result;
+}
+
+
+
+
+
+
 Game.prototype.checkSAT = function() {
     this.emit("beforechecksat", [this]);
     if(SAT) {
@@ -870,6 +982,14 @@ Draw.prototype.drawImageNoOffset = function() {
  //.fullRect()
  //.fullText()
  //.drawImageNoOffset()
+ 
+ 
+ 
+ 
+/* ADD SAT
+ * ======= */
+Game.prototype.SAT = SAT;
+Game.SAT = SAT;
 
 
 

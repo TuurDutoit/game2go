@@ -1,3 +1,4 @@
+
 var ObjectTest = function(){
 	this.spriteID = "image";
 	this.height = 20;
@@ -7,43 +8,44 @@ var ObjectTest = function(){
 }
 ObjectTest.prototype.Init = function() {
 	this.positionX = 30;
-	this.positionY = 30;
+	this.positionY = 140;
+	this.sprite    = document.getElementById(this.spriteID);
 }
 ObjectTest.prototype.Update = function() {
 	this.positionX += 1;
-	this.positionY += 1;
     return(this.destroyed);
 }
 ObjectTest.prototype.Draw = function(d) {
-	d.drawImage(document.getElementById(this.spriteID), 0, 0);
+	d.drawImage(this.sprite, 0, 0);
 }
 
 
 
 
 
-var ObjectFireBall = function(x, y , size, angle, speed, damage){
-	this.sprite =  {image:"spritesheet", size: 8, frames: {standard: [[96,144],[104,144],[96,152], [104,152]]}}
-	this.currentAnimation = "standard";
-	this.currentFrame = 0;
-	this.positionX = x || 0;
-	this.positionY = y || 0;
-	this.speed = speed || 3;
-	this.angle = angle || 0;
-	this.size  = size || 35;
-    this.damage  = damage || 10;
-	this.height = this.size;
-	this.width = this.size;
-    this.destroyed = false;
+var ObjectFireBall = function(options){
+	this.positionX = options.x      || 0;
+	this.positionY = options.y      || 0;
+	this.speed     = options.speed  || 3;
+	this.angle     = options.angle  || 0;
+    this.damage    = options.damage || 10;
+    this.destroyed = options.destroyed || false;
+
+    this.size   = options.size || 36;
+    this.height = options.height || this.size;
+	this.width  = options.width  || this.size;
+    
 	return this;
 }
 ObjectFireBall.prototype.Init = function() {
-	this.angleRadian = (this.angle * Math.PI)/180;
-	this.plusX = Math.cos(this.angleRadian);
-	this.plusY = -Math.sin(this.angleRadian);
+	this.angleRadian =  (this.angle * Math.PI)/180;
+	this.plusX       =  Math.cos(this.angleRadian);
+	this.plusY       = -Math.sin(this.angleRadian);
+
+	this.animation = new game.Animation("fireball", this.sprites, {time: 90, img: document.getElementById("spritesheet")}).start();
+	game.saveAnimation("fireball", this.animation);
 }
 ObjectFireBall.prototype.Update = function() {
-	this.currentFrame = (this.currentFrame + 1) % this.sprite.frames[this.currentAnimation].length;
 	this.positionX += this.plusX * this.speed;
 	this.positionY -= this.plusY * this.speed;
     this.collider = new SAT.Box(new SAT.Vector(this.positionX, this.positionY), this.width, this.height).toPolygon();
@@ -52,11 +54,17 @@ ObjectFireBall.prototype.Update = function() {
         this.destroyed = true;
     }
     return this.destroyed;
-    //.collider.pos.x = testPlayer.positionX;
 }
 ObjectFireBall.prototype.Draw = function(d) {
-	d.drawImage(document.getElementById(this.sprite.image), this.sprite.frames[this.currentAnimation][this.currentFrame][0], this.sprite.frames[this.currentAnimation][this.currentFrame][1], this.sprite.size , this.sprite.size, 0, 0, this.size, this.size);
+	var s = this.animation.getSprite();
+	d.drawImage(s.img, s.x, s.y, s.w, s.h, 0, 0, this.width, this.height);
 }
+ObjectFireBall.prototype.sprites = [
+	{x:96,  y:144, w:8, h:8},
+	{x:104, y:144, w:8, h:8},
+	{x:96,  y:152, w:8, h:8},
+	{x:104, y:152, w:8, h:8}
+];
 
 
 
@@ -64,10 +72,14 @@ ObjectFireBall.prototype.Draw = function(d) {
 
 
 var ObjectTestNoOffset = function() {
-	this.spriteID = "image";
+	this.spriteID  = "image";
     this.destroyed = false;
+
 	return this;
 }
+ObjectTestNoOffset.prototype.Init = function() {
+	this.sprite = document.getElementById(this.spriteID);
+}
 ObjectTestNoOffset.prototype.Draw = function(d) {
-	d.drawImageNoOffset(document.getElementById(this.spriteID), 15, 15)
+	d.drawImageNoOffset(this.sprite, 15, 15)
 }
