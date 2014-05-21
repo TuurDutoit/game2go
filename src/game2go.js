@@ -947,6 +947,9 @@ Draw.prototype.drawImage = Draw.prototype.image = Draw.prototype.img = function(
 
     return this;
 }
+Draw.prototype.drawSprite = function(sprite, dx, dy, dw, dh){
+    this.drawImage(sprite.img, sprite.x, sprite.y, sprite.w, sprite.h, dx, dy, dw, dh);
+}
 Draw.prototype.drawImageNoOffset = function() {
     this.context.drawImage.apply(this.context, arguments);
 

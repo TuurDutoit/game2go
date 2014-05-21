@@ -54,8 +54,7 @@ ObjectFireBall.prototype.Update = function() {
     return this.destroyed;
 }
 ObjectFireBall.prototype.Draw = function(d) {
-	var s = this.animation.getSprite();
-	d.drawImage(s.img, s.x, s.y, s.w, s.h, 0, 0, this.width, this.height);
+	d.drawSprite(this.animation.getSprite(), 0, 0, this.width, this.height);
 }
 ObjectFireBall.prototype.Move = function(x,y, game) {
     this.positionX += x;
