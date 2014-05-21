@@ -589,6 +589,15 @@ Game.prototype.getAverageDrawTime = function() {
     return (sum / this.drawTimes.length);
 }
 
+Game.prototype.getPolygonWidth = function(polygon) {
+    var highestX = 0;
+    for(var i = 0, len = polygon.calcPoints.length; i < len; i++) {
+        if(polygon.calcPoints[i] > highestX) {
+            highestX = polygon.calcPoints[i];
+        }
+    }
+    return highestX;
+}
 
 
 
