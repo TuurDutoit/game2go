@@ -48,7 +48,7 @@ ObjectFireBall.prototype.Init = function() {
 ObjectFireBall.prototype.Update = function(game) {
     //console.log(game);
     this.Move(this.plusX * this.speed,this.plusY * this.speed, game);
-    game.applyGravity(this);
+    //game.applyGravity(this);
     if(SAT.testPolygonPolygon(this.collider, testPlayer.collider, null)){
         testPlayer.damage(this.damage);
         this.destroyed = true;
