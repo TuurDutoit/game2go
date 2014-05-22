@@ -78,20 +78,12 @@ var testPlayer = {
     directionFacing: "right",
 	speed: 5,
     collider: null,
-	Update: function(game) {
-		var p = game.Player;
-        if(direction[0] == 0 && direction[1] == 0){
-            if(testPlayer.directionFacing == "right"){
-                testPlayer.currentAnimation = "standardRight";
-            }
-            else{
-                testPlayer.currentAnimation = "standardLeft";
-            }
-        }
+    Move: function(x,y, game){
+        var p = game.Player;
         testPlayer.currentFrameCounter += 0.1;
         testPlayer.currentFrame = (parseInt(testPlayer.currentFrameCounter)) % testPlayer.sprite.frames[testPlayer.currentAnimation].length;
-		game.offsetX += direction[0] * testPlayer.speed;
-		game.offsetY += direction[1] * testPlayer.speed;
+		game.offsetX += x;
+		game.offsetY += y;
 		
 		var po = {positionX: testPlayer.getPositionX(game), positionY: testPlayer.getPositionY(game), width: p.width, height: p.height};
 		var tc = game.getTerrainCollidersObject(po);
@@ -112,6 +104,19 @@ var testPlayer = {
 		if(game.offsetX < 0) {
 			game.offsetX = 0;
 		}
+    },
+	Update: function(game) {
+        if(direction[0] == 0 && direction[1] == 0){
+            if(testPlayer.directionFacing == "right"){
+                testPlayer.currentAnimation = "standardRight";
+            }
+            else{
+                testPlayer.currentAnimation = "standardLeft";
+            }
+        }
+        testPlayer.Move(direction[0] * testPlayer.speed,direction[1] * testPlayer.speed,game);
+        game.applyGravity(testPlayer);
+        
 
 	},
 	damage: function(damage) {
