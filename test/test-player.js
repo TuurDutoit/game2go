@@ -1,4 +1,5 @@
 var direction = [0,0];
+var jumped = false;
 window.addEventListener("keydown", function(e) {
 	switch(e.keyCode) {
 		case 40:
@@ -57,6 +58,9 @@ window.addEventListener("keyup", function(e) {
 		case 37:
 			direction[0] = 0;
 			break;
+        case 32:
+            jumped = true;
+            break;
 	}
 })
 
@@ -78,13 +82,20 @@ var testPlayer = {
     directionFacing: "right",
 	speed: 5,
     collider: null,
+    isJuming: false,
+    jumpSpeed: 0,
+    Jump: function(height){
+        if(!testPlayer.isJumping){
+            testPlayer.isJumping = true;
+            testPlayer.jumpspeed = height;
+        }
+    },
     Move: function(x,y, game){
         var p = game.Player;
         testPlayer.currentFrameCounter += 0.1;
         testPlayer.currentFrame = (parseInt(testPlayer.currentFrameCounter)) % testPlayer.sprite.frames[testPlayer.currentAnimation].length;
 		game.offsetX += x;
 		game.offsetY += y;
-		
 		var po = {positionX: testPlayer.getPositionX(game), positionY: testPlayer.getPositionY(game), width: p.width, height: p.height};
 		var tc = game.getTerrainCollidersObject(po);
 		testPlayer.collider = new SAT.Box(new SAT.Vector(po.positionX, po.positionY), po.width, po.height).toPolygon();
