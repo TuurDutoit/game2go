@@ -172,6 +172,9 @@ Game.prototype.updateObjects = function() {
         }
 	   }
 	   this.emit("updateobjects", [this]);
+       this.emit("beforeupdateobjectcolliders", [this]);
+       this.updateObjectColliders();
+       this.emit("updateobjectcolliders", [this]);
 	   return this;
 }
 Game.prototype.drawObjects = function() {
@@ -301,14 +304,13 @@ Game.prototype.updateObjectColliders = function() {
     this.emit("beforeupdateobjectcolliders", [this]);
     var colliders = [];
     var objects = this.scene.Objects;
-    console.log("blub");
     for(var i = 0, len = objects.length; i < len; i++) {
         var object = objects[i];
         if(object.collider) {
             colliders.push(object.collider);
         }
         else if(object.hasCollider !== false) {
-            var collider = new SAT.Box( new SAT.Vector(object.positionX, object.positionX), object.width, object.height);
+            var collider = new SAT.Box( new SAT.Vector(object.positionX, object.positionX), object.width, object.height).toPolygon();
             colliders.push(collider);
         }
     }
@@ -328,22 +330,20 @@ Game.prototype.getTerrainCollidersObject = function(object) {
     return this.getTerrainColliders(object.positionX, object.width);
 }
 Game.prototype.getObjectColliders = function(x, w) {
-    //if(typeof w !== "number") {var Collider = x; var x = Collider.pos.x; var w = this.getPolygonWidth(Collider);}
+    if(typeof w !== "number") {var Collider = x; var x = Collider.pos.x; var w = this.getPolygonWidth(Collider);}
     
     var colliders = [];
     var objects = this.objectColliders;
     var xw = x + w;
-    //console.log(objects);
     for(var i = 0, len = objects.length; i < len; i++) {
         var o = objects[i];
-        var ow = this.getPolygonWidth(object);
-        console.log("e");
-       // if(((x > o.pos.x && x < o.pos.x+ow) ||
-        //    (xw > o.pos.x && xw < o.pos.x+ow) ||
-        //    (x < o.pos.x && xw > o.pos.x+ ow))
-         //  && o !== Collider) {
-               colliders.push(object);
-         //}
+        var ow = this.getPolygonWidth(o);
+       if(((x > o.pos.x && x < o.pos.x+ow) ||
+           (xw > o.pos.x && xw < o.pos.x+ow) ||
+           (x < o.pos.x && xw > o.pos.x+ ow))
+          && o !== Collider) {
+               colliders.push(o);
+         }
      }
      return colliders;
 }
