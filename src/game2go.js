@@ -15,6 +15,7 @@ Game = function(elem, options) {
     self.width            = self.canvas.offsetWidth;
     self.height           = self.canvas.offsetHeight;
     self.blockSize        = options.blockSize || 36;
+    self.gravity          = options.gravity   || 10;
     self.Draw             = new Draw(self.context, self.blockSize);
     
     self.frames           = 0;
@@ -250,15 +251,18 @@ Game.prototype.drawForegrounds = function() {
     this.emit("drawforegrounds", [this]);
     return this;
 }
-
 Game.prototype.clearCanvas = function() {
     this.emit("beforeclearcanvas", [this]);
     this.context.clearRect(0, 0, this.width, this.height);
     this.emit("afterclearcanvas");
+    //console.log(this.gravity);
     return this;
+    
 }
 
-
+Game.prototype.applyGravity = function(object){
+    object.Move(0,-this.gravity, this);
+}
 
 
 

@@ -3,7 +3,8 @@ var Textures = {
 }
 
 var options = {
-	Player: testPlayer
+	Player: testPlayer,
+    gravity: 1
 }
 
 var game = new Game(document.getElementById("game-canvas"), options);

@@ -45,8 +45,10 @@ ObjectFireBall.prototype.Init = function() {
 	this.animation = new game.Animation("fireball", this.sprites, {time: 90, img: document.getElementById("spritesheet")}).start();
 	game.saveAnimation("fireball", this.animation);
 }
-ObjectFireBall.prototype.Update = function() {
+ObjectFireBall.prototype.Update = function(game) {
+    //console.log(game);
     this.Move(this.plusX * this.speed,this.plusY * this.speed, game);
+    game.applyGravity(this);
     if(SAT.testPolygonPolygon(this.collider, testPlayer.collider, null)){
         testPlayer.damage(this.damage);
         this.destroyed = true;
@@ -62,20 +64,17 @@ ObjectFireBall.prototype.Move = function(x,y, game) {
     this.collider.pos.x += x;
     this.collider.pos.y += y;
     var po = {positionX: this.positionX, positionY: this.positionY, width: this.size, height: this.size};
-    var tc = game.getTerrainCollidersObject(po);
-    var oc = game.getObjectCollidersObject(po);
     var positionX =  this.positionX;
     var positionY =  this.positionY;
     var colliderX =  this.collider.pos.x;
     var colliderY =  this.collider.pos.y;
-    var res = new SAT.Response();
-    game.checkCollisionAll(this.collider, tc, function(res) {
+    game.checkCollisionAll(this.collider, game.getTerrainCollidersObject(po), function(res) {
         positionX -= res.overlapV.x;
         positionY -= res.overlapV.y;
 		colliderX -= res.overlapV.x;
 		colliderY -= res.overlapV.y;
     });
-    game.checkCollisionAll(this.collider, oc, function(res) {
+    game.checkCollisionAll(this.collider, game.getObjectCollidersObject(po), function(res) {
         positionX -= res.overlapV.x;
         positionY -= res.overlapV.y;
 		colliderX -= res.overlapV.x;
