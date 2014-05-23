@@ -16,6 +16,7 @@ Game = function(elem, options) {
     self.height           = self.canvas.offsetHeight;
     self.blockSize        = options.blockSize || 36;
     self.gravity          = options.gravity   || 10;
+    self.maxGravitySpeed  = options.maxGravitySpeed || 50;
     self.Draw             = new Draw(self.context, self.blockSize);
     
     self.frames           = 0;
@@ -261,7 +262,11 @@ Game.prototype.clearCanvas = function() {
 }
 
 Game.prototype.applyGravity = function(object){
-    object.Move(0,-this.gravity, this);
+    object.Move(0,-object.fallSpeed, this);
+    object.fallSpeed += 0.1;
+    if(object.fallSpeed > this.maxGravitySpeed){
+        object.fallSpeed = this.maxGravitySpeed;
+    }
 }
 
 

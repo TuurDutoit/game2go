@@ -90,6 +90,7 @@ var testPlayer = {
     isJuming: false,
     jumpSpeed: 0,
     jumpHeight: 18,
+    fallSpeed: 0,
     Jump: function(height){
         if(!testPlayer.isJumping){
             testPlayer.isJumping = true;

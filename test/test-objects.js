@@ -30,6 +30,7 @@ var ObjectFireBall = function(options){
 	this.angle     = options.angle  || 0;
     this.damage    = options.damage || 10;
     this.destroyed = options.destroyed || false;
+    this.fallSpeed = 0;
 
     this.size   = options.size || 36;
     this.height = options.height || this.size;
