@@ -89,7 +89,7 @@ var testPlayer = {
     collider: null,
     isJuming: false,
     jumpSpeed: 0,
-    jumpHeight: 20,
+    jumpHeight: 18,
     Jump: function(height){
         if(!testPlayer.isJumping){
             testPlayer.isJumping = true;
