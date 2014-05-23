@@ -42,6 +42,10 @@ window.addEventListener("keydown", function(e) {
             //testPlayer.currentFrameCounter = 0;
             //testPlayer.currentFrame = 0;
 			break;
+        case 32:
+            console.log("TEST");
+            jumped = true;
+            break;
         }
     });
 window.addEventListener("keyup", function(e) {
@@ -59,6 +63,7 @@ window.addEventListener("keyup", function(e) {
 			direction[0] = 0;
 			break;
         case 32:
+            console.log("TEST");
             jumped = true;
             break;
 	}
@@ -84,10 +89,21 @@ var testPlayer = {
     collider: null,
     isJuming: false,
     jumpSpeed: 0,
+    jumpHeight: 20,
     Jump: function(height){
         if(!testPlayer.isJumping){
             testPlayer.isJumping = true;
-            testPlayer.jumpspeed = height;
+            testPlayer.jumpSpeed = height;
+            console.log(testPlayer.jumpSpeed);
+        }
+    },
+    ApplyJump: function(game){
+        if(testPlayer.isJumping){
+            testPlayer.Move(0,testPlayer.jumpSpeed, game);
+            testPlayer.jumpSpeed -= 1;
+            if(testPlayer.jumpSpeed < 0){
+                testPlayer.jumpSpeed = 0;
+            }
         }
     },
     Move: function(x,y, game){
@@ -127,7 +143,12 @@ var testPlayer = {
         }
         testPlayer.Move(direction[0] * testPlayer.speed,direction[1] * testPlayer.speed,game);
         game.applyGravity(testPlayer);
-        
+        if(jumped){
+            //console.log(testPlayer.jumpHeight);
+            testPlayer.Jump(testPlayer.jumpHeight);
+        }
+        testPlayer.ApplyJump(game);
+      //  console.log(game.offsetY);
 
 	},
 	damage: function(damage) {
