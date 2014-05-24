@@ -96,25 +96,32 @@ var testPlayer = {
         testPlayer.currentFrame = (parseInt(testPlayer.currentFrameCounter)) % testPlayer.sprite.frames[testPlayer.currentAnimation].length;
 		game.offsetX += x;
 		game.offsetY += y;
-		var po = {positionX: testPlayer.getPositionX(game), positionY: testPlayer.getPositionY(game), width: p.width, height: p.height};
-		var tc = game.getTerrainCollidersObject(po);
-		testPlayer.collider = new SAT.Box(new SAT.Vector(po.positionX, po.positionY), po.width, po.height).toPolygon();
-		game.checkCollisionAll(testPlayer.collider, tc, function(res) {
-			game.offsetX -= res.overlapV.x;
-			game.offsetY -= res.overlapV.y;
+		if(testPlayer.collider) testPlayer.collider.pos.x += x;
+		if(testPlayer.collider) testPlayer.collider.pos.y += y;
+		//var po = {positionX: testPlayer.getPositionX(game), positionY: testPlayer.getPositionY(game), width: p.width, height: p.height};
+		//var tc = game.getTerrainCollidersObject(po);
+		//testPlayer.collider = new SAT.Box(new SAT.Vector(po.positionX, po.positionY), po.width, po.height).toPolygon();
+		if(testPlayer.collider) {
+			game.checkCollisionTerrain(testPlayer.collider, function(res, block) {
+				game.offsetX -= res.overlapV.x;
+				game.offsetY -= res.overlapV.y;
 
-			testPlayer.collider.pos.x -= res.overlapV.x;
-			testPlayer.collider.pos.y -= res.overlapV.y;
+				testPlayer.collider.pos.x -= res.overlapV.x;
+				testPlayer.collider.pos.y -= res.overlapV.y;
 
-			if(game.offsetX < 0) {
-				game.offsetX = 0;
-				testPlayer.collider.pos.x = testPlayer.positionX;
-			}
-		});
+				if(game.offsetX < 0) {
+					game.offsetX = 0;
+					testPlayer.collider.pos.x = testPlayer.positionX;
+				}
+			});
+		}
 
 		if(game.offsetX < 0) {
 			game.offsetX = 0;
 		}
+    },
+    Init: function() {
+    	testPlayer.collider = new SAT.Box(new SAT.Vector(this.positionX, this.positionY), this.width, this.height).toPolygon();
     },
 	Update: function(game) {
         if(direction[0] == 0 && direction[1] == 0){

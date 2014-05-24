@@ -284,14 +284,11 @@ Game.prototype.initTerrainColliders = function() {
     this.emit("beforeiniterraincolliders", [this]);
     var terrain = this.scene.Terrain;
     var w = this.blockSize;
-    console.log("block size:", w);
 
     for(var i = 0, len = terrain.length; i < len; i++) {
         var column = terrain[i];
         for(var j = 0, lenj = column.length; j < lenj; j++) {
             var block = column[j];
-            console.log("i: "+i+", j: "+j+" : ");
-            console.log(block);
             if(block.hasCollider !== false || block.collider) {
                 block.hasCollider = true;
             }
@@ -299,7 +296,6 @@ Game.prototype.initTerrainColliders = function() {
                 var x = i*w;
                 var y = j*w;
                 var collider = new this.SAT.Box(new this.SAT.Vector(x, y), w, w).toPolygon();
-                console.log(collider);
                 block.collider = collider;
             }
         }
@@ -444,27 +440,14 @@ Game.prototype.checkCollisionTerrain = function(collider, cb) {
         var column = terrain[i];
         for(var j = 0, lenj = column.length; j < lenj; j++) {
             var block = column[j];
-            console.log("i: "+i+", j: "+j+" : ", block);
             if(block.hasCollider && block.collider) {
-                console.log("  has a collider");
                 if(this.checkPossibleCollision(collider, block.collider)) {
-                    console.log("  possibly collides with given collider");
                     var res = new this.SAT.Response();
                     if(this.checkCollision(collider, block.collider, res)) {
-                        console.log("  collides with given collider");
                         if(cb) cb(res, block);
                         responses.push({response: res, object: block});
                     }
-                    else {
-                        console.log("  does not collide with given collider");
-                    }
                 }
-                else {
-                    console.log("  has no chance of colliding with given collider");
-                }
-            }
-            else {
-                console.log("  has no collider");
             }
         }
     }
@@ -479,6 +462,20 @@ Game.prototype.checkCollisionPlayer = function(collider, cb) {
     }
 
     return false;
+}
+Game.prototype.checkCollisionAll = function(collider, cb) {
+    var responses = [];
+    responses.push(this.checkCollisionPlayer(collider, function(res, player) {
+        cb(res, player, "player");
+    }));
+    responses.push(this.checkCollisionObjects(collider, function(res, object) {
+        cb(res, object, "object");
+    }));
+    responses.push(this.checkCollisionTerrain(collider, function(res, block) {
+        cb(res, block, "terrain");
+    }));
+
+    return responses;
 }
 
 
@@ -818,6 +815,7 @@ Game.prototype.getObjectWidth = function(object) {
         }
     }
     else {
+        console.log(object);
         width = object.r * 2;
     }
     return width;
@@ -832,6 +830,7 @@ Game.prototype.getObjectHeight = function(object) {
         }
     }
     else {
+        console.log(object);
         height = object.r * 2;
     }
     return height;

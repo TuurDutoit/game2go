@@ -46,13 +46,17 @@ ObjectFireBall.prototype.Init = function() {
 	game.saveAnimation("fireball", this.animation);
 }
 ObjectFireBall.prototype.Update = function(game) {
-    //console.log(game);
-    this.Move(this.plusX * this.speed,this.plusY * this.speed, game);
+    var self = this;
+    self.Move(this.plusX * this.speed,this.plusY * this.speed, game);
     //game.applyGravity(this);
-    if(SAT.testPolygonPolygon(this.collider, testPlayer.collider, null)){
-        testPlayer.damage(this.damage);
-        this.destroyed = true;
-    }
+    game.checkCollisionPlayer(self.collider, function(res, player) {
+        player.damage(self.damage);
+        self.destroyed = true;
+    })
+    // if(SAT.testPolygonPolygon(this.collider, testPlayer.collider, null)){
+    //     testPlayer.damage(this.damage);
+    //     this.destroyed = true;
+    // }
     return this.destroyed;
 }
 ObjectFireBall.prototype.Draw = function(d) {
@@ -68,22 +72,31 @@ ObjectFireBall.prototype.Move = function(x,y, game) {
     var positionY =  this.positionY;
     var colliderX =  this.collider.pos.x;
     var colliderY =  this.collider.pos.y;
-    game.checkCollisionAll(this.collider, game.getTerrainCollidersObject(po), function(res) {
-        positionX -= res.overlapV.x;
-        positionY -= res.overlapV.y;
-		colliderX -= res.overlapV.x;
-		colliderY -= res.overlapV.y;
+    game.checkCollisionAll(this.collider, function(res, object, type) {
+        if(type !== "player") {
+            positionX -= res.overlapV.x;
+            positionY -= res.overlapV.y;
+            colliderX -= res.overlapV.x;
+            colliderY -= res.overlapV.y;
+        }
     });
-    game.checkCollisionAll(this.collider, game.getObjectCollidersObject(po), function(res) {
-        positionX -= res.overlapV.x;
-        positionY -= res.overlapV.y;
-		colliderX -= res.overlapV.x;
-		colliderY -= res.overlapV.y;
-    });
-    this.positionX = positionX;
-    this.positionY = positionY;
-    this.collider.pos.x = colliderX;
-    this.collider.pos.y = colliderY;
+  //   game.checkCollisionAll(this.collider, game.getTerrainCollidersObject(po), function(res) {
+  //       positionX -= res.overlapV.x;
+  //       positionY -= res.overlapV.y;
+		// colliderX -= res.overlapV.x;
+		// colliderY -= res.overlapV.y;
+  //   });
+  //   game.checkCollisionAll(this.collider, game.getObjectCollidersObject(po), function(res) {
+  //       positionX -= res.overlapV.x;
+  //       positionY -= res.overlapV.y;
+		// colliderX -= res.overlapV.x;
+		// colliderY -= res.overlapV.y;
+  //   });
+
+    // this.positionX = positionX;
+    // this.positionY = positionY;
+    // this.collider.pos.x = colliderX;
+    // this.collider.pos.y = colliderY;
 }
 ObjectFireBall.prototype.sprites = [
 	{x:96,  y:144, w:8, h:8},
