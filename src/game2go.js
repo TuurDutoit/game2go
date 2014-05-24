@@ -28,8 +28,6 @@ Game = function(elem, options) {
     self.scene            = null;
     self.sceneNum         = 0;
     self.terrainBuffer    = [];
-    self.terrainColliders = [];
-    self.objectColliders  = [];
     self.gameHeight       = 0;
     self.gameWidth        = 0;
 
@@ -90,10 +88,12 @@ Game.prototype.start = function(sceneID) {
 }
 //Stop the game
 Game.prototype.stop = function() {
-    this.emit("beforestop", [this]);
-    this.stopTime = this.getTime();
-    this.playing = false;
-    this.emit("stop", [this]);
+    if(!this.playing) {
+        this.emit("beforestop", [this]);
+        this.stopTime = this.getTime();
+        this.playing = false;
+        this.emit("stop", [this]);
+    }
     return this;
 }
 //Initialization on first start()
@@ -124,6 +124,7 @@ Game.prototype.Loop = function() {
     this.drawObjects();
     this.drawPlayer();
     this.drawForegrounds();
+
     this.drawTimes.push(this.getTime() - START);
     this.emit("frame", [this]);
     this.requestLoop();
@@ -156,44 +157,44 @@ Game.prototype.initObjects = function() {
     this.emit("beforeinitobjects", [this]);
     var objects = this.scene.Objects;
    	for(var i = 0, len = objects.length; i < len; i++) {
-        if(objects[i].Init) {
-            objects[i].Init(this);
-            if(object.hasCollider !== false || object.collider) {
-                object.hasCollider = true;
-            }
-            if(!object.collider && object.hasCollider) {
-                object.collider = new this.SAT.Box(new this.SAT.Vector(object.positionX, object.positionY), object.width, object.height)toPolygon();
-            }
+        var object = objects[i];
+        if(object.Init) {
+            object.Init(this);
         }
-	   }
-	   this.emit("initobjects", [this]);
-	   return this;
+        if(object.hasCollider !== false || object.collider) {
+            object.hasCollider = true;
+        }
+        if(!object.collider && object.hasCollider) {
+            object.collider = new this.SAT.Box(new this.SAT.Vector(object.positionX, object.positionY), object.width, object.height).toPolygon();
+        }
+	}
+   this.emit("initobjects", [this]);
+   return this;
 }
 Game.prototype.updateObjects = function() {
     this.emit("beforeupdateobjects", [this]);
     var objects = this.scene.Objects;
    	for(var i = 0, len = objects.length; i < len; i++) {
         if(objects[i].Update) {
-            if(objects[i].Update(this)){
-                objects.splice(i, 1);
-            }
+            var remove = objects[i].Update(this);
+            if(remove) objects.splice(i, 1);
         }
-	   }
-	   this.emit("updateobjects", [this]);
-       this.emit("beforeupdateobjectcolliders", [this]);
-       this.updateObjectColliders();
-       this.emit("updateobjectcolliders", [this]);
-	   return this;
+    }
+    this.emit("updateobjects", [this]);
+    this.emit("beforeupdateobjectcolliders", [this]);
+    this.updateObjectColliders();
+    this.emit("updateobjectcolliders", [this]);
+    return this;
 }
 Game.prototype.drawObjects = function() {
     this.emit("beforedrawobjects", [this]);
     var objects = this.scene.Objects;
-	   for(var i = 0, len = objects.length; i < len; i++) {
+    for(var i = 0, len = objects.length; i < len; i++) {
         if(objects[i].Draw) {
             var object = objects[i];
             this.Draw.offsetX = -this.offsetX + object.positionX;
             this.Draw.offsetY = this.height - (object.positionY - this.offsetY) - (object.height || this.blockSize);
-            object.Draw(this.Draw);
+            object.Draw(this.Draw, object);
         }
    	}
    	this.emit("drawobjects", [this]);
@@ -208,18 +209,18 @@ Game.prototype.updateTerrain = function() {
 }
 Game.prototype.drawTerrain = function() {
     this.emit("beforedrawterrain", [this]);
-    var column, i, j, leni, lenj;
     var h = game.height;
 
 //Loop terrainBuffer
-    for(i = this.terrainBuffer.length - 1; i >= 0; i--) {
-        column = this.terrainBuffer[i];
+//Reverse loop for performance
+    for(var i = this.terrainBuffer.length - 1; i >= 0; i--) {
+        var column = this.terrainBuffer[i];
 
-        for(j = column.length - 1; j >= 0; j--) {
+        for(var j = column.length - 1; j >= 0; j--) {
 //Reuse offsetX and offsetY for memory efficiency
             this.Draw.offsetX = (i*this.blockSize) - (this.offsetX % this.blockSize);
             this.Draw.offsetY = h-((j+1)*this.blockSize) + this.offsetY;
-            column[j].Draw(this.Draw);
+            column[j].Draw(this.Draw, column[j]);
         }
     }
     this.emit("drawterrain", [this]);
@@ -237,7 +238,7 @@ Game.prototype.drawBackgrounds = function() {
             var b = backgrounds[i];
             this.Draw.offsetX = -this.offsetX + (b.positionX || 0);
             this.Draw.offsetY = this.height - ((b.positionY || 0) - this.offsetY) - (b.height || 0);
-            b.Draw(this.Draw);
+            b.Draw(this.Draw, b);
         }
     }
     this.emit("drawbackgrounds", [this]);
@@ -262,7 +263,6 @@ Game.prototype.clearCanvas = function() {
     this.emit("beforeclearcanvas", [this]);
     this.context.clearRect(0, 0, this.width, this.height);
     this.emit("afterclearcanvas");
-    //console.log(this.gravity);
     return this;
     
 }
@@ -284,17 +284,23 @@ Game.prototype.initTerrainColliders = function() {
     this.emit("beforeiniterraincolliders", [this]);
     var terrain = this.scene.Terrain;
     var w = this.blockSize;
+    console.log("block size:", w);
+
     for(var i = 0, len = terrain.length; i < len; i++) {
         var column = terrain[i];
         for(var j = 0, lenj = column.length; j < lenj; j++) {
             var block = column[j];
+            console.log("i: "+i+", j: "+j+" : ");
+            console.log(block);
             if(block.hasCollider !== false || block.collider) {
                 block.hasCollider = true;
             }
             if(block.hasCollider && !block.collider) {
                 var x = i*w;
                 var y = j*w;
-                block.collider = new this.SAT.Box(new this.SAT.Vector(x, y), w, w).toPolygon();
+                var collider = new this.SAT.Box(new this.SAT.Vector(x, y), w, w).toPolygon();
+                console.log(collider);
+                block.collider = collider;
             }
         }
     }
@@ -309,7 +315,6 @@ Game.prototype.updateTerrainColliders = function() {
         column = terrain[i];
         for(var j = 0, lenj = column.length; j < lenj; j++) {
             var block = column[j];
- 
             if(block.hasCollider && block.collider) {
                 var x = i * w;
                 var y = j * w;
@@ -336,36 +341,36 @@ Game.prototype.updateObjectColliders = function() {
     return this;
 }
 
-Game.prototype.getTerrainColliders = function(x, w) {
-    var columns = this.terrainColliders.slice(Math.floor(x / this.blockSize), Math.ceil((x + w) / this.blockSize));
-    var colliders = this.flattenMatrix(columns);
+// Game.prototype.getTerrainColliders = function(x, w) {
+//     var columns = this.terrainColliders.slice(Math.floor(x / this.blockSize), Math.ceil((x + w) / this.blockSize));
+//     var colliders = this.flattenMatrix(columns);
 
-    return colliders;
-}
-Game.prototype.getTerrainCollidersObject = function(object) {
-    return this.getTerrainColliders(object.positionX, object.width);
-}
-Game.prototype.getObjectColliders = function(x, w) {
-    if(typeof w !== "number") {var Collider = x; var x = Collider.pos.x; var w = this.getPolygonWidth(Collider);}
+//     return colliders;
+// }
+// Game.prototype.getTerrainCollidersObject = function(object) {
+//     return this.getTerrainColliders(object.positionX, object.width);
+// }
+// Game.prototype.getObjectColliders = function(x, w) {
+//     if(typeof w !== "number") {var Collider = x; var x = Collider.pos.x; var w = this.getObjectWidth(Collider);}
     
-    var colliders = [];
-    var objects = this.objectColliders;
-    var xw = x + w;
-    for(var i = 0, len = objects.length; i < len; i++) {
-        var o = objects[i];
-        var ow = this.getPolygonWidth(o);
-       if(((x > o.pos.x && x < o.pos.x+ow) ||
-           (xw > o.pos.x && xw < o.pos.x+ow) ||
-           (x < o.pos.x && xw > o.pos.x+ ow))
-          && o !== Collider) {
-               colliders.push(o);
-         }
-     }
-     return colliders;
-}
-Game.prototype.getObjectCollidersObject = function(object) {
-    return this.getObjectColliders(object.positionX, object.width);
-}
+//     var colliders = [];
+//     var objects = this.objectColliders;
+//     var xw = x + w;
+//     for(var i = 0, len = objects.length; i < len; i++) {
+//         var o = objects[i];
+//         var ow = this.getObjectWidth(o);
+//        if(((x > o.pos.x && x < o.pos.x+ow) ||
+//            (xw > o.pos.x && xw < o.pos.x+ow) ||
+//            (x < o.pos.x && xw > o.pos.x+ ow))
+//           && o !== Collider) {
+//                colliders.push(o);
+//          }
+//      }
+//      return colliders;
+// }
+// Game.prototype.getObjectCollidersObject = function(object) {
+//     return this.getObjectColliders(object.positionX, object.width);
+// }
 Game.prototype.checkCollision = function(A, B, res) {
     if(A instanceof SAT.Box) var A = A.toPolygon();
     if(B instanceof SAT.Box) var B = B.toPolygon();
@@ -386,24 +391,95 @@ Game.prototype.checkCollision = function(A, B, res) {
             return SAT.testCircleCircle(A, B, res);
         }
     }
-
 }
-Game.prototype.checkCollisionAll = function(A, B, cb) {
-    var result = [];
-    for(var i = 0, len = B.length; i < len; i++) {
-        var collider = B[i];
-        var res = new SAT.Response();
-        if(this.checkCollision(A, collider, res)) {
-            result.push(res);
-            if(cb) {
-                cb(res);
+Game.prototype.checkPossibleCollision = function(A, B) {
+    var aw = this.getObjectWidth(A);
+    var bw = this.getObjectWidth(B);
+    var apos = A.pos;
+    var bpos = B.pos;
+    if(A instanceof this.SAT.Circle) {apos = this.getCirclePos(A);}
+    if(B instanceof this.SAT.Circle) {bpos = this.getCirclePos(B);}
+
+    if((apos.x >= bpos.x && apos.x <= bpos.x + bw) || //left inside
+       (apos.x+aw >= bpos.x && apos.x+aw <= bpos.x + bw) || //right inside
+       (apos.x <= bpos.x && apos.x+aw >= bpos.x) || //B in A
+       (apos.x <= bpos.x && apos.x+aw <= bpos.x+bw)) { //A in B
+        var ah = this.getObjectHeight(A);
+        var bh = this.getObjectHeight(B);
+
+        if((apos.y >= bpos.y && apos.y <= bpos.y + bh) || //top inside
+           (apos.y+ah >= bpos.y && apos.y+ah <= bpos.y + bh) || //bottom inside
+           (apos.y <= bpos.y && apos.y+ah >= bpos.y) || //B in A
+           (apos.y <= bpos.y && apos.y+ah <= bpos.y+bh)) { //A in B
+            return true;
+        }
+    }
+
+    return false;
+}
+Game.prototype.checkCollisionObjects = function(collider, cb) {
+    var objects = this.scene.Objects;
+    var responses = [];
+
+    for(var i = 0, len = objects.length; i < 0; i++) {
+        var object = objects[i];
+        if(object.hasCollider && object.collider) {
+            if(this.checkPossibleCollision(collider, object)) {
+                var res = new this.SAT.Response();
+                if(this.checkCollision(collider, object, res)) {
+                    if(cb) cb(res, object);
+                    responses.push({response: res, object: object});
+                }
             }
         }
     }
 
-    return result;
+    return responses;
 }
+Game.prototype.checkCollisionTerrain = function(collider, cb) {
+    var terrain = this.scene.Terrain;
+    var responses = [];
 
+    for(var i = 0, len = terrain.length; i < len; i++) {
+        var column = terrain[i];
+        for(var j = 0, lenj = column.length; j < lenj; j++) {
+            var block = column[j];
+            console.log("i: "+i+", j: "+j+" : ", block);
+            if(block.hasCollider && block.collider) {
+                console.log("  has a collider");
+                if(this.checkPossibleCollision(collider, block.collider)) {
+                    console.log("  possibly collides with given collider");
+                    var res = new this.SAT.Response();
+                    if(this.checkCollision(collider, block.collider, res)) {
+                        console.log("  collides with given collider");
+                        if(cb) cb(res, block);
+                        responses.push({response: res, object: block});
+                    }
+                    else {
+                        console.log("  does not collide with given collider");
+                    }
+                }
+                else {
+                    console.log("  has no chance of colliding with given collider");
+                }
+            }
+            else {
+                console.log("  has no collider");
+            }
+        }
+    }
+
+    return responses;
+}
+Game.prototype.checkCollisionPlayer = function(collider, cb) {
+    var res = new this.SAT.Response();
+    if(this.checkCollision(collider, this.Player.collider, res)) {
+        if(cb) cb(res, this.Player);
+        return res;
+    }
+
+    return false;
+}
 
 
 
@@ -463,7 +539,7 @@ Game.prototype.loadScene = function(scene) {
 
     this.updateGameHeight();
     this.updateGameWidth();
-    this.updateTerrainColliders();
+    this.initTerrainColliders();
     this.initObjects();
 
     this.emit("resetplayer", [this]);
@@ -649,6 +725,10 @@ Game.prototype.updateGameWidth = function() {
     return this;
 }
 
+Game.prototype.getCirclePos = function(Circle) {
+    return {x: Circle.pos.x - Circle.r, y: Circle.pos.y - Circle.r};
+}
+
 
 
 /* UTILS
@@ -673,7 +753,7 @@ Game.prototype.parseBlock = function(b) {
             return b;
             break;
         case "string":
-            return this.savedBlocks[b];
+            return new this.savedBlocks[b]();
             break;
         default:
             return null;
@@ -728,14 +808,33 @@ Game.prototype.getAverageDrawTime = function() {
     return (sum / this.drawTimes.length);
 }
 
-Game.prototype.getPolygonWidth = function(polygon) {
-    var highestX = 0;
-    for(var i = 0, len = polygon.calcPoints.length; i < len; i++) {
-        if(polygon.calcPoints[i] > highestX) {
-            highestX = polygon.calcPoints[i];
+Game.prototype.getObjectWidth = function(object) {
+    var width = 0;
+    if(object instanceof this.SAT.Polygon) {
+        for(var i = 0, len = object.calcPoints.length; i < len; i++) {
+            if(object.calcPoints[i].x > width) {
+                width = object.calcPoints[i];
+            }
         }
     }
-    return highestX;
+    else {
+        width = object.r * 2;
+    }
+    return width;
+}
+Game.prototype.getObjectHeight = function(object) {
+    var height = 0;
+    if(object instanceof this.SAT.Polygon) {
+        for(var i = 0, len = object.calcPoints.length; i < len; i++) {
+            if(object.calcPoints[i].y > height) {
+                height = object.calcPoints[i].y;
+            }
+        }
+    }
+    else {
+        height = object.r * 2;
+    }
+    return height;
 }
 
 
