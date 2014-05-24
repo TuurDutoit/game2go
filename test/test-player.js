@@ -15,9 +15,11 @@ window.addEventListener("keydown", function(e) {
                 testPlayer.currentFrameCounter = 0;
                 testPlayer.currentFrame = 0;
             }
+            if(testPlayer.isGrounded){  
+                testPlayer.currentAnimation = "runningRight";
+            }
             testPlayer.directionFacing = "right";
-			direction[0] = 1;
-            testPlayer.currentAnimation = "runningRight";
+            direction[0] = 1;
            // testPlayer.currentFrameCounter = 0;
            // testPlayer.currentFrame = 0;
 			break;
@@ -38,12 +40,14 @@ window.addEventListener("keydown", function(e) {
             }
             testPlayer.directionFacing = "left";
 			direction[0] = -1;
-            testPlayer.currentAnimation = "runningLeft";
+            if(testPlayer.isGrounded){  
+                testPlayer.currentAnimation = "runningLeft";
+            }
             //testPlayer.currentFrameCounter = 0;
             //testPlayer.currentFrame = 0;
 			break;
         case 32:
-            console.log("TEST");
+            //console.log("TEST");
             jumped = true;
             break;
         }
@@ -63,8 +67,8 @@ window.addEventListener("keyup", function(e) {
 			direction[0] = 0;
 			break;
         case 32:
-            console.log("TEST");
-            jumped = true;
+            //console.log("TEST");
+            //jumped = true;
             break;
 	}
 })
@@ -74,7 +78,7 @@ var log = false;
 
 
 var testPlayer = {
-    sprite: {image:"mario", sizeX: 16, sizeY: 32, frames: {standardRight: [[80,0]], standardLeft: [[736,0]], runningRight: [[112,0],[127,0],[112,0], [96,0]], runningLeft: [[704,0],[720,0],[704,0], [688,0]]}},
+    sprite: {image:"mario", sizeX: 16, sizeY: 32, frames: {standardRight: [[80,0]], standardLeft: [[736,0]], runningRight: [[112,0],[127,0],[112,0], [96,0]], runningLeft: [[704,0],[720,0],[704,0], [688,0]], jumpRight: [[160,0]], jumpLeft: [[656,0]]}},
 	positionX: 193,
 	positionY: 140,
 	width: 35,
@@ -91,7 +95,8 @@ var testPlayer = {
     jumpSpeed: 0,
     jumpHeight: 18,
     fallSpeed: 0,
-    IsGrounded: function(game){
+    isGrounded: true,
+    IsGroundedCheck: function(game){
         var collided = false;
         var p = game.Player;
         var go = {positionX: testPlayer.getPositionX(game), positionY: testPlayer.getPositionY(game) - 1, width: p.width, height: 2};
@@ -118,8 +123,6 @@ var testPlayer = {
     },
     Move: function(x,y, game){
         var p = game.Player;
-        testPlayer.currentFrameCounter += 0.1;
-        testPlayer.currentFrame = (parseInt(testPlayer.currentFrameCounter)) % testPlayer.sprite.frames[testPlayer.currentAnimation].length;
 		game.offsetX += x;
 		game.offsetY += y;
 		var po = {positionX: testPlayer.getPositionX(game), positionY: testPlayer.getPositionY(game), width: p.width, height: p.height};
@@ -137,34 +140,56 @@ var testPlayer = {
 				testPlayer.collider.pos.x = testPlayer.positionX;
 			}
 		});
-       //console.log(testPlayer.IsGrounded(game));
+       //console.log(testPlayer.IsGroundedCheck(game));
 		if(game.offsetX < 0) {
 			game.offsetX = 0;
 		}
     },
 	Update: function(game) {
-        if(direction[0] == 0 && direction[1] == 0){
+        testPlayer.currentFrameCounter += 0.1;
+        testPlayer.currentFrame = (parseInt(testPlayer.currentFrameCounter)) % (testPlayer.sprite.frames[testPlayer.currentAnimation].length);
+        if(testPlayer.currentFrame >= testPlayer.sprite.frames[testPlayer.currentAnimation].length){
+            console.log("A wild missigno appeared, catched!");
+            testPlayer.currentFrame = 0;
+        }
+        if(direction[0] == 0 && direction[1] == 0 && testPlayer.IsGroundedCheck(game)){
             if(testPlayer.directionFacing == "right"){
+                testPlayer.currentFrame = 0;
                 testPlayer.currentAnimation = "standardRight";
             }
             else{
+                testPlayer.currentFrame = 0;
                 testPlayer.currentAnimation = "standardLeft";
             }
         }
         testPlayer.Move(direction[0] * testPlayer.speed,direction[1] * testPlayer.speed,game);
         game.applyGravity(testPlayer);
         if(jumped){
+            //game.loadScene(1);
+            //game.start();
             jumped = false;
             //console.log(testPlayer.jumpHeight);
-            if(testPlayer.IsGrounded(game)){
+            if(testPlayer.IsGroundedCheck(game)){
                 testPlayer.Jump(testPlayer.jumpHeight);
             }
         }
         testPlayer.ApplyJump(game);
-        if(testPlayer.IsGrounded(game)){
+        testPlayer.isGrounded = testPlayer.IsGroundedCheck(game);
+        if(testPlayer.IsGroundedCheck(game)){
             testPlayer.fallSpeed = 0;
             testPlayer.isJumping = false;
         }
+        if(testPlayer.isJumping){
+            if(testPlayer.directionFacing == "right"){
+                testPlayer.currentFrame = 0;
+                testPlayer.currentAnimation = "jumpRight";
+            }
+            else{
+                testPlayer.currentFrame = 0;
+                testPlayer.currentAnimation = "jumpLeft";
+            }
+        }
+        
       //  console.log(game.offsetY);
 
 	},

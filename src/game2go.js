@@ -461,7 +461,6 @@ Game.prototype.loadScene = function(scene) {
 
     this.emit("resetplayer", [this]);
     this.emit("loadscene", [this, scene]);
-
     return this;
 }
 
