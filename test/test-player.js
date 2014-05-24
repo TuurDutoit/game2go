@@ -87,15 +87,24 @@ var testPlayer = {
     directionFacing: "right",
 	speed: 5,
     collider: null,
-    isJuming: false,
+    isJumping: false,
     jumpSpeed: 0,
     jumpHeight: 18,
     fallSpeed: 0,
+    IsGrounded: function(game){
+        var collided = false;
+        var p = game.Player;
+        var go = {positionX: testPlayer.getPositionX(game), positionY: testPlayer.getPositionY(game) - 1, width: p.width, height: 2};
+        var tcb = game.getTerrainCollidersObject(go);
+        game.checkCollisionAll(new SAT.Box(new SAT.Vector(go.positionX, go.positionY), go.width, go.height).toPolygon(), tcb, function(res) {
+            collided = true;
+        });
+        return collided;
+    },
     Jump: function(height){
         if(!testPlayer.isJumping){
             testPlayer.isJumping = true;
             testPlayer.jumpSpeed = height;
-            console.log(testPlayer.jumpSpeed);
         }
     },
     ApplyJump: function(game){
@@ -128,7 +137,7 @@ var testPlayer = {
 				testPlayer.collider.pos.x = testPlayer.positionX;
 			}
 		});
-
+       //console.log(testPlayer.IsGrounded(game));
 		if(game.offsetX < 0) {
 			game.offsetX = 0;
 		}
@@ -145,10 +154,17 @@ var testPlayer = {
         testPlayer.Move(direction[0] * testPlayer.speed,direction[1] * testPlayer.speed,game);
         game.applyGravity(testPlayer);
         if(jumped){
+            jumped = false;
             //console.log(testPlayer.jumpHeight);
-            testPlayer.Jump(testPlayer.jumpHeight);
+            if(testPlayer.IsGrounded(game)){
+                testPlayer.Jump(testPlayer.jumpHeight);
+            }
         }
         testPlayer.ApplyJump(game);
+        if(testPlayer.IsGrounded(game)){
+            testPlayer.fallSpeed = 0;
+            testPlayer.isJumping = false;
+        }
       //  console.log(game.offsetY);
 
 	},
