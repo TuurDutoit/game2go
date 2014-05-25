@@ -2,24 +2,32 @@ window.addEventListener("keydown", function(e) {
 	switch(e.keyCode) {
 		case 40:
 			//Down
-			player.keys.down = game.getTime();
-			player.updateSpeeds("downPressed");
+    if(!playee.keys.down) {
+			  player.keys.down = game.getTime();
+			  player.updateSpeeds("downPressed");
+    }
 			break;
 		case 39:
 			//Right
-			player.keys.right = game.getTime();
-			player.updateSpeeds("rightPressed");
+    if(!player.keys.right) {
+			  player.keys.right = game.getTime();
+		   	player.updateSpeeds("rightPressed");
+    }
 			break;
 		case 38:
 			//Up
-			player.gravity.start();
-			player.keys.up = game.getTime();
-			player.updateSpeeds("upPressed");
+    if(!player.keys.up) {
+			  player.gravity.start();
+			  player.keys.up = game.getTime();
+	  	  	player.updateSpeeds("upPressed");
+    }
 			break;
 		case 37:
 			//Left
-			player.keys.left = game.getTime();
-			player.updateSpeeds("leftPressed");
+    if(!player.keys.left) {
+			  player.keys.left = game.getTime();
+			  player.updateSpeeds("leftPressed");
+    }
 			break;
         }
     });
@@ -27,24 +35,32 @@ window.addEventListener("keyup", function(e) {
 	switch(e.keyCode) {
 		case 40:
 			//Down
-			player.keys.down = false;
-			player.updateSpeeds("downRealeased");
+    if(player.keys.down) {
+			  player.keys.down = false;
+			  player.updateSpeeds("downRealeased");
+    }
 			break;
 		case 39:
 			//Right
-			player.keys.right = false;
-			player.updateSpeeds("rightRealeased");
+    if(player.keys.right) {
+			  player.keys.right = false;
+			  player.updateSpeeds("rightRealeased");
+    }
 			break;
 		case 38:
 			//Up
-			player.gravity.stop();
-			player.keys.up = false;
-			player.updateSpeeds("upRealeased");
+    if(player.keys.up) {
+			  player.gravity.stop();
+			  player.keys.up = false;
+			  player.updateSpeeds("upRealeased");
+    }
 			break;
 		case 37:
 			//Left
-			player.keys.left = false;
-			player.updateSpeeds("leftRealeased");
+    if(player.keys.left) {
+			  player.keys.left = false;
+			  player.updateSpeeds("leftRealeased");
+    }
 			break;
 	}
 })
@@ -88,7 +104,7 @@ Player.prototype.Init = function(game) {
 	game.saveAnimations(this.animations);
 	this.animation = "playerRight";
 
-	this.collider = new SAT.Box(new SAT.Vector(this.positionX, this.positionY), this.width, this.height).toPolygon();
+	this.collider = new SAT.Box(new SAT.Vector(this.offsetX + game.offsetX, this.offsetY), this.width, this.height).toPolygon();
 	this.setSpeed(this.speed);
 
 	this.speedX = 0;
@@ -97,6 +113,7 @@ Player.prototype.Init = function(game) {
 	return this;
 }
 Player.prototype.Update = function(game, player) {
+  this.speedY = this.gravity.apply(this.speedY);
 	this.Move(this.speedX, this.speedY, game);
 	return this;
 }
@@ -131,11 +148,11 @@ Player.prototype.setSpeed = function(x, y) {
 		this.speed.x = x;
 		this.speed.y = y;
 	}
-	else if(x instanceof Number) {
+	else if(typeof x === "number") {
 		this.speed.x = x;
 		this.speed.y = x;
 	}
-	else if(x instanceof Object) {
+	else if(typeof x === "object") {
 		this.speed = x;
 	}
 	else {
@@ -169,8 +186,7 @@ Player.prototype.updateSpeeds = function(event) {
 	}
 
 	if(this.keys.up) {
-		if(event === "upPressed") {this.speedY = this.speed.y;}
-		this.speedY = this.gravity.apply(this.speedY);
+    this.speedY = this.speed.y;
 		// this.changeAnimation("playerJump");
 	}
 }
