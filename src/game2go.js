@@ -15,7 +15,6 @@ Game = function(elem, options) {
     self.width            = self.canvas.offsetWidth;
     self.height           = self.canvas.offsetHeight;
     self.blockSize        = options.blockSize || 36;
-    self.gravity          = options.gravity   || 10;
     self.Draw             = new Draw(self.context, self.blockSize);
     
     self.frames           = 0;
@@ -43,7 +42,7 @@ Game = function(elem, options) {
     self.drawTimes        = [];
     self.savedBlocks      = {};
     self.animations       = {};
-    self._events          = {};
+    self._events          = {__ALL__:[]};
     
     self.Player = self.options.Player || {};
     if(!self.Player.positionX) self.Player.positionX = 0;
@@ -88,7 +87,7 @@ Game.prototype.start = function(sceneID) {
 }
 //Stop the game
 Game.prototype.stop = function() {
-    if(!this.playing) {
+    if(this.playing) {
         this.emit("beforestop", [this]);
         this.stopTime = this.getTime();
         this.playing = false;
@@ -103,7 +102,7 @@ Game.prototype.init = function(sceneID) {
     this.initTime = this.getTime();
     this.sceneNum = (sceneID || 0);
     this.loadScene(this.sceneNum);
-    this.initTerrainColliders();
+    this.initPlayer();
     this.emit("init", [this, arguments]);
     return this;
 }
@@ -135,21 +134,66 @@ Game.prototype.Loop = function() {
 //Functions used by Loop
 Game.prototype.initPlayer = function() {
     this.emit("beforeinitplayer", [this]);
-    if(this.Player.Init) this.Player.Init(this);
+    if(this.Player.Init) this.Player.Init(this, this.Player);
+
+    var game = this;
+    var getX = function() {
+        return game.offsetX + game.Player.offsetX;
+    }
+    var setX = function(v) {
+        game.offsetX = v - game.Player.offsetX;
+        game.updatePlayerCollider();
+    }
+    var getY = function() {
+        return game.offsetY + game.Player.offsetY;
+    }
+    var setY = function(v) {
+        game.offsetY = v - game.Player.offsetY;
+        game.updatePlayerCollider();
+    }
+    if(Object.defineProperty) {
+        Object.defineProperty(this.Player, "positionX", {
+            get: getX,
+            set: setX,
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(this.Player, "positionY", {
+            get: getY,
+            set: setY,
+            enumerable: true,
+            configurable: true
+        });
+    }
+    else if(Object.__defineSetter__ && Object.__defineGetter__) {
+        this.Player.__defineGetter__("positionX", getX);
+        this.Player.__defineSetter__("positionX", setX);
+        this.Player.__defineGetter__("positionY", getY);
+        this.Player.__defineSetter__("positionY", setY);
+    }
+    else {
+        console.log("Warning!")
+        console.log("  Object.__define[G|S]etter__ and Object.defineProperty are not supported in this browser!");
+        console.log("  Getting/Setting Game.Player.position[X|Y] will not work!");
+        this.emit("definepropertynotsupported", [this]);
+    }
+
+    this.initPlayerCollider();
+
     this.emit("initplayer", [this]);
     return this;
 }
 Game.prototype.updatePlayer = function() {
     this.emit("beforeupdateplayer", [this]);
-    this.Player.Update(this);
+    this.Player.Update(this, this.Player);
     this.emit("updateplayer", [this]);
     return this;
 }
 Game.prototype.drawPlayer = function() {
     this.emit("beforedrawplayer", [this]);
-    this.Draw.offsetX = this.Player.positionX;
-    this.Draw.offsetY = this.height - this.Player.positionY - (this.Player.height || this.blockSize);
-    this.Player.Draw(this.Draw);
+    this.Draw.offsetX = this.Player.offsetX;
+    this.Draw.offsetY = this.height - this.Player.offsetY - this.Player.height;
+    this.Player.Draw(this.Draw, this.Player);
     this.emit("drawplayer", [this]);
     return this;
 }
@@ -159,7 +203,7 @@ Game.prototype.initObjects = function() {
    	for(var i = 0, len = objects.length; i < len; i++) {
         var object = objects[i];
         if(object.Init) {
-            object.Init(this);
+            object.Init(this, object);
         }
         if(object.hasCollider !== false || object.collider) {
             object.hasCollider = true;
@@ -176,8 +220,7 @@ Game.prototype.updateObjects = function() {
     var objects = this.scene.Objects;
    	for(var i = 0, len = objects.length; i < len; i++) {
         if(objects[i].Update) {
-            var remove = objects[i].Update(this);
-            if(remove) objects.splice(i, 1);
+            objects[i].Update(this, objects[i]);
         }
     }
     this.emit("updateobjects", [this]);
@@ -267,10 +310,6 @@ Game.prototype.clearCanvas = function() {
     
 }
 
-Game.prototype.applyGravity = function(object){
-    object.Move(0,-this.gravity, this);
-}
-
 
 
 
@@ -301,6 +340,11 @@ Game.prototype.initTerrainColliders = function() {
         }
     }
     this.emit("initterraincolliders", [this]);
+}
+Game.prototype.initPlayerCollider = function() {
+    var p = this.Player;
+    p.collider = new this.SAT.Box(new this.SAT.Vector(p.positionX, p.positionY), p.width, p.height).toPolygon();
+    return this;
 }
 Game.prototype.updateTerrainColliders = function() {
     this.emit("beforeupdateterraincolliders", [this]);
@@ -334,6 +378,11 @@ Game.prototype.updateObjectColliders = function() {
         }
      }
     this.emit("updateobjectcolliders", [this]);
+    return this;
+}
+Game.prototype.updatePlayerCollider = function() {
+    this.Player.collider.pos.x = this.Player.positionX;
+    this.Player.collider.pos.y = this.Player.positionY;
     return this;
 }
 
@@ -655,6 +704,15 @@ Game.prototype.saveAnimations = function(animations) {
     }
     return this;
 }
+Game.prototype.startAnimations = function() {
+    var anims = this.animations;
+    for(var i = 0, len = anims.length; i < len; i++) {
+        if(anims[i].autoStart) {
+            anims[i].start();
+        }
+    }
+    return this;
+}
 
 
 var Sprite = function(img, x, y, w, h) {
@@ -672,7 +730,9 @@ Game.prototype.parseSprite = function(s, img) {
         return s;
     }
     else {
-        return new Game.prototype.Sprite(s.img || s.image || img, s.x || s.positionX, s.y || s.positionY, s.w || s.width, s.h || s.height);
+        var w = typeof s.w === "number" ? s.w : s.width;
+        var h = typeof s.h === "number" ? s.h : s.height;
+        return new Game.prototype.Sprite(s.img || s.image || img, s.x, s.y, w, h);
     }
 }
 Game.prototype.parseSprites = function(sprites, img) {
@@ -810,12 +870,11 @@ Game.prototype.getObjectWidth = function(object) {
     if(object instanceof this.SAT.Polygon) {
         for(var i = 0, len = object.calcPoints.length; i < len; i++) {
             if(object.calcPoints[i].x > width) {
-                width = object.calcPoints[i];
+                width = object.calcPoints[i].x;
             }
         }
     }
     else {
-        console.log(object);
         width = object.r * 2;
     }
     return width;
@@ -830,7 +889,6 @@ Game.prototype.getObjectHeight = function(object) {
         }
     }
     else {
-        console.log(object);
         height = object.r * 2;
     }
     return height;
