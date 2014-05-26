@@ -129,8 +129,8 @@ Player.prototype.Move = function(x, y, game) {
                 player.gravity.stop();
             }
         }
-        if(block.collider.pos.y + game.blockWidth === this.positionY -1) {
-            this.grounded = true;
+        if(res.overlapN.y === -1) {
+            player.grounded = true;
         };
 
         player.positionX -= res.overlapV.x;

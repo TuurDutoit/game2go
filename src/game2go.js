@@ -385,7 +385,7 @@ Game.prototype.checkCollisionObjects = function(collider, cb) {
 
     return responses;
 }
-Game.prototype.checkCollisionTerrain = function(collider, cb) {
+Game.prototype.checkCollisionTerrain = function(collider, cb, allCb) {
     var terrain = this.scene.Terrain;
     var responses = [];
 
