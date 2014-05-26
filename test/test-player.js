@@ -125,7 +125,7 @@ Player.prototype.Move = function(x, y, game) {
 	game.checkCollisionTerrain(this.collider, function(res, block) {
 		if(res.overlapN.y !== 0) {
 			player.speedY = 0;
-			if(res.overlapN.y = 1) player.gravity.stop();
+			if(res.overlapN.y = -1) player.gravity.stop();
 		}
 		player.positionX -= res.overlapV.x;
 		player.positionY -= res.overlapV.y;
