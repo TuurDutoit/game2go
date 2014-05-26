@@ -135,6 +135,13 @@ Player.prototype.Move = function(x, y, game) {
 
         player.positionX -= res.overlapV.x;
         player.positionY -= res.overlapV.y;
+
+        if(game.offsetX < 0) {
+            player.positionX += -1*game.offsetX;
+        }
+        if(game.offsetY < 0) {
+            player.positionY += -1*game.offsetY;
+        }
     });
 }
 Player.prototype.Draw = function(d, player) {
