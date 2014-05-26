@@ -346,26 +346,6 @@ Game.prototype.initPlayerCollider = function() {
     p.collider = new this.SAT.Box(new this.SAT.Vector(p.positionX, p.positionY), p.width, p.height).toPolygon();
     return this;
 }
-Game.prototype.updateTerrainColliders = function() {
-    this.emit("beforeupdateterraincolliders", [this]);
-    var terrain = this.scene.Terrain;
-    var w = this.blockSize;
-
-    for(var i = 0, len = terrain.length; i < len; i++) {
-        column = terrain[i];
-        for(var j = 0, lenj = column.length; j < lenj; j++) {
-            var block = column[j];
-            if(block.hasCollider && block.collider) {
-                var x = i * w;
-                var y = j * w;
-                block.collider.pos.x = x;
-                block.collider.pos.y = y;
-            }
-        }
-    }
-    this.emit("updateterraincolliders", [this]);
-    return this;
-}
 
 Game.prototype.updateObjectColliders = function() {
     this.emit("beforeupdateobjectcolliders", [this]);
@@ -386,36 +366,6 @@ Game.prototype.updatePlayerCollider = function() {
     return this;
 }
 
-// Game.prototype.getTerrainColliders = function(x, w) {
-//     var columns = this.terrainColliders.slice(Math.floor(x / this.blockSize), Math.ceil((x + w) / this.blockSize));
-//     var colliders = this.flattenMatrix(columns);
-
-//     return colliders;
-// }
-// Game.prototype.getTerrainCollidersObject = function(object) {
-//     return this.getTerrainColliders(object.positionX, object.width);
-// }
-// Game.prototype.getObjectColliders = function(x, w) {
-//     if(typeof w !== "number") {var Collider = x; var x = Collider.pos.x; var w = this.getObjectWidth(Collider);}
-    
-//     var colliders = [];
-//     var objects = this.objectColliders;
-//     var xw = x + w;
-//     for(var i = 0, len = objects.length; i < len; i++) {
-//         var o = objects[i];
-//         var ow = this.getObjectWidth(o);
-//        if(((x > o.pos.x && x < o.pos.x+ow) ||
-//            (xw > o.pos.x && xw < o.pos.x+ow) ||
-//            (x < o.pos.x && xw > o.pos.x+ ow))
-//           && o !== Collider) {
-//                colliders.push(o);
-//          }
-//      }
-//      return colliders;
-// }
-// Game.prototype.getObjectCollidersObject = function(object) {
-//     return this.getObjectColliders(object.positionX, object.width);
-// }
 Game.prototype.checkCollision = function(A, B, res) {
     if(A instanceof SAT.Box) var A = A.toPolygon();
     if(B instanceof SAT.Box) var B = B.toPolygon();
@@ -440,27 +390,20 @@ Game.prototype.checkCollision = function(A, B, res) {
 Game.prototype.checkPossibleCollision = function(A, B) {
     var aw = this.getObjectWidth(A);
     var bw = this.getObjectWidth(B);
+    var ah = this.getObjectHeight(A);
+    var bh = this.getObjectHeight(B);
     var apos = A.pos;
     var bpos = B.pos;
     if(A instanceof this.SAT.Circle) {apos = this.getCirclePos(A);}
     if(B instanceof this.SAT.Circle) {bpos = this.getCirclePos(B);}
 
-    if((apos.x >= bpos.x && apos.x <= bpos.x + bw) || //left inside
-       (apos.x+aw >= bpos.x && apos.x+aw <= bpos.x + bw) || //right inside
-       (apos.x <= bpos.x && apos.x+aw >= bpos.x) || //B in A
-       (apos.x <= bpos.x && apos.x+aw <= bpos.x+bw)) { //A in B
-        var ah = this.getObjectHeight(A);
-        var bh = this.getObjectHeight(B);
-
-        if((apos.y >= bpos.y && apos.y <= bpos.y + bh) || //top inside
-           (apos.y+ah >= bpos.y && apos.y+ah <= bpos.y + bh) || //bottom inside
-           (apos.y <= bpos.y && apos.y+ah >= bpos.y) || //B in A
-           (apos.y <= bpos.y && apos.y+ah <= bpos.y+bh)) { //A in B
-            return true;
-        }
+    if(apos.x + aw < bpos.x || apos.x > bpos + bw) {
+        return false;
     }
-
-    return false;
+    if(apos.y + ah < bpos.y || apos.y > bpos + bw) {
+        return false;
+    }
+    return true;
 }
 Game.prototype.checkCollisionObjects = function(collider, cb) {
     var objects = this.scene.Objects;
