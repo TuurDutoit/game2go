@@ -17,7 +17,6 @@ window.addEventListener("keydown", function(e) {
 		case 38:
 			//Up
     if(!player.keys.up) {
-			  player.gravity.start();
 			  player.keys.up = game.getTime();
 	  	  	player.updateSpeeds("upPressed");
     }
@@ -50,7 +49,6 @@ window.addEventListener("keyup", function(e) {
 		case 38:
 			//Up
     if(player.keys.up) {
-			  player.gravity.stop();
 			  player.keys.up = false;
 			  player.updateSpeeds("upRealeased");
     }
@@ -188,6 +186,9 @@ Player.prototype.updateSpeeds = function(event) {
 
 	if(this.keys.up) {
     this.speedY = this.speed.y;
+    if(event === "upPressed") {
+      this.gravity.start();
+    }
 		// this.changeAnimation("playerJump");
 	}
 }
