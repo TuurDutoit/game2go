@@ -74,7 +74,6 @@ var Player = function(options, sprites) {
 	this.width      = options.width    || 36;
 	this.height     = options.height   || 72;
 	this.gravity    = new Gravity(options.gravity || 0, options.gravityTime || 10);
-	this.angle      = false;
 
 	this.keys = {
 		up:    false,
@@ -110,6 +109,8 @@ Player.prototype.Init = function(game) {
 	this.speedX = 0;
 	this.speedY = 0;
 
+  this.Move(0,0,game);
+
 	return this;
 }
 Player.prototype.Update = function(game, player) {
@@ -123,9 +124,9 @@ Player.prototype.Move = function(x, y, game) {
 
 	var player = this;
 	game.checkCollisionTerrain(this.collider, function(res, block) {
-		if(res.overlapN.y !== 0) {
+		if(res.overlapV.y !== 0) {
 			player.speedY = 0;
-			if(res.overlapN.y = -1) player.gravity.stop();
+			if(res.overlapV.y < 0) player.gravity.stop();
 		}
 		player.positionX -= res.overlapV.x;
 		player.positionY -= res.overlapV.y;
