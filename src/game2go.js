@@ -186,7 +186,7 @@ Game.prototype.drawPlayer = function() {
 Game.prototype.initObjects = function() {
     this.emit("beforeinitobjects", [this]);
     var objects = this.scene.Objects;
-   	for(var i = 0, len = objects.length; i < len; i++) {
+    for(var i = 0, len = objects.length; i < len; i++) {
         var object = objects[i];
         if(object.Init) {
             object.Init(this, object);
@@ -197,7 +197,7 @@ Game.prototype.initObjects = function() {
         if(!object.collider && object.hasCollider) {
             object.collider = new this.SAT.Box(new this.SAT.Vector(object.positionX, object.positionY), object.width, object.height).toPolygon();
         }
-	}
+    }
    this.emit("initobjects", [this]);
    return this;
 }
