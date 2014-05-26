@@ -122,9 +122,10 @@ Player.prototype.Move = function(x, y, game) {
 
 	var player = this;
 	game.checkCollisionTerrain(this.collider, function(res, block) {
-		if(res.overlapV.y !== 0) {
+		if(res.overlapV.y !== 0 && res.overlap > 0.5) {
+			console.log(res);
 			player.speedY = 0;
-			if(res.overlapV.y < 0) player.gravity.stop();
+			if(res.overlapN === -1) player.gravity.stop();
 		}
 		player.positionX -= res.overlapV.x;
 		player.positionY -= res.overlapV.y;
