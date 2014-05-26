@@ -121,14 +121,21 @@ Player.prototype.Move = function(x, y, game) {
     this.positionY += y;
 
     var player = this;
+    player.grounded = false;
     game.checkCollisionTerrain(this.collider, function(res, block) {
         if(res.overlapV.y !== 0 && res.overlap > 0.5) {
             player.speedY = 0;
-            if(res.overlapN === -1) player.gravity.stop();
+            if(res.overlapN === -1)  {
+                player.gravity.stop();
+            }
         }
+        if(block.collider.pos.y + game.blockWidth === this.positionY -1) {
+            this.grounded = true;
+        };
+
         player.positionX -= res.overlapV.x;
         player.positionY -= res.overlapV.y;
-    })
+    });
 }
 Player.prototype.Draw = function(d, player) {
     var sprite = player.animations[player.animation].getSprite();
@@ -181,7 +188,7 @@ Player.prototype.updateSpeeds = function(event) {
     }
 
     if(this.keys.up) {
-        if(event === "upPressed") {
+        if(event === "upPressed" && this.grounded) {
             this.speedY = this.speed.y;
             this.gravity.start();
         }
