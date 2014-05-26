@@ -2,7 +2,7 @@ window.addEventListener("keydown", function(e) {
 	switch(e.keyCode) {
 		case 40:
 			//Down
-    if(!playee.keys.down) {
+    if(!player.keys.down) {
 			  player.keys.down = game.getTime();
 			  player.updateSpeeds("downPressed");
     }

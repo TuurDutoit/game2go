@@ -8,7 +8,7 @@ var playerOptions = {
 	hp: 0,
 	money: 0,
 	offsetX: 198,
-	offsetY: 186,
+	offsetY: 100,
 	width: 36,
 	height: 72,
 	speed: 5,

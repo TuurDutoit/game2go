@@ -106,6 +106,23 @@ Game.prototype.init = function(sceneID) {
     this.emit("init", [this, arguments]);
     return this;
 }
+Game.prototype.reset = function() {
+    this.emit("beforereset", [this]);
+
+    this.offsetX          = 0;
+    this.offsetY          = 0;
+    this.terrainBuffer    = [];
+    this.scene            = [];
+    this.terrainColliders = [];
+    this.objectColliders  = [];
+    this.gameHeight       = 0;
+    this.gameWidth        = 0;
+    //Reset Player on 'resetplayer' event, fired in loadScene
+
+    this.emit("reset", [this]);
+
+    return this;
+}
 //The main Game Loop
 Game.prototype.Loop = function() {
 
@@ -114,14 +131,11 @@ Game.prototype.Loop = function() {
     this.emit("beforeframe", [this]);
 
     this.frames++;
-    this.updatePlayer();
-    this.updateObjects();
-    this.updateTerrain();
     this.clearCanvas();
     this.drawBackgrounds();
     this.drawTerrain();
     this.drawObjects();
-    this.drawPlayer();
+    this.drawPlayer()
     this.drawForegrounds();
 
     this.drawTimes.push(this.getTime() - START);
@@ -131,72 +145,44 @@ Game.prototype.Loop = function() {
     return this;
 }
 
-//Functions used by Loop
+
+
+
+
+/* INIT / UPDATE / DRAW
+ * ==================== */
+
 Game.prototype.initPlayer = function() {
     this.emit("beforeinitplayer", [this]);
+
     if(this.Player.Init) this.Player.Init(this, this.Player);
 
-    var game = this;
-    var getX = function() {
-        return game.offsetX + game.Player.offsetX;
-    }
-    var setX = function(v) {
-        game.offsetX = v - game.Player.offsetX;
-        game.updatePlayerCollider();
-    }
-    var getY = function() {
-        return game.offsetY + game.Player.offsetY;
-    }
-    var setY = function(v) {
-        game.offsetY = v - game.Player.offsetY;
-        game.updatePlayerCollider();
-    }
-    if(Object.defineProperty) {
-        Object.defineProperty(this.Player, "positionX", {
-            get: getX,
-            set: setX,
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(this.Player, "positionY", {
-            get: getY,
-            set: setY,
-            enumerable: true,
-            configurable: true
-        });
-    }
-    else if(Object.__defineSetter__ && Object.__defineGetter__) {
-        this.Player.__defineGetter__("positionX", getX);
-        this.Player.__defineSetter__("positionX", setX);
-        this.Player.__defineGetter__("positionY", getY);
-        this.Player.__defineSetter__("positionY", setY);
-    }
-    else {
-        console.log("Warning!")
-        console.log("  Object.__define[G|S]etter__ and Object.defineProperty are not supported in this browser!");
-        console.log("  Getting/Setting Game.Player.position[X|Y] will not work!");
-        this.emit("definepropertynotsupported", [this]);
-    }
+    this.initPlayerPosition(this);
 
-    this.initPlayerCollider();
+    if(!this.Player.collider) {
+        this.Player.collider = new this.SAT.Box(new this.SAT.Vector(p.positionX, p.positionY), p.width, p.height).toPolygon();
+    }
 
     this.emit("initplayer", [this]);
     return this;
 }
-Game.prototype.updatePlayer = function() {
-    this.emit("beforeupdateplayer", [this]);
-    this.Player.Update(this, this.Player);
-    this.emit("updateplayer", [this]);
-    return this;
-}
 Game.prototype.drawPlayer = function() {
+    this.emit("beforeupdateplayer", [this]);
+
+    this.Player.Update(this, this.Player);
+
+    this.emit("updateplayer", [this]);
     this.emit("beforedrawplayer", [this]);
+
     this.Draw.offsetX = this.Player.offsetX;
     this.Draw.offsetY = this.height - this.Player.offsetY - this.Player.height;
     this.Player.Draw(this.Draw, this.Player);
+
     this.emit("drawplayer", [this]);
+
     return this;
 }
+
 Game.prototype.initObjects = function() {
     this.emit("beforeinitobjects", [this]);
     var objects = this.scene.Objects;
@@ -215,49 +201,38 @@ Game.prototype.initObjects = function() {
    this.emit("initobjects", [this]);
    return this;
 }
-Game.prototype.updateObjects = function() {
-    this.emit("beforeupdateobjects", [this]);
-    var objects = this.scene.Objects;
-   	for(var i = 0, len = objects.length; i < len; i++) {
-        if(objects[i].Update) {
-            objects[i].Update(this, objects[i]);
-        }
-    }
-    this.emit("updateobjects", [this]);
-    this.emit("beforeupdateobjectcolliders", [this]);
-    this.updateObjectColliders();
-    this.emit("updateobjectcolliders", [this]);
-    return this;
-}
 Game.prototype.drawObjects = function() {
-    this.emit("beforedrawobjects", [this]);
     var objects = this.scene.Objects;
     for(var i = 0, len = objects.length; i < len; i++) {
-        if(objects[i].Draw) {
-            var object = objects[i];
+        var object = objects[i];
+        if(object.Update) {
+            object.Update(this, object);
+        }
+
+        if(object.hasCollider && object.collider) {
+            object.collider.pos.x = object.positionX;
+            object.collider.pos.y = object.positionY;
+        }
+
+        if(object.Draw) {
             this.Draw.offsetX = -this.offsetX + object.positionX;
             this.Draw.offsetY = this.height - (object.positionY - this.offsetY) - (object.height || this.blockSize);
             object.Draw(this.Draw, object);
         }
-   	}
-   	this.emit("drawobjects", [this]);
+    }
+
     return this;
 }
 
-Game.prototype.updateTerrain = function() {
-    this.emit("beforeupdateterrain", [this]);
-    this.terrainBuffer = this.scene.Terrain.slice(Math.floor(this.offsetX/this.blockSize), Math.ceil((this.offsetX + this.width)/this.blockSize));
-    this.emit("updateterrain", [this]);
-    return this;
-}
 Game.prototype.drawTerrain = function() {
-    this.emit("beforedrawterrain", [this]);
     var h = game.height;
+
+    var buffer = this.scene.Terrain.slice(Math.floor(this.offsetX/this.blockSize), Math.ceil((this.offsetX + this.width)/this.blockSize));
 
 //Loop terrainBuffer
 //Reverse loop for performance
-    for(var i = this.terrainBuffer.length - 1; i >= 0; i--) {
-        var column = this.terrainBuffer[i];
+    for(var i = buffer.length - 1; i >= 0; i--) {
+        var column = buffer[i];
 
         for(var j = column.length - 1; j >= 0; j--) {
 //Reuse offsetX and offsetY for memory efficiency
@@ -266,46 +241,33 @@ Game.prototype.drawTerrain = function() {
             column[j].Draw(this.Draw, column[j]);
         }
     }
-    this.emit("drawterrain", [this]);
 
     return this;
 }
 
 //Draw the terrain (=blocks)
 Game.prototype.drawBackgrounds = function() {
-    this.emit("beforedrawbackgrounds", [this]);
-//Check if any backgrounds are given
-    if(this.scene.Backgrounds instanceof Array) {
-        var backgrounds = this.scene.Backgrounds;
-        for(var i = 0, len = backgrounds.length; i < len; i++) {
-            var b = backgrounds[i];
-            this.Draw.offsetX = -this.offsetX + (b.positionX || 0);
-            this.Draw.offsetY = this.height - ((b.positionY || 0) - this.offsetY) - (b.height || 0);
-            b.Draw(this.Draw, b);
-        }
+    var backgrounds = this.scene.Backgrounds;
+    for(var i = 0, len = backgrounds.length; i < len; i++) {
+        var b = backgrounds[i];
+        this.Draw.offsetX = -this.offsetX + (b.positionX || 0);
+        this.Draw.offsetY = this.height - ((b.positionY || 0) - this.offsetY) - (b.height || 0);
+        b.Draw(this.Draw, b);
     }
-    this.emit("drawbackgrounds", [this]);
     return this;
 }
 Game.prototype.drawForegrounds = function() {
-    this.emit("beforedrawforegrounds", [this]);
-//Check if any backgrounds are given
-    if(this.scene.Foregrounds instanceof Array) {
-        var foregrounds = this.scene.Foregrounds;
-        for(var i = 0, len = foregrounds.length; i < len; i++) {
-            var f = foregrounds[i];
-            this.Draw.offsetX = -this.offsetX + (f.positionX || 0);
-            this.Draw.offsetY = this.height - ((f.positionY || 0) - this.offsetY) - (f.height || 0);
-            f.Draw(this.Draw);
-        }
+    var foregrounds = this.scene.Foregrounds;
+    for(var i = 0, len = foregrounds.length; i < len; i++) {
+        var f = foregrounds[i];
+        this.Draw.offsetX = -this.offsetX + (f.positionX || 0);
+        this.Draw.offsetY = this.height - ((f.positionY || 0) - this.offsetY) - (f.height || 0);
+        f.Draw(this.Draw);
     }
-    this.emit("drawforegrounds", [this]);
     return this;
 }
 Game.prototype.clearCanvas = function() {
-    this.emit("beforeclearcanvas", [this]);
     this.context.clearRect(0, 0, this.width, this.height);
-    this.emit("afterclearcanvas");
     return this;
     
 }
@@ -317,10 +279,9 @@ Game.prototype.clearCanvas = function() {
 
 
 
-/* COLLIDERS
- * ========= */
+/* INIT/UPDATE COLLIDERS
+ * ===================== */
 Game.prototype.initTerrainColliders = function() {
-    this.emit("beforeiniterraincolliders", [this]);
     var terrain = this.scene.Terrain;
     var w = this.blockSize;
 
@@ -341,14 +302,8 @@ Game.prototype.initTerrainColliders = function() {
     }
     this.emit("initterraincolliders", [this]);
 }
-Game.prototype.initPlayerCollider = function() {
-    var p = this.Player;
-    p.collider = new this.SAT.Box(new this.SAT.Vector(p.positionX, p.positionY), p.width, p.height).toPolygon();
-    return this;
-}
 
 Game.prototype.updateObjectColliders = function() {
-    this.emit("beforeupdateobjectcolliders", [this]);
     var objects = this.scene.Objects;
     for(var i = 0, len = objects.length; i < len; i++) {
         var object = objects[i];
@@ -357,7 +312,6 @@ Game.prototype.updateObjectColliders = function() {
             object.collider.pos.y = object.positionY;
         }
      }
-    this.emit("updateobjectcolliders", [this]);
     return this;
 }
 Game.prototype.updatePlayerCollider = function() {
@@ -366,6 +320,31 @@ Game.prototype.updatePlayerCollider = function() {
     return this;
 }
 
+
+
+
+
+/* CHECK COLLIDERS
+ * =============== */
+
+Game.prototype.checkPossibleCollision = function(A, B) {
+    var aw = this.getObjectWidth(A);
+    var bw = this.getObjectWidth(B);
+    var ah = this.getObjectHeight(A);
+    var bh = this.getObjectHeight(B);
+    var apos = A.pos;
+    var bpos = B.pos;
+    if(A instanceof this.SAT.Circle) {apos = this.getCirclePos(A);}
+    if(B instanceof this.SAT.Circle) {bpos = this.getCirclePos(B);}
+
+    if(apos.x + aw < bpos.x || apos.x > bpos + bw) {
+        return false;
+    }
+    if(apos.y + ah < bpos.y || apos.y > bpos + bw) {
+        return false;
+    }
+    return true;
+}
 Game.prototype.checkCollision = function(A, B, res) {
     if(A instanceof SAT.Box) var A = A.toPolygon();
     if(B instanceof SAT.Box) var B = B.toPolygon();
@@ -386,24 +365,6 @@ Game.prototype.checkCollision = function(A, B, res) {
             return SAT.testCircleCircle(A, B, res);
         }
     }
-}
-Game.prototype.checkPossibleCollision = function(A, B) {
-    var aw = this.getObjectWidth(A);
-    var bw = this.getObjectWidth(B);
-    var ah = this.getObjectHeight(A);
-    var bh = this.getObjectHeight(B);
-    var apos = A.pos;
-    var bpos = B.pos;
-    if(A instanceof this.SAT.Circle) {apos = this.getCirclePos(A);}
-    if(B instanceof this.SAT.Circle) {bpos = this.getCirclePos(B);}
-
-    if(apos.x + aw < bpos.x || apos.x > bpos + bw) {
-        return false;
-    }
-    if(apos.y + ah < bpos.y || apos.y > bpos + bw) {
-        return false;
-    }
-    return true;
 }
 Game.prototype.checkCollisionObjects = function(collider, cb) {
     var objects = this.scene.Objects;
@@ -478,35 +439,25 @@ Game.prototype.checkCollisionAll = function(collider, cb) {
  * ====== */
 
 //Load in a world (=select this world to play)
-Game.prototype.loadWorld = Game.prototype.load = function(world) {
-    this.emit("beforeloadworld", [this, world]);
-    this.stop();
-    this.reset();
-    this.worldLoadTime = this.getTime();
-
+Game.prototype.addWorld = function(world) {
     this.world = world;
-    this.loadScene(0);
-    this.emit("loadworld", [this, world]);
-
     return this;
 }
-Game.prototype.addWorld = function(world) {
-    this.emit("beforeaddworld", [this, world]);
+Game.prototype.loadWorld = Game.prototype.load = function(world) {
+    this.worldLoadTime = this.getTime();
     this.world = world;
-    this.emit("addworld", [this, world]);
+    this.loadScene(0);
+
     return this;
 }
 
 //Add a scene to the current world
 Game.prototype.addScene = function(scene) {
-    this.emit("beforeaddscene", [this, scene])
     this.world.push(scene);
-    this.emit("addscene", [this, scene]);
     return this;
 }
 //Load in a scene (=select this scene to play)
 Game.prototype.loadScene = function(scene) {
-    this.emit("beforeloadscene", [this, scene]);
 //Stop the game to avoid corruption
     this.stop();
     this.reset();
@@ -515,24 +466,30 @@ Game.prototype.loadScene = function(scene) {
 //The index of the game in the world is given
     if(typeof scene === "number") {
         var parsedScene = this.parseScene(this.world.Scenes[scene]);
-        this.scene = parsedScene;
     }
 //The scene object itself is given
     else {
         var parsedScene = this.parseScene(scene);
         this.world.Scenes.push(parsedScene);
-        this.scene = parsedScene;
     }
+    this.scene = parsedScene;
 
-    this.emit("beforeupdateloadscene", [this, scene]);
+    this.initScene();
 
+    return this;
+}
+Game.prototype.initScene = function() {
     this.updateGameHeight();
     this.updateGameWidth();
-    this.initTerrainColliders();
+    this.initTerrainColliders()
     this.initObjects();
 
-    this.emit("resetplayer", [this]);
-    this.emit("loadscene", [this, scene]);
+    if(!this.scene.Backgrounds instanceof Array) {
+        this.scene.Backgrounds = [];
+    }
+    if(!this.scene.Foregrounds instanceof Array) {
+        this.scene.Foregrounds = [];
+    }
 
     return this;
 }
@@ -544,20 +501,229 @@ Game.prototype.loadScene = function(scene) {
 
 //Save a block
 Game.prototype.saveBlock = function(name, b) {
-    this.emit("beforesaveblock", [this, name, b]);
     this.savedBlocks[name] = b;
-    this.emit("saveblock", [this, name, b]);
     return this;
 }
 Game.prototype.saveBlocks = function(blocks) {
-    this.emit("beforesaveblocks", [this, blocks]);
     for(name in blocks) {
         this.savedBlocks[name] = blocks[name];
     }
-    this.emit("saveblocks", [this, blocks]);
     return this;
 }
 
+Game.prototype.parseBlock = function(b) {
+    if(typeof b === "string") {
+        return new this.savedBlocks[b]();
+    }
+    else {
+        return b;
+    }
+}
+Game.prototype.parseColumn = function(c) {
+    var parsedColumn = [];
+    for(var i = 0, len = c.length; i < len; i++) {
+        var parsedBlock = this.parseBlock(c[i]);
+        parsedColumn.push(parsedBlock);
+    }
+    return parsedColumn;
+}
+Game.prototype.parseScene = function(s) {
+    var parsedScene = this.cloneObject(s);
+    parsedScene.Terrain = [];
+    for(var i = 0, len = s.Terrain.length; i < len; i++) {
+        parsedScene.Terrain.push(this.parseColumn(s.Terrain[i]));
+    }
+    return parsedScene;
+}
+
+
+
+
+/* LOOP UTILS
+ * ========== */
+
+Game.prototype.requestLoop = function() {
+    if(this.playing) {
+        var game = this;
+        requestAnimationFrame(function() {
+            game.Loop();
+        });
+    }
+    return this;
+}
+Game.prototype.getObjectWidth = function(object) {
+    var width = 0;
+    if(object instanceof this.SAT.Polygon) {
+        for(var i = 0, len = object.calcPoints.length; i < len; i++) {
+            if(object.calcPoints[i].x > width) {
+                width = object.calcPoints[i].x;
+            }
+        }
+    }
+    else {
+        width = object.r * 2;
+    }
+    return width;
+}
+Game.prototype.getObjectHeight = function(object) {
+    var height = 0;
+    if(object instanceof this.SAT.Polygon) {
+        for(var i = 0, len = object.calcPoints.length; i < len; i++) {
+            if(object.calcPoints[i].y > height) {
+                height = object.calcPoints[i].y;
+            }
+        }
+    }
+    else {
+        height = object.r * 2;
+    }
+    return height;
+}
+Game.prototype.getCirclePos = function(Circle) {
+    return {x: Circle.pos.x - Circle.r, y: Circle.pos.y - Circle.r};
+}
+Game.prototype.getHighestColumnLength = function(matrix) {
+    var highestColumnLength = 0;
+    var t = matrix || this.scene.Terrain;
+    for(var i = 0, len = t.length; i < len; i++) {
+        if(t[i].length > highestColumnLength) {
+            highestColumnLength = t[i].length;
+        }
+    }
+    return highestColumnLength;
+}
+Game.prototype.checkSAT = function() {
+    if(SAT) {
+        return true;
+    }
+    else {
+        throw new Error("Make sure SAT.js is provided. You can find it here: https://github.com/jriecken/sat-js");
+    }
+}
+
+
+
+
+
+
+
+/* GAME UTILS
+ * ========== */
+
+
+Game.prototype.getTime = function() {
+    if(window.performance && window.performance.now) {
+        return window.performance.now();
+    }
+    else {
+        return new Date();
+    }
+}
+Game.prototype.updateGameWidth = function() {
+    this.emit("beforeupdategamewidth", [this]);
+    this.gameWidth = this.scene.Terrain.length * this.blockSize;
+    this.emit("updategamewidth", [this]);
+    return this;
+}
+Game.prototype.updateGameHeight = function() {
+    this.emit("beforeupdategameheight", [this]);
+    this.gameHeight = this.getHighestColumnLength() * this.blockSize;
+    this.emit("updategameheight", [this]);
+    return this;
+}
+Game.prototype.getAverageDrawTime = function() {
+    var sum = 0;
+    for(var i = this.drawTimes.length - 1; i >= 0; i--) {
+        sum += this.drawTimes[i];
+    }
+    return (sum / this.drawTimes.length);
+}
+
+
+
+
+
+
+
+
+/* OTHER UTILS
+ * =========== */
+
+Game.prototype.cloneObject = function(obj) {
+    var newObj = {};
+    for(key in obj) {
+        newObj[key] = obj[key];
+    }
+    return newObj;
+}
+Game.prototype.cloneArray = function(arr) {
+    return arr.slice(0);
+}
+Game.prototype.cloneMatrix = function(m) {
+    return m.map(function(arr) {return arr.slice(0)});
+}
+Game.prototype.getArray = function(length, value) {
+    var arr = [];
+    for(var i = 0; i < length; i++) {
+        arr.push(value);
+    }
+    return arr;
+}
+Game.prototype.flattenMatrix = function(m) {
+    var array = [];
+    for(var i = 0, len = m.length; i < len; i++) {
+        array = array.concat(m[i]);
+    }
+    return array;
+}
+
+
+
+
+
+
+
+/* EVENTS
+ * ====== */
+Game.prototype.on = function(event, cb) {
+    if(this._events[event]) {
+        this._events[event].push(cb);
+    }
+    else {
+        this._events[event] = [cb];
+    }
+    return this;
+}
+Game.prototype.emit = function(event, args) {
+    var events = this._events[event];
+    if(events) {
+        for(var i = 0, len = events.length; i < len; i++) {
+            events[i].apply(this, args);
+        }
+    }
+    return this;
+}
+Game.prototype.removeListener = function(event, cb) {
+    var events = this._events[event];
+    if(events) {
+        events.splice(events.indexOf(cb), 1);
+    }
+    return this;
+}
+Game.prototype.removeEvent = function(event) {
+    this._events[event] = undefined;
+    return this;
+}
+
+
+
+
+
+
+/* CONSTRUCTORS
+ * ============ */
+
+ //ANIMATION
 var Animation = function(name, sprites, options) {
     if(!options) var options = {};
     this.name       = name;
@@ -624,6 +790,8 @@ Animation.prototype.getSprite = function() {
 }
 Game.prototype.Animation = Animation;
 
+
+
 Game.prototype.parseAnimation = function(anim) {
     return new this.Animation(anim.name, anim.sprites, anim.options);
 }
@@ -658,6 +826,10 @@ Game.prototype.startAnimations = function() {
 }
 
 
+
+
+
+ //SPRITE
 var Sprite = function(img, x, y, w, h) {
     this.img = img;
     this.x   = x;
@@ -691,236 +863,9 @@ Game.prototype.parseSprites = function(sprites, img) {
 
 
 
-Game.prototype.checkSAT = function() {
-    this.emit("beforechecksat", [this]);
-    if(SAT) {
-        return true;
-    }
-    else {
-        throw new Error("Make sure SAT.js is provided. You can find it here: https://github.com/jriecken/sat-js");
-    }
-    this.emit("checksat", [this]);
-}
-Game.prototype.getHighestColumnLength = function(matrix) {
-    var highestColumnLength = 0;
-    var t = matrix || this.scene.Terrain;
-    for(var i = 0, len = t.length; i < len; i++) {
-        if(t[i].length > highestColumnLength) {
-            highestColumnLength = t[i].length;
-        }
-    }
-    return highestColumnLength;
-}
 
-Game.prototype.updateGameHeight = function() {
-    this.emit("beforeupdategameheight", [this]);
-    this.gameHeight = this.getHighestColumnLength() * this.blockSize;
-    this.emit("updategameheight", [this]);
-    return this;
-}
-Game.prototype.updateGameWidth = function() {
-    this.emit("beforeupdategamewidth", [this]);
-    this.gameWidth = this.scene.Terrain.length * this.blockSize;
-    this.emit("updategamewidth", [this]);
-    return this;
-}
-
-Game.prototype.getCirclePos = function(Circle) {
-    return {x: Circle.pos.x - Circle.r, y: Circle.pos.y - Circle.r};
-}
-
-
-
-/* UTILS
- * ===== */
-
-//Request an AnimationFrame
-Game.prototype.requestLoop = function() {
-    if(this.playing) {
-        var game = this;
-        requestAnimationFrame(function() {
-            game.Loop();
-        });
-    }
-    return this;
-}
-
-//Get parsed block
-Game.prototype.parseBlock = function(b) {
-    this.emit("beforeparseblock", [this, b]);
-    switch (typeof b) {
-        case "object":
-            return b;
-            break;
-        case "string":
-            return new this.savedBlocks[b]();
-            break;
-        default:
-            return null;
-    }
-    this.emit("parseblock", [this, b]);
-}
-Game.prototype.parseColumn = function(c) {
-    this.emit("beforeparsecolumn", [this, c]);
-    var parsedColumn = [];
-    for(var i = 0, len = c.length; i < len; i++) {
-        var parsedBlock = this.parseBlock(c[i]);
-        parsedColumn.push(parsedBlock);
-    }
-    this.emit("parsecolumn", [this, c]);
-    return parsedColumn;
-}
-Game.prototype.parseScene = function(s) {
-    this.emit("beforeparsescene", [this, s]);
-    var parsedScene = this.cloneObject(s);
-    parsedScene.Terrain = [];
-    for(var i = 0, len = s.Terrain.length; i < len; i++) {
-        parsedScene.Terrain.push(this.parseColumn(s.Terrain[i]));
-    }
-    this.emit("parsescene", [this, s]);
-    return parsedScene;
-}
-
-Game.prototype.reset = function() {
-    this.emit("beforereset", [this]);
-
-    this.offsetX          = 0;
-    this.offsetY          = 0;
-    this.terrainBuffer    = [];
-    this.scene            = [];
-    this.terrainColliders = [];
-    this.objectColliders  = [];
-    this.gameHeight       = 0;
-    this.gameWidth        = 0;
-    //Reset Player on 'resetplayer' event, fired in loadScene
-
-    this.emit("reset", [this]);
-
-    return this;
-}
-
-//Get the average draw time (of all frames)
-Game.prototype.getAverageDrawTime = function() {
-    var sum = 0;
-    for(var i = this.drawTimes.length - 1; i >= 0; i--) {
-        sum += this.drawTimes[i];
-    }
-    return (sum / this.drawTimes.length);
-}
-
-Game.prototype.getObjectWidth = function(object) {
-    var width = 0;
-    if(object instanceof this.SAT.Polygon) {
-        for(var i = 0, len = object.calcPoints.length; i < len; i++) {
-            if(object.calcPoints[i].x > width) {
-                width = object.calcPoints[i].x;
-            }
-        }
-    }
-    else {
-        width = object.r * 2;
-    }
-    return width;
-}
-Game.prototype.getObjectHeight = function(object) {
-    var height = 0;
-    if(object instanceof this.SAT.Polygon) {
-        for(var i = 0, len = object.calcPoints.length; i < len; i++) {
-            if(object.calcPoints[i].y > height) {
-                height = object.calcPoints[i].y;
-            }
-        }
-    }
-    else {
-        height = object.r * 2;
-    }
-    return height;
-}
-
-
-
-/* MISCELLEANOUS
- * ============= */
-Game.prototype.cloneObject = function(obj) {
-    var newObj = {};
-    for(key in obj) {
-        newObj[key] = obj[key];
-    }
-    return newObj;
-}
-Game.prototype.cloneArray = function(arr) {
-    return arr.slice(0);
-}
-Game.prototype.cloneMatrix = function(m) {
-    return m.map(function(arr) {return arr.slice(0)});
-}
-Game.prototype.flattenMatrix = function(m) {
-    var array = [];
-    for(var i = 0, len = m.length; i < len; i++) {
-        array = array.concat(m[i]);
-    }
-    return array;
-}
-Game.prototype.getArray = function(length, value) {
-    var arr = [];
-    for(var i = 0; i < length; i++) {
-        arr.push(value);
-    }
-    return arr;
-}
-Game.prototype.getTime = function() {
-    if(window.performance && window.performance.now) {
-        return window.performance.now();
-    }
-    else {
-        return new Date();
-    }
-}
-
-
-
-
-
-
-/* EVENTS
- * ====== */
-Game.prototype.on = function(event, cb) {
-    if(this._events[event]) {
-        this._events[event].push(cb);
-    }
-    else {
-        this._events[event] = [cb];
-    }
-    return this;
-}
-Game.prototype.emit = function(event, args) {
-    var events = this._events[event];
-    if(events) {
-        for(var i = 0, len = events.length; i < len; i++) {
-            events[i].apply(this, args);
-        }
-    }
-    return this;
-}
-Game.prototype.removeListener = function(event, cb) {
-    var events = this._events[event];
-    if(events) {
-        events.splice(events.indexOf(cb), 1);
-    }
-    return this;
-}
-Game.prototype.removeEvent = function(event) {
-    this._events[event] = undefined;
-    return this;
-}
-
-
-
-
-
-
-
-
+/* DRAW OBJECT
+ * =========== */
 
 //The main Draw object
 //An instance of this object is passed to the block functions
@@ -1110,6 +1055,60 @@ Draw.prototype.drawImageNoOffset = function() {
  * ======= */
 Game.prototype.SAT = SAT;
 Game.SAT = SAT;
+
+
+
+
+
+/* InitPlayerPosition
+ * ==================
+ *
+ * Sets the getters and setters on Game.Player.positionX/Y
+ */
+Game.prototype.initPlayerPosition = function(game) {
+    var getX = function() {
+        return game.offsetX + game.Player.offsetX;
+    }
+    var setX = function(v) {
+        game.offsetX = v - game.Player.offsetX;
+        game.updatePlayerCollider();
+    }
+    var getY = function() {
+        return game.offsetY + game.Player.offsetY;
+    }
+    var setY = function(v) {
+        game.offsetY = v - game.Player.offsetY;
+        game.updatePlayerCollider();
+    }
+    if(Object.defineProperty) {
+        Object.defineProperty(this.Player, "positionX", {
+            get: getX,
+            set: setX,
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(this.Player, "positionY", {
+            get: getY,
+            set: setY,
+            enumerable: true,
+            configurable: true
+        });
+    }
+    else if(Object.__defineSetter__ && Object.__defineGetter__) {
+        this.Player.__defineGetter__("positionX", getX);
+        this.Player.__defineSetter__("positionX", setX);
+        this.Player.__defineGetter__("positionY", getY);
+        this.Player.__defineSetter__("positionY", setY);
+    }
+    else {
+        console.log("Warning!")
+        console.log("  Object.__define[G|S]etter__ and Object.defineProperty are not supported in this browser!");
+        console.log("  Getting/Setting Game.Player.position[X|Y] will not work!");
+        this.emit("definepropertynotsupported", [this]);
+    }
+
+    return game.Player;
+}
 
 
 
