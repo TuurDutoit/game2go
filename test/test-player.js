@@ -5,7 +5,7 @@ window.addEventListener("keyup", function(e) {
     player.updateDirection(e, "released");
 });
 
-
+var log = false;
 
 var Player = function(options, sprites) {
     this.options    = options;
@@ -13,8 +13,10 @@ var Player = function(options, sprites) {
     this.offsetY    = options.offsetY    || 0;
     this.width      = options.width      || 36;
     this.height     = options.height     || 72;
-    this.gravity    = options.gravity || 0.22;
-    this.maxJump    = options.maxJump || 1;
+    this.speed      = options.speed      || 5;
+    this.maxSpeed   = options.maxSpeed   || 5;
+    this.gravity    = options.gravity    || 0.22;
+    this.maxJump    = options.maxJump    || 1;
 
     this.keys = {
         up:    false,
@@ -32,7 +34,7 @@ var Player = function(options, sprites) {
     return this;
 }
 Player.prototype.Init = function(game) {
-    var spritemap = document.getElementById(this.spriteID);
+    var spritemap   = document.getElementById(this.spriteID);
     this.animations = {
         playerRight:     new game.Animation("playerRight",     this.sprites.right,     {time: 90, img: spritemap}).start(),
         playerLeft:      new game.Animation("playerLeft",      this.sprites.left,      {time: 90, img: spritemap}),
@@ -40,45 +42,85 @@ Player.prototype.Init = function(game) {
         playerWalkLeft:  new game.Animation("playerWalkLeft",  this.sprites.walkLeft,  {time: 90, img: spritemap}),
     }
     game.saveAnimations(this.animations);
-    this.animation = "playerRight";
+    this.animation  = "playerRight";
 
-    this.collider = new SAT.Box(new SAT.Vector(this.offsetX + game.offsetX, this.offsetY), this.width, this.height).toPolygon();
-    this.setSpeed(this.speed);
+    this.collider   = new SAT.Box(new SAT.Vector(this.offsetX + game.offsetX, this.offsetY), this.width, this.height).toPolygon();
+    this.setBaseSpeed(this.speed);
+    this.setMaxSpeed(this.maxSpeed);
 
-    this.speedX = 0;
-    this.speedY = 0;
-    this.jumping = 0;
+    this.speedX     = 0;
+    this.speedY     = 0;
+    this.jumping    = 0;
+    this.touching   = {
+        top: false,
+        right: false,
+        bottom: false,
+        left: false
+    }
 
-    this.hadInit = true;
+    this.hadInit    = true;
 
     return this;
 }
 Player.prototype.Update = function(game, player) {
+//Check is speed is not exceeding maximum
+    if(this.speedX > this.maxSpeed.x) {
+        this.speedX = this.maxSpeed.x;
+    }
+    else if(this.speedX < -1*this.maxSpeed.x) {
+        this.speedX = -1*this.maxSpeed.x;
+    }
+    if(this.speedY > this.maxSpeed.y) {
+        this.speedY = this.maxSpeed.y;
+    }
+    else if(this.speedY < -1*this.maxSpeed.y) {
+        this.speedY = -1*this.maxSpeed.y;
+    }
+
+//Move the player
     this.Move(this.speedX, this.speedY, game);
+
+//Some checks for jumps, gravity etc.
+    if(!this.touching.bottom) {
+        //Apply gravity if not touching the floor
+        this.speedY -= this.gravity;
+    }
+    else {
+        //If touching the floor, stop jumping
+        this.jumping = 0;
+        this.speedY = 0;
+        if(log)console.log("touched floor");
+    }
+    if(this.touching.top) {
+        this.speedY = 0;
+    }
+
     return this;
 }
 Player.prototype.Move = function(x, y, game) {
     this.positionX += x;
     this.positionY += y;
 
+    this.touching = {top:false, right:false, bottom:false, left: false};
     var player = this;
-    this.grounded = false; game.checkCollisionTerrain(this.collider, function(res, block) {
+    game.checkCollisionTerrain(this.collider, function(res, block) {
 //Handle collisions
         player.positionX -= res.overlapV.x;
         player.positionY -= res.overlapV.y;
 
-    if(res.overlapN.y === -1) {
-        player.speedY = 0;
-        player.jumping = 0;
-        player.grounded = true;
-    }
-    else if(res.overlapN.y === 1) {
-        player.speedY = 0;
-    }
-
-    if(!player.grounded) {
-        player.speedY -= player.gravity;
-    }
+//Set some 'touching' values
+        if(res.overlapV.y > 0) {
+            player.touching.top = true;
+        }
+        else if(res.overlapV.y < 0) {
+            player.touching.bottom = true;
+        }
+        if(res.overlapV.x > 0) {
+            player.touching.right = true;
+        }
+        else if(res.overlapV.x < 0) {
+            player.touching.left = true;
+        }
 
 // Do not allow Player to walk out of the game
         if(game.offsetX < 0) {
@@ -100,8 +142,9 @@ Player.prototype.damage = function(damage) {
         game.stop();
         alert("Game Over!");
     }
+    return this;
 }
-Player.prototype.setSpeed = function(x, y) {
+Player.prototype.setBaseSpeed = function(x, y) {
 //Sets the x/y speed _base_ speed
     if(y) {
         this.speed.x = x;
@@ -117,7 +160,24 @@ Player.prototype.setSpeed = function(x, y) {
     else {
         this.speed = {x: 5, y: 5};
     }
-    this.updateDirection();
+    return this;
+}
+Player.prototype.setMaxSpeed = function(x, y) {
+    //Sets the x/y _maximum_ speed
+    if(y) {
+        this.maxSpeed.x = x;
+        this.maxSpeed.y = y;
+    }
+    else if(typeof x === "number") {
+        this.maxSpeed.x = x;
+        this.maxSpeed.y = x;
+    }
+    else if(typeof x === "object") {
+        this.maxSpeed = x;
+    }
+    else {
+        this.maxSpeed = {x: 5, y: 5};
+    }
     return this;
 }
 Player.prototype.updateDirection = function(event, type) {
@@ -132,6 +192,7 @@ Player.prototype.updateDirection = function(event, type) {
                 if(this.jumping < this.maxJump) {
                     this.speedY += this.speed.y;
                     this.jumping++;
+                    log = true;
                 }
                 break;
             case 39:

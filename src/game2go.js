@@ -337,10 +337,10 @@ Game.prototype.checkPossibleCollision = function(A, B) {
     if(A instanceof this.SAT.Circle) {apos = this.getCirclePos(A);}
     if(B instanceof this.SAT.Circle) {bpos = this.getCirclePos(B);}
 
-    if(apos.x + aw < bpos.x || apos.x > bpos + bw) {
+    if(apos.x + aw <= bpos.x || apos.x >= bpos + bw) {
         return false;
     }
-    if(apos.y + ah < bpos.y || apos.y > bpos + bw) {
+    if(apos.y + ah <= bpos.y || apos.y >= bpos + bw) {
         return false;
     }
     return true;

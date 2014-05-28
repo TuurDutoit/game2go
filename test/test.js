@@ -11,7 +11,10 @@ var playerOptions = {
     offsetY: 72,
     width: 36,
     height: 72,
-    speed: 5,
+    speed: {x: 5, y: 8},
+    maxSpeed: {x: 5, y: 15},
+    gravity: 0.22,
+    maxJump: 2,
     sprites: {
         right: [{x:80,  y:0, w:16, h:32}],
         left : [{x:736, y:0, w:16, h:32}],
