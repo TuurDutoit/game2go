@@ -1,77 +1,19 @@
 window.addEventListener("keydown", function(e) {
-    switch(e.keyCode) {
-        case 40:
-            //Down
-            if(!player.keys.down) {
-                player.keys.down = game.getTime();
-                player.updateSpeeds("downPressed");
-            }
-            break;
-        case 39:
-            //Right
-            if(!player.keys.right) {
-                player.keys.right = game.getTime();
-                player.updateSpeeds("rightPressed");
-            }
-            break;
-        case 38:
-            //Up
-            if(!player.keys.up) {
-                player.keys.up = game.getTime();
-                player.updateSpeeds("upPressed");
-            }
-            break;
-        case 37:
-            //Left
-            if(!player.keys.left) {
-                player.keys.left = game.getTime();
-                player.updateSpeeds("leftPressed");
-            }
-            break;
-        }
-    });
+    player.updateDirection(e, "pressed");
+});
 window.addEventListener("keyup", function(e) {
-    switch(e.keyCode) {
-        case 40:
-            //Down
-            if(player.keys.down) {
-                player.keys.down = false;
-                player.updateSpeeds("downRealeased");
-            }
-            break;
-        case 39:
-            //Right
-            if(player.keys.right) {
-                player.keys.right = false;
-                player.updateSpeeds("rightRealeased");
-            }
-            break;
-        case 38:
-            //Up
-            if(player.keys.up) {
-                player.keys.up = false;
-                player.updateSpeeds("upRealeased");
-            }
-            break;
-        case 37:
-            //Left
-            if(player.keys.left) {
-                player.keys.left = false;
-                player.updateSpeeds("leftRealeased");
-            }
-            break;
-    }
-})
+    player.updateDirection(e, "released");
+});
 
 
 
 var Player = function(options, sprites) {
     this.options    = options;
-    this.offsetX    = options.offsetX  || 0;
-    this.offsetY    = options.offsetY  || 0;
-    this.width      = options.width    || 36;
-    this.height     = options.height   || 72;
-    this.gravity    = new Gravity(options.gravity || 0, options.gravityTime || 10);
+    this.offsetX    = options.offsetX    || 0;
+    this.offsetY    = options.offsetY    || 0;
+    this.width      = options.width      || 36;
+    this.height     = options.height     || 72;
+    this.gravity    = options.gravity    || 0.22;
 
     this.keys = {
         up:    false,
@@ -84,8 +26,6 @@ var Player = function(options, sprites) {
     this.spriteID   = options.spriteID || "player-sprite";
     this.hp         = options.hp       || 0;
     this.money      = options.money    || 0;
-
-
     this.sprites    = options.sprites;
 
     return this;
@@ -109,10 +49,18 @@ Player.prototype.Init = function(game) {
 
     this.Move(0,0,game);
 
+    this.hadInit = true;
+
     return this;
 }
 Player.prototype.Update = function(game, player) {
-    this.speedY = this.gravity.apply(this.speedY);
+    if(!this.grounded) {
+        this.speedY -= this.gravity;
+    }
+    else {
+        this.speedY = 0;
+    }
+
     this.Move(this.speedX, this.speedY, game);
     return this;
 }
@@ -123,19 +71,19 @@ Player.prototype.Move = function(x, y, game) {
     var player = this;
     player.grounded = false;
     game.checkCollisionTerrain(this.collider, function(res, block) {
-        if(res.overlapV.y !== 0 && res.overlap > 0.5) {
-            player.speedY = 0;
-            if(res.overlapN === -1)  {
-                player.gravity.stop();
-            }
-        }
-        if(res.overlapN.y === -1) {
-            player.grounded = true;
-        };
-
+//Handle collisions
         player.positionX -= res.overlapV.x;
         player.positionY -= res.overlapV.y;
 
+//Update some things for jumping
+        if(res.overlapN.y === -1) {
+            this.grounded = true;
+        }
+        else if(res.overlapN.y === 1) {
+            this.speedY = 0;
+        }
+
+// Do not allow Player to walk out of the game
         if(game.offsetX < 0) {
             player.positionX += -1*game.offsetX;
         }
@@ -157,7 +105,7 @@ Player.prototype.damage = function(damage) {
     }
 }
 Player.prototype.setSpeed = function(x, y) {
-//Sets the x/y speed base speed
+//Sets the x/y speed _base_ speed
     if(y) {
         this.speed.x = x;
         this.speed.y = y;
@@ -172,38 +120,52 @@ Player.prototype.setSpeed = function(x, y) {
     else {
         this.speed = {x: 5, y: 5};
     }
-    this.updateSpeeds();
+    this.updateDirection();
     return this;
 }
-Player.prototype.updateSpeeds = function(event) {
-    if(this.keys.right && this.keys.left) {
-        if(this.keys.left < this.keys.right) {
-            this.speedX = -1*this.speed.x
+Player.prototype.updateDirection = function(event, type) {
+    if(type === "pressed") {
+        switch(event.keyCode) {
+            case 37:
+                this.keys.left = game.getTime();
+                this.speedX = -1*this.speed.x;
+                break;
+            case 38:
+                this.keys.up = game.getTime();
+                if(this.grounded) this.speedY = this.speed.y;
+                break;
+            case 39:
+                this.keys.right = game.getTime();
+                this.speedX = this.speed.x;
+                break;
+            case 40:
+                this.keys.down = game.getTime();
+                break;
         }
-        else {
-            this.speedX = this.speed.x;
+    }
+    else if(type === "released") {
+        switch(event.keyCode) {
+            case 37:
+                this.keys.left = false;
+                this.speedX = this.keys.right ? this.speed.x : 0;
+                break;
+            case 38:
+                this.keys.up = false;
+                break;
+            case 39:
+                this.keys.right = false;
+                this.speedX = this.keys.left ? -1*this.speed.x : 0;
+                break;
+            case 40:
+                this.keys.down = false;
+                break;
         }
-    }
-    else if(this.keys.right) {
-        this.speedX = this.speed.x;
-    }
-    else if(this.keys.left) {
-        this.speedX = -1*this.speed.x;
-    }
-    else {
-        this.speedX = 0;
     }
 
-    if(this.keys.up) {
-        if(event === "upPressed" && this.grounded) {
-            this.speedY = this.speed.y;
-            this.gravity.start();
-        }
-    }
-
-    this.updateAnimation();
+    if(this.hadInit) this.updateAnimation(event, type);
+    return this;
 }
-Player.prototype.updateAnimation = function(event) {
+Player.prototype.updateAnimation = function(event, type) {
     if(this.speedX > 0) {
         this.changeAnimation("playerWalkRight");
     }
@@ -211,7 +173,7 @@ Player.prototype.updateAnimation = function(event) {
         this.changeAnimation("playerWalkLeft");
     }
     else {
-        if(event === "leftReleased") {
+        if(event.keyCode === 37 && type === "released") {
             this.changeAnimation("playerLeft");
         }
         else {
@@ -219,51 +181,12 @@ Player.prototype.updateAnimation = function(event) {
         }
     }
 
-    //Jump & Crouch ...
+    //Jump & Crouch ... in master branch
+    return this;
 }
 Player.prototype.changeAnimation = function(name) {
     this.animations[this.animation].stop();
     this.animations[name].start();
     this.animation = name;
     return this;
-}
-
-
-
-
-
-
-
-var Gravity = function(coefficient, time) {
-    this.coefficient = coefficient;
-    this.time        = time;
-    this.started     = false;
-    return this;
-}
-Gravity.prototype.start = function() {
-    //Start gravity
-    this.lastGetTime = Game.prototype.getTime();
-    this.started     = true;
-    return this;
-}
-Gravity.prototype.stop = function() {
-    //Stop gravity
-    //getSpeed will return 0
-    this.started = false;
-    return this;
-}
-Gravity.prototype.getSpeed = function() {
-    if(this.started) {
-        //Get delta time
-        var dtime = (Game.prototype.getTime() - this.lastGetTime) / this.time;
-        //Return the velocity to be substracted from the current velocity
-        return this.coefficient * dtime;
-    }
-    else {
-        return 0;
-    }
-}
-Gravity.prototype.apply = function(speed) {
-    //Apply getSpeed on the given speed
-    return speed - this.getSpeed();
 }

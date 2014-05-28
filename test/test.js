@@ -12,8 +12,6 @@ var playerOptions = {
     width: 36,
     height: 72,
     speed: 5,
-    gravity: 1,
-    gravityTime: 3000,
     sprites: {
         right: [{x:80,  y:0, w:16, h:32}],
         left : [{x:736, y:0, w:16, h:32}],
