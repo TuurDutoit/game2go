@@ -13,6 +13,7 @@ var Player = function(options, sprites) {
     this.offsetY    = options.offsetY    || 0;
     this.width      = options.width      || 36;
     this.height     = options.height     || 72;
+    this.gravity    = options.gravity || 0.22;
 
     this.keys = {
         up:    false,
@@ -59,10 +60,22 @@ Player.prototype.Move = function(x, y, game) {
     this.positionY += y;
 
     var player = this;
-    game.checkCollisionTerrain(this.collider, function(res, block) {
+    this.grounded = false; game.checkCollisionTerrain(this.collider, function(res, block) {
 //Handle collisions
         player.positionX -= res.overlapV.x;
         player.positionY -= res.overlapV.y;
+
+    if(res.overlapN.y === -1) {
+        player.speedY = 0;
+        player.grounded = true;
+    }
+    else if(res.overlapN.y === 1) {
+        player.speedY = 0;
+    }
+
+    if(!player.grounded) {
+        player.speedY -= player.gravity;
+    }
 
 // Do not allow Player to walk out of the game
         if(game.offsetX < 0) {
@@ -113,6 +126,7 @@ Player.prototype.updateDirection = function(event, type) {
                 break;
             case 38:
                 this.keys.up = game.getTime();
+                this.speedY = this.speed.y;
                 break;
             case 39:
                 this.keys.right = game.getTime();
