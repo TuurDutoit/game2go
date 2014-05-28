@@ -14,6 +14,7 @@ var Player = function(options, sprites) {
     this.width      = options.width      || 36;
     this.height     = options.height     || 72;
     this.gravity    = options.gravity || 0.22;
+    this.maxJump    = options.maxJump || 1;
 
     this.keys = {
         up:    false,
@@ -46,6 +47,7 @@ Player.prototype.Init = function(game) {
 
     this.speedX = 0;
     this.speedY = 0;
+    this.jumping = 0;
 
     this.hadInit = true;
 
@@ -67,6 +69,7 @@ Player.prototype.Move = function(x, y, game) {
 
     if(res.overlapN.y === -1) {
         player.speedY = 0;
+        player.jumping = 0;
         player.grounded = true;
     }
     else if(res.overlapN.y === 1) {
@@ -126,7 +129,10 @@ Player.prototype.updateDirection = function(event, type) {
                 break;
             case 38:
                 this.keys.up = game.getTime();
-                this.speedY = this.speed.y;
+                if(this.jumping < this.maxJump) {
+                    this.speedY += this.speed.y;
+                    this.jumping++;
+                }
                 break;
             case 39:
                 this.keys.right = game.getTime();
