@@ -57,6 +57,8 @@ Player.prototype.Init = function(game) {
         left: false
     }
 
+    this.origOffset = {x: this.offsetX, y: this.offsetY};
+
     this.hadInit    = true;
 
     return this;
@@ -96,8 +98,64 @@ Player.prototype.Update = function(game, player) {
     return this;
 }
 Player.prototype.Move = function(x, y, game) {
-    this.positionX += x;
+//Do not allow the player to walk off the canvas
+    if(x < 0) { //Walking left
+        this.positionX += x;
+        if(game.offsetX < 0) { //Game offset going negative
+            this.offsetX += game.offsetX;
+            game.offsetX = 0;
+            if(this.offsetX < 0) {
+                this.offsetX = 0;
+            }
+            game.updatePlayerCollider();
+        }
+    }
+    if(x > 0) { //Walking right
+        if(this.offsetX === this.origOffset.x) {
+            this.positionX += x;
+        }
+        else if(this.offsetX < this.origOffset.x) {
+            var diff = this.origOffset.x - this.offsetX;
+            if(diff >= x) {
+                this.offsetX += x;
+            }
+            else {
+                game.offsetX += diff;
+                this.offsetX = this.origOffset.x;
+            }
+            game.updatePlayerCollider();
+        }
+    }
+
     this.positionY += y;
+    // if(game.offsetY < 0) {
+    //     this.offsetY += game.offsetY;
+    //     game.offsetY = 0;
+    //     if(this.offsetY < 0) {
+    //         this.offsetY = 0;
+    //     }
+    //     game.updatePlayerCollider();
+    // }
+
+
+
+
+
+    this.positionY += y;
+
+// Do not allow Player to walk out of the game
+    if(game.offsetX < 0) {
+        var diff = game.offsetX;
+        game.offsetX -= diff;
+        this.offsetX += diff;
+        game.updatePlayerCollider();
+    }
+    if(game.offsetY < 0) {
+        var diff = game.offsetY;
+        game.offsetY -= diff;
+        this.positionY += diff;
+        game.updatePlayerCollider();
+    }
 
     this.touching = {top:false, right:false, bottom:false, left: false};
     var player = this;
@@ -118,14 +176,6 @@ Player.prototype.Move = function(x, y, game) {
         }
         else if(res.overlapV.x < 0) {
             player.touching.left = true;
-        }
-
-// Do not allow Player to walk out of the game
-        if(game.offsetX < 0) {
-            player.positionX += -1*game.offsetX;
-        }
-        if(game.offsetY < 0) {
-            player.positionY += -1*game.offsetY;
         }
     });
 }
