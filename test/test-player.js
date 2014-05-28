@@ -1,11 +1,10 @@
 window.addEventListener("keydown", function(e) {
-    player.updateDirection(e, "pressed");
+    player.updateKeys(e, "pressed");
 });
 window.addEventListener("keyup", function(e) {
-    player.updateDirection(e, "released");
+    player.updateKeys(e, "released");
 });
 
-var log = false;
 
 var Player = function(options, sprites) {
     this.options    = options;
@@ -15,8 +14,8 @@ var Player = function(options, sprites) {
     this.height     = options.height     || 72;
     this.speed      = options.speed      || 5;
     this.maxSpeed   = options.maxSpeed   || 5;
-    this.gravity    = options.gravity    || 0.22;
     this.maxJump    = options.maxJump    || 1;
+    this.gravity    = options.gravity    || 0.22;
 
     this.keys = {
         up:    false,
@@ -63,7 +62,7 @@ Player.prototype.Init = function(game) {
     return this;
 }
 Player.prototype.Update = function(game, player) {
-//Check is speed is not exceeding maximum
+//Check if speed is not exceeding maximum
     if(this.speedX > this.maxSpeed.x) {
         this.speedX = this.maxSpeed.x;
     }
@@ -89,7 +88,6 @@ Player.prototype.Update = function(game, player) {
         //If touching the floor, stop jumping
         this.jumping = 0;
         this.speedY = 0;
-        if(log)console.log("touched floor");
     }
     if(this.touching.top) {
         this.speedY = 0;
@@ -160,6 +158,8 @@ Player.prototype.setBaseSpeed = function(x, y) {
     else {
         this.speed = {x: 5, y: 5};
     }
+    if(this.origBaseSpeed) this.updateBaseSpeed();
+    this.origBaseSpeed = this.speed;
     return this;
 }
 Player.prototype.setMaxSpeed = function(x, y) {
@@ -180,7 +180,7 @@ Player.prototype.setMaxSpeed = function(x, y) {
     }
     return this;
 }
-Player.prototype.updateDirection = function(event, type) {
+Player.prototype.updateKeys = function(event, type) {
     if(type === "pressed") {
         switch(event.keyCode) {
             case 37:
@@ -188,11 +188,10 @@ Player.prototype.updateDirection = function(event, type) {
                 this.speedX = -1*this.speed.x;
                 break;
             case 38:
-                this.keys.up = game.getTime();
-                if(this.jumping < this.maxJump) {
+                if(this.jumping < this.maxJump && !this.keys.up) {
+                    this.keys.up = game.getTime();
                     this.speedY += this.speed.y;
                     this.jumping++;
-                    log = true;
                 }
                 break;
             case 39:
@@ -224,6 +223,17 @@ Player.prototype.updateDirection = function(event, type) {
     }
 
     if(this.hadInit) this.updateAnimation(event, type);
+    return this;
+}
+Player.prototype.updateBaseSpeed = function() {
+    //Should be called when the base speed (player.speed) is changed
+    //But before the origBaseSpeed is changed!
+    var ratioX = this.speedX/this.origBaseSpeed.x;
+    var ratioY = this.speedY/this.origBaseSpeed.y;
+    
+    this.speedX = ratioX * this.speed.x;
+    this.speedY = ratioY * this.speed.y;
+
     return this;
 }
 Player.prototype.updateAnimation = function(event, type) {
