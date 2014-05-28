@@ -99,49 +99,7 @@ Player.prototype.Update = function(game, player) {
 }
 Player.prototype.Move = function(x, y, game) {
 //Do not allow the player to walk off the canvas
-    if(x < 0) { //Walking left
-        this.positionX += x;
-        if(game.offsetX < 0) { //Game offset going negative
-            this.offsetX += game.offsetX;
-            game.offsetX = 0;
-            if(this.offsetX < 0) {
-                this.offsetX = 0;
-            }
-            game.updatePlayerCollider();
-        }
-    }
-    if(x > 0) { //Walking right
-        if(this.offsetX === this.origOffset.x) {
-            this.positionX += x;
-        }
-        else if(this.offsetX < this.origOffset.x) {
-            var diff = this.origOffset.x - this.offsetX;
-            if(diff >= x) {
-                this.offsetX += x;
-            }
-            else {
-                game.offsetX += diff;
-                this.offsetX = this.origOffset.x;
-            }
-            game.updatePlayerCollider();
-        }
-    }
-
-    this.positionY += y;
-    // if(game.offsetY < 0) {
-    //     this.offsetY += game.offsetY;
-    //     game.offsetY = 0;
-    //     if(this.offsetY < 0) {
-    //         this.offsetY = 0;
-    //     }
-    //     game.updatePlayerCollider();
-    // }
-
-
-
-
-
-    this.positionY += y;
+   this.performMove(x, y, game);
 
 // Do not allow Player to walk out of the game
     if(game.offsetX < 0) {
@@ -178,6 +136,100 @@ Player.prototype.Move = function(x, y, game) {
             player.touching.left = true;
         }
     });
+}
+Player.prototype.performMove = function(x, y, game) {
+//Move the player, while checking it is not going off canvas
+//X
+    if(x < 0) { //Walking left
+        if(this.offsetX <= this.origOffset.x) {
+            this.positionX += x;
+            if(game.offsetX < 0) { //Game offset going negative
+                this.offsetX += game.offsetX;
+                game.offsetX = 0;
+            }
+        }
+        else {
+            var diff = this.offsetX - this.origOffset.x;
+            if(diff >= -1*x) {
+                this.offsetX += x;
+            }
+            else {
+                game.offsetX -= diff + x;
+                this.offsetX = this.origOffset.x;
+            }
+        }
+    }
+    if(x > 0) { //Walking right
+        if(this.offsetX >= this.origOffset.x) {
+            this.positionX += x;
+            maxOffset = game.gameWidth - game.width;
+            if(game.offsetX > maxOffset) {
+                var diff = game.offsetX - maxOffset;
+                this.offsetX += diff;
+                game.offsetX = maxOffset;
+            }
+        }
+        else if(this.offsetX < this.origOffset.x) {
+            var diff = this.origOffset.x - this.offsetX;
+            if(diff >= x) {
+                this.offsetX += x;
+            }
+            else {
+                game.offsetX += diff;
+                this.offsetX = this.origOffset.x;
+            }
+        }
+    }
+
+//Y
+    if(y < 0) { //Going down
+        if(this.offsetY <= this.origOffset.y) {
+            this.positionY += y;
+            if(game.offsetY < 0) { //Game offset going negative
+                this.offsetY += game.offsetY;
+                game.offsetY = 0;
+            }
+        }
+        else {
+            var diff = this.offsetY - this.origOffset.y;
+            if(diff >= -1*y) {
+                this.offsetY += y;
+            }
+            else {
+                game.offsetY -= diff + y;
+                this.offsetY = this.origOffset.y;
+            }
+        }
+    }
+    if(y > 0) { //Going up
+        if(this.offsetY >= this.origOffset.y) {
+            this.positionY += y;
+            maxOffset = game.gameHeight - game.height;
+            if(game.offsetY > maxOffset) {
+                var diff = game.offsetY - maxOffset;
+                this.offsetY += diff;
+                game.offsetY = maxOffset;
+            }
+        }
+        else if(this.offsetY < this.origOffset.y) {
+            var diff = this.origOffset.y - this.offsetY;
+            if(diff >= y) {
+                this.offsetY += y;
+            }
+            else {
+                game.offsetY += diff;
+                this.offsetY = this.origOffset.x;
+            }
+        }
+    }
+
+    if(player.offsetX < 0) {player.offsetX = 0;}
+    if(player.offsetY < 0) {player.offsetY = 0;}
+    if(player.offsetX > game.width - player.width) {player.offsetX = game.width - player.width;}
+    if(player.offsetY > game.height - player.height) {player.offsetY = game.height - player.height;}
+
+    game.updatePlayerCollider();
+    return this;
 }
 Player.prototype.Draw = function(d, player) {
     var sprite = player.animations[player.animation].getSprite();
