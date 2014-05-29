@@ -183,22 +183,13 @@ Player.prototype.performMove = function(x, y, game) {
 
 //Y
     if(y < 0) { //Going down
-        if(this.offsetY <= this.origOffset.y) {
-            this.positionY += y;
-            if(game.offsetY < 0) { //Game offset going negative
-                this.offsetY += game.offsetY;
-                game.offsetY = 0;
-            }
+        var diff = this.offsetY - this.origOffset.y;
+        if(diff >= -1*y) {
+            this.offsetY += y;
         }
         else {
-            var diff = this.offsetY - this.origOffset.y;
-            if(diff >= -1*y) {
-                this.offsetY += y;
-            }
-            else {
-                game.offsetY -= diff + y;
-                this.offsetY = this.origOffset.y;
-            }
+            game.offsetY += diff - (-1*y);
+            this.offsetY = this.origOffset.y;
         }
     }
     if(y > 0) { //Going up
@@ -227,6 +218,7 @@ Player.prototype.performMove = function(x, y, game) {
     if(player.offsetY < 0) {player.offsetY = 0;}
     if(player.offsetX > game.width - player.width) {player.offsetX = game.width - player.width;}
     if(player.offsetY > game.height - player.height) {player.offsetY = game.height - player.height;}
+    if(game.offsetY > game.gameHeight - game.height) {game.offsetY = game.gameHeight - game.height;}
 
     game.updatePlayerCollider();
     return this;
