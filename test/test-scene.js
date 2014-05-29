@@ -8,6 +8,7 @@ var testScene = {
             }
         }
     ],
+    SpawnPoints: {standard: {x: 0,y: 0}},
 	Objects: [new ObjectTest(), new ObjectTestNoOffset(), new ObjectFireBall({x:50, y:300, speed:1.5, angle:0, size:32}), new ObjectFireBall({x:90, y:300, speed:1, angle:0, size:32})],
     Foregrounds: [],
     Terrain: [
@@ -35,6 +36,7 @@ var testSceneB = {
             }
         }
     ],
+    SpawnPoints: {standard: {x: 1000,y: 1000}},
 	Objects: [new ObjectTest(), new ObjectTestNoOffset(), new ObjectFireBall({x:50, y:300, speed:1.5, angle:0, size:32}), new ObjectFireBall({x:90, y:300, speed:1, angle:0, size:32})],
     Foregrounds: [],
     Terrain: [

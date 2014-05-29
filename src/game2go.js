@@ -478,6 +478,12 @@ Game.prototype.loadScene = function(scene) {
 
     return this;
 }
+Game.prototype.warpToScene = function(scene, spawnPoint){
+    this.loadScene(scene);
+    this.Player.positionX = this.scene.SpawnPoints[spawnPoint].x;
+    this.Player.positionY = this.scene.SpawnPoints[spawnPoint].y;
+    return this;
+}
 Game.prototype.initScene = function() {
     this.updateGameHeight();
     this.updateGameWidth();

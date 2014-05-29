@@ -226,13 +226,16 @@ Player.prototype.performMove = function(x, y, game) {
 Player.prototype.Draw = function(d, player) {
     var sprite = player.animations[player.animation].getSprite();
     d.drawSprite(sprite, 0, 0, player.width, player.height);
+    //console.log(this.positionX);
+    //console.log(this.positionY);
     return this;
 }
 Player.prototype.damage = function(damage) {
     this.hp -= damage;
-    if(damage <= 0) {
-        game.stop();
-        alert("Game Over!");
+    if(this.hp <= 0) {
+        //game.stop();
+        game.warpToScene(1, "standard");
+        //alert("Game Over!");
     }
     return this;
 }
