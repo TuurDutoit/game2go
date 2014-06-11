@@ -1,5 +1,6 @@
 
 var ObjectTest = function(){
+    this.name     = "ObjectTest";
 	this.spriteID = "image";
 	this.height = 20;
 	this.width = 20;
@@ -19,11 +20,30 @@ ObjectTest.prototype.Draw = function(d) {
 	d.drawImage(this.sprite, 0, 0);
 }
 
-
-
-
-
+var ObjectWarpTile = function(options){
+    this.name      = "ObjectWarpTile";
+    this.positionX = options.x          || 0;
+	this.positionY = options.y          || 0;
+    this.height    = options.height     || 36;
+    this.width     = options.width      || 36;
+    this.spawnPoint= options.spawnPoint || "standard";
+    this.spawnWorld= options.spawnWorld || "ChrisHoulihan";
+}
+ObjectWarpTile.prototype.Update = function(game) {
+    self = this;
+    game.checkCollisionPlayer(this.collider, function(res, player) {
+        console.log(self.spawnWorld);
+        game.warpToScene(self.spawnWorld, self.spawnPoint);
+    });
+}
+ObjectWarpTile.prototype.Init = function() {
+    this.collider = new SAT.Box(new SAT.Vector(this.positionX, this.positionY), this.width, this.height).toPolygon();
+}
+ObjectWarpTile.prototype.Draw = function(d) {
+	d.drawImage(document.getElementById("image"), 0, 0, this.width, this.height);
+}
 var ObjectFireBall = function(options){
+    this.name      = "ObjectFireBall"; 
 	this.positionX = options.x      || 0;
 	this.positionY = options.y      || 0;
 	this.speed     = options.speed  || 3;
@@ -49,14 +69,14 @@ ObjectFireBall.prototype.Update = function(game) {
     var self = this;
     self.Move(this.plusX * this.speed,this.plusY * this.speed, game);
     //game.applyGravity(this);
-    game.checkCollisionPlayer(self.collider, function(res, player) {
+    //if(SAT.testPolygonPolygon(this.collider, Player.collider, null)){
+    game.checkCollisionPlayer(this.collider, function(res, player) {
+        console.log(self.damage);
         player.damage(self.damage);
-        self.destroyed = true;
-    })
-    // if(SAT.testPolygonPolygon(this.collider, testPlayer.collider, null)){
-    //     testPlayer.damage(this.damage);
-    //     this.destroyed = true;
-    // }
+    }); 
+   
+        //this.destroyed = true;
+    //}
     return this.destroyed;
 }
 ObjectFireBall.prototype.Draw = function(d) {
@@ -111,6 +131,7 @@ ObjectFireBall.prototype.sprites = [
 
 
 var ObjectTestNoOffset = function() {
+    this.name      = "ObjectTestNoOffset";
 	this.spriteID  = "image";
     this.destroyed = false;
 
@@ -120,5 +141,5 @@ ObjectTestNoOffset.prototype.Init = function() {
 	this.sprite = document.getElementById(this.spriteID);
 }
 ObjectTestNoOffset.prototype.Draw = function(d) {
-	d.drawImageNoOffset(this.sprite, 15, 15)
+	d.drawImageNoOffset(this.sprite, 15, 15);
 }

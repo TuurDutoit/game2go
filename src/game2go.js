@@ -100,8 +100,8 @@ Game.prototype.init = function(sceneID) {
     this.checkSAT();
     this.emit("beforeinit", [this, arguments]);
     this.initTime = this.getTime();
-    this.sceneNum = (sceneID || 0);
-    this.loadScene(this.sceneNum);
+    this.sceneName = (sceneID || "ChrisHoulihan");
+    this.loadScene(this.sceneName);
     this.initPlayer();
     this.emit("init", [this, arguments]);
     return this;
@@ -446,7 +446,7 @@ Game.prototype.addWorld = function(world) {
 Game.prototype.loadWorld = Game.prototype.load = function(world) {
     this.worldLoadTime = this.getTime();
     this.world = world;
-    this.loadScene(0);
+    this.loadScene("TestScene");
 
     return this;
 }
@@ -464,8 +464,9 @@ Game.prototype.loadScene = function(scene) {
     this.sceneLoadTime = this.getTime();
 
 //The index of the game in the world is given
-    if(typeof scene === "number") {
+    if(typeof scene === "string") {
         var parsedScene = this.parseScene(this.world.Scenes[scene]);
+        
     }
 //The scene object itself is given
     else {
@@ -480,6 +481,7 @@ Game.prototype.loadScene = function(scene) {
 }
 Game.prototype.warpToScene = function(scene, spawnPoint){
     this.loadScene(scene);
+    console.log("Warped to: " + scene);
     this.Player.positionX = this.scene.SpawnPoints[spawnPoint].x;
     this.Player.positionY = this.scene.SpawnPoints[spawnPoint].y;
     return this;
@@ -535,6 +537,7 @@ Game.prototype.parseColumn = function(c) {
 }
 Game.prototype.parseScene = function(s) {
     var parsedScene = this.cloneObject(s);
+    console.log("Blo");
     parsedScene.Terrain = [];
     for(var i = 0, len = s.Terrain.length; i < len; i++) {
         parsedScene.Terrain.push(this.parseColumn(s.Terrain[i]));

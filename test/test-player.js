@@ -232,9 +232,11 @@ Player.prototype.Draw = function(d, player) {
 }
 Player.prototype.damage = function(damage) {
     this.hp -= damage;
+    console.log("Bloooo");
     if(this.hp <= 0) {
+        console.log("Blooeoo");
         //game.stop();
-        game.warpToScene(1, "standard");
+        game.warpToScene("TestSceneB", "standard");
         //alert("Game Over!");
     }
     return this;
