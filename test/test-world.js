@@ -1,7 +1,7 @@
 var testWorld = { //World
     name: "Test World",
     Scenes: { //Scenes
-        TestScene: testScene,
+        MainEntrance : sceneMainEntrance,
         ChrisHoulihan: sceneChrisHoulihan,
         TestSceneB   : testSceneB
     }

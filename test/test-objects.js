@@ -19,6 +19,60 @@ ObjectTest.prototype.Update = function() {
 ObjectTest.prototype.Draw = function(d) {
 	d.drawImage(this.sprite, 0, 0);
 }
+var ObjectBomb = function(X, Y, sizeX, sizeY, timer, damage){
+    this.name     = "ObjectBomb";
+	this.spriteID = "image";
+    this.positionX = X  || 0;
+	this.positionY = Y  || 0;
+	this.height = sizeY || 36;
+	this.width  = sizeX || 36;
+    this.timer  = timer || 60 * 4;
+    this.damage = damage|| 0;
+    this.destroyed = false;
+	return this;
+}
+ObjectBomb.prototype.Init = function() {
+	this.sprite    = document.getElementById(this.spriteID);
+}
+ObjectBomb.prototype.Update = function() {
+	if(this.timer <= 0){
+        //Bomb is destroyed
+        //Explosion is created
+    }
+    else{
+        this.timer -= 1;
+    }
+}
+ObjectBomb.prototype.Draw = function(d) {
+	d.drawImage(this.sprite, 0, 0);
+}
+var ObjectBombBlast = function(X, Y, damage){
+    this.name     = "ObjectBombBlast";
+	this.spriteID = "image";
+    this.positionX = X - 36  || 0;
+	this.positionY = Y - 36  || 0;
+	this.height = 36 * 2;
+	this.width  = 36 * 2;
+    this.timer  = timer || 10;
+    this.damage = damage|| 0;
+    this.destroyed = false;
+	return this;
+}
+
+ObjectBombBlast.prototype.Init = function() {
+	this.sprite    = document.getElementById(this.spriteID);
+}
+ObjectBombBlast.prototype.Update = function() {
+	if(this.timer <= 0){
+        //Blast dissapears
+    }
+    else{
+        this.timer -= 1;
+    }
+}
+ObjectBombBlast.prototype.Draw = function(d) {
+	d.drawImage(this.sprite, 0, 0);
+}
 
 var ObjectWarpTile = function(options){
     this.name      = "ObjectWarpTile";

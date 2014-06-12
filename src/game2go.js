@@ -25,6 +25,7 @@ Game = function(elem, options) {
 
     self.world            = null;
     self.scene            = null;
+    self.errorHandlingStage = "ChrisHoulihan";
     self.sceneNum         = 0;
     self.terrainBuffer    = [];
     self.gameHeight       = 0;
@@ -466,7 +467,6 @@ Game.prototype.loadScene = function(scene) {
 //The index of the game in the world is given
     if(typeof scene === "string") {
         var parsedScene = this.parseScene(this.world.Scenes[scene]);
-        
     }
 //The scene object itself is given
     else {
@@ -481,7 +481,7 @@ Game.prototype.loadScene = function(scene) {
 }
 Game.prototype.warpToScene = function(scene, spawnPoint){
     this.loadScene(scene);
-    console.log("Warped to: " + scene);
+    console.log("Warped to: " + scene + " x: " + this.scene.SpawnPoints[spawnPoint].x + " y: " + this.scene.SpawnPoints[spawnPoint].y);
     this.Player.positionX = this.scene.SpawnPoints[spawnPoint].x;
     this.Player.positionY = this.scene.SpawnPoints[spawnPoint].y;
     return this;

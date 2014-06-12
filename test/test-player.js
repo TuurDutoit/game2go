@@ -16,6 +16,7 @@ var Player = function(options, sprites) {
     this.maxSpeed   = options.maxSpeed   || 5;
     this.maxJump    = options.maxJump    || 1;
     this.gravity    = options.gravity    || 0.22;
+    this.postHitInv = 30;
 
     this.keys = {
         up:    false,
@@ -226,18 +227,18 @@ Player.prototype.performMove = function(x, y, game) {
 Player.prototype.Draw = function(d, player) {
     var sprite = player.animations[player.animation].getSprite();
     d.drawSprite(sprite, 0, 0, player.width, player.height);
-    //console.log(this.positionX);
-    //console.log(this.positionY);
     return this;
 }
 Player.prototype.damage = function(damage) {
-    this.hp -= damage;
-    console.log("Bloooo");
-    if(this.hp <= 0) {
-        console.log("Blooeoo");
-        //game.stop();
-        game.warpToScene("TestSceneB", "standard");
-        //alert("Game Over!");
+    if(this.postHitInv <= 0){
+        this.hp -= damage;
+        if(this.hp <= 0) {
+            alert("Game Over!");
+        }
+        this.postHitInv = 30;
+    }
+    else{
+        this.postHitInv -= 1;
     }
     return this;
 }
